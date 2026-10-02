@@ -6,7 +6,7 @@ import API from "../services/api";
 import {
   BookOpen, Clock, Bookmark, FileText, ArrowRight, Plus, FolderPlus,
   Sparkles, Activity, Upload, Flame, Target, TrendingUp, ChevronRight, BarChart2, CheckCircle2,
-  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube
+  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -208,7 +208,7 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-medium border border-white/20">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Workspace Active
+                <GraduationCap className="w-3.5 h-3.5 text-amber-300" /> Workspace Active
               </span>
             </div>
             <div className="text-xs font-semibold text-white/80 font-mono bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5">
@@ -244,8 +244,8 @@ export const DashboardPage = () => {
             onClick={() => setShowSubjectModal(true)}
             className="w-full py-3.5 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
-            <Plus className="w-4 h-4" />
-            <span>+ Add Subject</span>
+            <GraduationCap className="w-4 h-4 text-amber-300" />
+            <span> Add Subject</span>
           </button>
 
           <button
@@ -484,7 +484,7 @@ export const DashboardPage = () => {
           >
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-amber-300 flex items-center justify-center border border-amber-300/30">
-                <Target className="w-4 h-4" />
+                <GraduationCap className="w-4 h-4" />
               </div>
               <span className="text-xs font-bold text-white tracking-wide">Focus on Your Goals</span>
             </div>
@@ -521,7 +521,7 @@ export const DashboardPage = () => {
                 onClick={() => navigate("/revision")}
                 className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
               >
-                <Clock className="w-3.5 h-3.5 text-purple-500" />
+                <GraduationCap className="w-3.5 h-3.5 text-purple-500" />
                 <span>Revisions</span>
               </button>
 
@@ -537,7 +537,7 @@ export const DashboardPage = () => {
                 onClick={() => navigate("/dashboard")}
                 className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
               >
-                <TrendingUp className="w-3.5 h-3.5 text-cyan-500" />
+                <Brain className="w-3.5 h-3.5 text-cyan-500" />
                 <span>Progress</span>
               </button>
             </div>

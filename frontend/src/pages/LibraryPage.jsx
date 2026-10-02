@@ -6,7 +6,7 @@ import API from "../services/api";
 import { 
   FileText, Upload, Search, Filter, Trash2, BookOpen, LayoutGrid, List, 
   AlertCircle, ArrowRight, CloudUpload, File, CheckCircle2, X, Sparkles, Plus,
-  Youtube, Play, Video
+  Youtube, Play, Video, GraduationCap, Library
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchBar } from "../components/ui/SearchBar";
@@ -166,12 +166,12 @@ export const LibraryPage = () => {
   };
 
   const getFormatBadge = (filename, fileType) => {
-    if (fileType === 'youtube') return { label: 'YT VIDEO', bg: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' };
-    const ext = filename?.split('.').pop()?.toUpperCase() || 'FILE';
-    if (ext === 'PDF') return { label: 'PDF', bg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' };
-    if (ext === 'DOCX' || ext === 'DOC') return { label: 'DOCX', bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' };
-    if (ext === 'TXT' || ext === 'MD') return { label: ext, bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' };
-    return { label: ext, bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' };
+    const type = (fileType || "").toLowerCase();
+    if (type === "youtube") return { label: "YT VIDEO", bg: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" };
+    if (type === "pdf" || filename?.toLowerCase().endsWith(".pdf")) return { label: "PDF", bg: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" };
+    if (type === "docx" || type === "doc" || filename?.toLowerCase().endsWith(".docx") || filename?.toLowerCase().endsWith(".doc")) return { label: "DOCX", bg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" };
+    if (type === "txt" || type === "md" || filename?.toLowerCase().endsWith(".txt") || filename?.toLowerCase().endsWith(".md")) return { label: type ? type.toUpperCase() : "TXT", bg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" };
+    return { label: type ? type.toUpperCase() : "DOC", bg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" };
   };
 
   const handleUploadSubmit = async (e) => {
@@ -236,11 +236,14 @@ export const LibraryPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+              <GraduationCap className="w-5 h-5" />
+            </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Document Library</h1>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            All your PDF notes, textbooks, and interactive study modules in one workspace.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            <span>All your PDF notes, textbooks, and interactive study modules in one workspace.</span>
           </p>
         </div>
 
@@ -274,6 +277,7 @@ export const LibraryPage = () => {
                 : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5"
             }`}
           >
+            <Library className="w-3.5 h-3.5" />
             <span>All Items</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${libraryCategory === "all" ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>
               {documents.length}
@@ -430,7 +434,7 @@ export const LibraryPage = () => {
                 onClick={() => navigate(`/document/${doc._id}`)}
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 shadow-sm hover:shadow-xl transition-all group cursor-pointer flex flex-col justify-between overflow-hidden"
               >
-                {/* YouTube Video Thumbnail Banner */}
+                {/* YouTube Video Thumbnail Banner or Document 16:9 Cover Banner */}
                 {doc.fileType === "youtube" ? (
                   <div className="relative w-full h-44 bg-slate-950 overflow-hidden group-hover:brightness-110 transition-all">
                     <img
@@ -449,30 +453,53 @@ export const LibraryPage = () => {
                   </div>
                 ) : (
                   <div 
-                    className="h-1.5 w-full" 
-                    style={{ backgroundColor: subjectColor }} 
-                  />
-                )}
+                    className="relative w-full h-44 overflow-hidden p-4 flex flex-col justify-between group-hover:brightness-105 transition-all"
+                    style={{
+                      background: `linear-gradient(135deg, ${subjectColor}40 0%, rgba(15, 23, 42, 0.95) 100%)`
+                    }}
+                  >
+                    {/* Top Subject Color Stripe */}
+                    <div className="absolute top-0 left-0 right-0 h-1.5" style={{ backgroundColor: subjectColor }} />
 
-                <div className="p-5 space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
+                    {/* Top Row Badges inside Cover */}
+                    <div className="flex items-center justify-between relative z-10">
                       <span
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1.5"
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 backdrop-blur-md text-white"
                         style={{
-                          backgroundColor: `${subjectColor}15`,
-                          borderColor: `${subjectColor}30`,
-                          color: subjectColor
+                          backgroundColor: `${subjectColor}35`,
+                          borderColor: `${subjectColor}60`
                         }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjectColor }} />
                         {doc.subjectId?.name || "General"}
                       </span>
-                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${formatBadge.bg}`}>
+
+                      <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border backdrop-blur-md ${formatBadge.bg}`}>
                         .{formatBadge.label}
                       </span>
                     </div>
 
+                    {/* Center 3D Icon Artwork */}
+                    <div className="flex items-center justify-center my-auto relative z-10">
+                      <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                        <FileText className="w-7 h-7 text-indigo-300 drop-shadow" />
+                      </div>
+                    </div>
+
+                    {/* Bottom Cover Tags */}
+                    <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/90 relative z-10">
+                      <span className="flex items-center gap-1 bg-black/50 px-2 py-0.5 rounded backdrop-blur-md border border-white/10">
+                        <BookOpen className="w-3 h-3 text-indigo-400" /> Study Module
+                      </span>
+                      <span className="flex items-center gap-1 bg-black/50 px-2 py-0.5 rounded backdrop-blur-md border border-white/10 text-amber-300">
+                        <Sparkles className="w-3 h-3 text-amber-400" /> Reflow Ready
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-5 space-y-4">
+                  <div>
                     <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
                       {doc.title}
                     </h3>

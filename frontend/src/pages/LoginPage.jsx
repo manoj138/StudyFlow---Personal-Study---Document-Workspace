@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, LogIn, Mail, Lock, AlertCircle, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
+import { BookOpen, LogIn, Mail, Lock, AlertCircle, Sparkles, CheckCircle2, ShieldCheck, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const LoginPage = () => {
@@ -52,7 +52,7 @@ export const LoginPage = () => {
 
           <div className="space-y-4 my-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-amber-300 text-xs font-semibold border border-white/20">
-              <Sparkles className="w-3.5 h-3.5" /> Focused Learning
+              <GraduationCap className="w-3.5 h-3.5 text-amber-300" /> Focused Learning
             </span>
             <h2 className="text-2xl font-extrabold text-white leading-snug">
               Welcome Back to Your Workspace

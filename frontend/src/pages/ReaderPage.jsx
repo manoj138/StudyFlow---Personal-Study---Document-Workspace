@@ -11,7 +11,8 @@ import {
 import { StudyReader } from "../components/reader/StudyReader";
 import {
   BookOpen, Layers, Bookmark, Highlighter, MessageSquare, ChevronLeft, ChevronRight,
-  ArrowLeft, Plus, Trash2, CheckCircle, Sparkles, Sun, Moon, Edit3, X, Youtube, Play, Video
+  ArrowLeft, Plus, Trash2, CheckCircle, Sparkles, Sun, Moon, Edit3, X, Youtube, Play, Video,
+  GraduationCap, Brain
 } from "lucide-react";
 
 const extractYouTubeVideoId = (url) => {
@@ -378,7 +379,7 @@ export const ReaderPage = () => {
             }`}
             title="Study Reflow Mode"
           >
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
             <span className="hidden sm:inline">Study Mode</span>
           </button>
           <button

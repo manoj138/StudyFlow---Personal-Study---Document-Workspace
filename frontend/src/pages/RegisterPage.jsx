@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, UserPlus, User, Mail, Lock, AlertCircle, Sparkles, CheckCircle2 } from "lucide-react";
+import { BookOpen, UserPlus, User, Mail, Lock, AlertCircle, Sparkles, CheckCircle2, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const RegisterPage = () => {
@@ -53,7 +53,7 @@ export const RegisterPage = () => {
 
           <div className="space-y-4 my-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-purple-300 text-xs font-semibold border border-white/20">
-              <Sparkles className="w-3.5 h-3.5 text-purple-300" /> Start Free Workspace
+              <GraduationCap className="w-3.5 h-3.5 text-purple-300" /> Start Free Workspace
             </span>
             <h2 className="text-2xl font-extrabold text-white leading-snug">
               Create Your Personal Study Workspace

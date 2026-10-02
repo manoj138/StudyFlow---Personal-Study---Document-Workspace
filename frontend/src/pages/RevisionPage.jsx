@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
-import { Bookmark, MessageSquare, BookOpen, ArrowRight, Sparkles, Highlighter, CheckCircle2, FileText } from "lucide-react";
+import { Bookmark, MessageSquare, BookOpen, ArrowRight, Sparkles, Highlighter, CheckCircle2, FileText, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 import { EmptyState } from "../components/common/EmptyState";
 import { SubjectBadge } from "../components/ui/SubjectBadge";
@@ -43,7 +43,7 @@ export const RevisionPage = () => {
       <div className="bg-white dark:bg-[#111827] p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold border border-purple-500/20">
-            <Sparkles className="w-3.5 h-3.5" /> Study Revision Hub
+            <GraduationCap className="w-3.5 h-3.5 text-purple-500" /> Study Revision Hub
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Revision Center</h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
