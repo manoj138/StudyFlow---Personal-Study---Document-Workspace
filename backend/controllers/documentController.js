@@ -217,7 +217,10 @@ export const getDocumentById = async (req, res, next) => {
         document.extractedText.includes("<code>const</code>") ||
         document.extractedText.includes("<code>var</code>") ||
         (document.extractedText.includes("studyflow-code-block") && /[\u0900-\u097F]/.test(document.extractedText)) ||
-        (document.extractedText.includes("↓") && !document.extractedText.includes("text-indigo-400 font-bold text-xs my-1 pl-1")))
+        (document.extractedText.includes("↓") && !document.extractedText.includes("my-2.5 pl-4 flex items-center")) ||
+        document.extractedText.includes('justify-center my-3') ||
+        document.extractedText.includes('space-y-1 leading-relaxed"></div>') ||
+        document.extractedText.includes('rounded-xl font-mono text-xs text-indigo-300 space-y-1 leading-relaxed"></div>'))
     ) {
       const filePath = path.join(process.cwd(), document.fileUrl);
       if (fs.existsSync(filePath)) {

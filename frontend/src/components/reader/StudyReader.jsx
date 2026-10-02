@@ -36,6 +36,11 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
     return <p className="text-slate-400 italic">No content available for Study Reflow Mode.</p>;
   }
 
+  // Sanitize any legacy empty flow diagram boxes or centered arrows and replace with left-aligned down arrow badges
+  const cleanHtml = htmlContent
+    .replace(/<div\s+class="flex\s+items-center\s+justify-center\s+my-3">\s*<div\s+class="w-8\s+h-8\s+rounded-full\s+bg-indigo-500\/20\s+border\s+border-indigo-500\/30\s+text-indigo-400\s+text-sm\s+font-bold\s+flex\s+items-center\s+justify-center\s+shadow-md">\s*↓\s*<\/div>\s*<\/div>/gi, '<div class="my-2.5 pl-4 flex items-center"><div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold flex items-center justify-center shadow-sm">↓</div></div>')
+    .replace(/<div\s+class="my-3\s+p-3\.5\s+bg-\[#0D121F\]\s+border\s+border-dark-border\s+rounded-xl\s+font-mono\s+text-xs\s+text-indigo-300\s+space-y-1(?:\.5)?\s+leading-relaxed">\s*<\/div>/gi, '<div class="my-2.5 pl-4 flex items-center"><div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold flex items-center justify-center shadow-sm">↓</div></div>');
+
   // Parse HTML string and extract code blocks & interactive demo buttons
   const parts = [];
   const regex = /(<pre\s+class="studyflow-code-block"\s*data-lang="([^"]*)"><code>([\s\S]*?)<\/code><\/pre>|<span\s+class="studyflow-demo-btn">([\s\S]*?)<\/span>)/gi;
@@ -43,8 +48,8 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
   let lastIndex = 0;
   let match;
 
-  while ((match = regex.exec(htmlContent)) !== null) {
-    const textBefore = htmlContent.substring(lastIndex, match.index);
+  while ((match = regex.exec(cleanHtml)) !== null) {
+    const textBefore = cleanHtml.substring(lastIndex, match.index);
     if (textBefore) {
       parts.push({ type: "html", content: textBefore });
     }
@@ -78,7 +83,7 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
     lastIndex = regex.lastIndex;
   }
 
-  const remainingText = htmlContent.substring(lastIndex);
+  const remainingText = cleanHtml.substring(lastIndex);
   if (remainingText) {
     parts.push({ type: "html", content: remainingText });
   }

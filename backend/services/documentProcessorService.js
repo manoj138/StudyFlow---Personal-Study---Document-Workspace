@@ -171,20 +171,39 @@ export const transformToNotionStyleHtml = (text) => {
     }
 
     // 5. Flow Diagram Mappings (↓ Down Flows - Rendered vertically one below the other)
-    if (trimmed.includes("↓")) {
+    if (trimmed.includes("↓") || trimmed.includes("⬇")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      const stepsHtml = trimmed
-        .split("↓")
+      const steps = trimmed
+        .split(/↓|⬇/)
         .map((s) => s.trim())
-        .filter(Boolean)
-        .join('<div class="text-indigo-400 font-bold text-xs my-1 pl-1">↓</div>');
-      htmlResult += `<div class="my-3 p-3.5 bg-[#0D121F] border border-dark-border rounded-xl font-mono text-xs text-indigo-300 space-y-1 leading-relaxed">${applyInlineFormatting(stepsHtml)}</div>`;
+        .filter(Boolean);
+
+      if (steps.length > 0) {
+        const stepsHtml = steps
+          .map((s) => `<div class="px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono text-xs font-semibold inline-block shadow-sm">${applyInlineFormatting(s)}</div>`)
+          .join('<div class="text-indigo-400 font-bold text-xs my-1 pl-3 flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs">↓</span></div>');
+        htmlResult += `<div class="my-4 p-4 bg-[#0D121F] border border-dark-border rounded-2xl flex flex-col items-start gap-1.5">${stepsHtml}</div>`;
+      } else {
+        htmlResult += `<div class="my-2.5 pl-4 flex items-center"><div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold flex items-center justify-center shadow-sm">↓</div></div>`;
+      }
       return;
     }
 
-    if (trimmed.includes("→")) {
+    if (trimmed.includes("→") || trimmed.includes("->")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<div class="my-3 p-3 bg-[#0D121F] border border-dark-border rounded-xl font-mono text-xs text-indigo-300 space-y-1.5 leading-relaxed">${applyInlineFormatting(trimmed)}</div>`;
+      const steps = trimmed
+        .split(/→|->/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      if (steps.length > 0) {
+        const stepsHtml = steps
+          .map((s) => `<span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono text-xs font-semibold">${applyInlineFormatting(s)}</span>`)
+          .join('<span class="text-indigo-400 font-bold text-xs mx-1">→</span>');
+        htmlResult += `<div class="my-3 p-3.5 bg-[#0D121F] border border-dark-border rounded-xl font-mono text-xs text-indigo-300 flex flex-wrap items-center gap-1.5">${stepsHtml}</div>`;
+      } else {
+        htmlResult += `<div class="inline-flex items-center justify-center my-2 text-indigo-400 font-bold text-sm">→</div>`;
+      }
       return;
     }
 
