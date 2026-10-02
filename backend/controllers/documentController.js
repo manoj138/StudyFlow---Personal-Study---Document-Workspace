@@ -195,8 +195,20 @@ export const getDocumentById = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Document not found" });
     }
 
-    // Auto-reparse if old placeholder, orphan keywords, or Devanagari in code blocks are present
+    // Auto-reparse YouTube documents if old static text-white classes exist
+    if (document.fileType === "youtube" && document.extractedText && document.extractedText.includes('<strong class="font-bold text-white">')) {
+      const updatedAiData = await generateYouTubeAINotes(document.title, document.youtubeVideoId || "course");
+      document.extractedText = updatedAiData.extractedText;
+      if (updatedAiData.aiSummary) document.aiSummary = updatedAiData.aiSummary;
+      if (updatedAiData.aiKeyPoints?.length) document.aiKeyPoints = updatedAiData.aiKeyPoints;
+      if (updatedAiData.aiChapters?.length) document.aiChapters = updatedAiData.aiChapters;
+      if (updatedAiData.aiFlashcards?.length) document.aiFlashcards = updatedAiData.aiFlashcards;
+      await document.save();
+    }
+
+    // Auto-reparse uploaded file documents if old placeholder or broken code blocks exist
     if (
+      document.fileType !== "youtube" &&
       document.fileUrl &&
       (!document.extractedText ||
         document.extractedText === "Document content extracted for reading." ||

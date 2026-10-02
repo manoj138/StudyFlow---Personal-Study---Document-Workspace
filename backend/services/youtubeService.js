@@ -34,7 +34,7 @@ export const fetchYouTubeMetadata = async (url) => {
         title: data.title || "YouTube Study Lesson",
         authorName: data.author_name || "Study Instructor",
         thumbnailUrl: thumbnail,
-        embedUrl: `https://www.youtube.com/embed/${videoId}`
+        embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`
       };
     }
   } catch (err) {
@@ -46,7 +46,7 @@ export const fetchYouTubeMetadata = async (url) => {
     title: `YouTube Study Video (${videoId})`,
     authorName: "Online Course",
     thumbnailUrl: thumbnail,
-    embedUrl: `https://www.youtube.com/embed/${videoId}`
+    embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`
   };
 };
 
@@ -161,54 +161,54 @@ export const generateYouTubeAINotes = async (title, videoId) => {
 
   // Generated Notion-style HTML for StudyReader
   const formattedHtml = `
-    <h2 class="text-2xl font-extrabold text-white mt-6 mb-4 border-b border-dark-border/80 pb-3 tracking-tight">
+    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-6 mb-4 border-b border-slate-200 dark:border-dark-border/80 pb-3 tracking-tight">
       🎬 ${cleanTitle} — Gemini AI Video Study Notes
     </h2>
 
-    <div class="my-4 p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-slate-200 shadow-md">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Gemini AI Executive Summary
+    <div class="my-4 p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 text-slate-800 dark:text-slate-200 shadow-md">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span> Google Gemini AI Executive Summary
       </h3>
-      <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">${aiSummary}</p>
+      <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-sans">${aiSummary}</p>
     </div>
 
     ${aiDeepArticle || ""}
 
-    <h3 class="text-lg font-bold text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
+    <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> 📌 Key Study Takeaways
     </h3>
-    <ul class="list-disc list-inside space-y-2.5 my-3 text-slate-300 text-sm pl-2">
-      ${aiKeyPoints.map((pt) => `<li class="leading-relaxed"><strong class="font-bold text-white">${pt}</strong></li>`).join("")}
+    <ul class="list-disc list-inside space-y-2.5 my-3 text-slate-700 dark:text-slate-300 text-sm pl-2">
+      ${aiKeyPoints.map((pt) => `<li class="leading-relaxed"><strong class="font-bold text-slate-900 dark:text-white">${pt}</strong></li>`).join("")}
     </ul>
 
-    <h3 class="text-lg font-bold text-purple-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
+    <h3 class="text-lg font-bold text-purple-600 dark:text-purple-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span> ⏱️ Video Chapter Timelines
     </h3>
     <div class="space-y-3 my-4">
       ${aiChapters.map((ch) => `
-        <div class="p-3.5 bg-[#0D121F] border border-dark-border/80 rounded-xl flex items-start gap-3">
-          <span class="px-2.5 py-1 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 font-mono text-xs font-bold shrink-0">
+        <div class="p-3.5 bg-slate-100 dark:bg-[#0D121F] border border-slate-200 dark:border-dark-border/80 rounded-xl flex items-start gap-3">
+          <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 dark:bg-indigo-600/30 border border-indigo-500/30 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-300 font-mono text-xs font-bold shrink-0">
             ${ch.timestamp}
           </span>
           <div>
-            <h4 class="text-xs font-bold text-white mb-0.5">${ch.title}</h4>
-            <p class="text-xs text-slate-400">${ch.description}</p>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-0.5">${ch.title}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-400">${ch.description}</p>
           </div>
         </div>
       `).join("")}
     </div>
 
-    <h3 class="text-lg font-bold text-emerald-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
+    <h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-300 mt-8 mb-3 tracking-tight flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> ❓ Auto-Generated Revision Flashcards
     </h3>
     <div class="grid grid-cols-1 gap-3 my-4">
       ${aiFlashcards.map((fc, idx) => `
-        <div class="p-4 bg-slate-900/90 border border-emerald-500/20 rounded-2xl space-y-1.5">
-          <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+        <div class="p-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-emerald-500/20 rounded-2xl space-y-1.5 shadow-sm">
+          <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
             <span>Card #${idx + 1}</span>
           </div>
-          <p class="text-xs font-semibold text-white">Q: ${fc.question}</p>
-          <p class="text-xs text-slate-300">A: ${fc.answer}</p>
+          <p class="text-xs font-semibold text-slate-900 dark:text-white">Q: ${fc.question}</p>
+          <p class="text-xs text-slate-700 dark:text-slate-300">A: ${fc.answer}</p>
         </div>
       `).join("")}
     </div>

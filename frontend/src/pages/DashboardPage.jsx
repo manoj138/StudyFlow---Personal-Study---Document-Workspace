@@ -6,7 +6,7 @@ import API from "../services/api";
 import {
   BookOpen, Clock, Bookmark, FileText, ArrowRight, Plus, FolderPlus,
   Sparkles, Activity, Upload, Flame, Target, TrendingUp, ChevronRight, BarChart2, CheckCircle2,
-  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon
+  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -124,8 +124,9 @@ export const DashboardPage = () => {
     { id: "Calculator", label: "Math", Icon: Calculator }
   ];
 
+  // Dynamic Reading Time Formatter
   const formatReadingTime = (totalSecs) => {
-    if (!totalSecs || totalSecs === 0) return "14h 32m";
+    if (!totalSecs || totalSecs === 0) return "0m";
     const hours = Math.floor(totalSecs / 3600);
     const mins = Math.floor((totalSecs % 3600) / 60);
     if (hours > 0) return `${hours}h ${mins}m`;
@@ -148,15 +149,49 @@ export const DashboardPage = () => {
     year: "numeric"
   });
 
-  const weekDays = [
-    { day: "Mon", hours: 4, height: 50 },
-    { day: "Tue", hours: 6, height: 75 },
-    { day: "Wed", hours: 3, height: 40 },
-    { day: "Thu", hours: 5, height: 62 },
-    { day: "Fri", hours: 8, height: 100 },
-    { day: "Sat", hours: 4, height: 50 },
-    { day: "Sun", hours: 6, height: 75 }
-  ];
+  // Calculate 7-day Upload Trend
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const newDocsThisWeek = documents.filter((d) => new Date(d.createdAt) >= sevenDaysAgo).length;
+
+  // Calculate Dynamic Average Completion & Focus Level
+  const avgCompletion = documents.length > 0
+    ? Math.round(documents.reduce((acc, curr) => acc + (curr.progress?.completionPercentage || 0), 0) / documents.length)
+    : 0;
+
+  const getFocusTier = (pct) => {
+    if (pct >= 75) return { label: "Peak Focus", note: "You're on fire! 🔥", stroke: "92, 100" };
+    if (pct >= 40) return { label: "Steady Progress", note: "Great momentum! ⚡", stroke: "60, 100" };
+    if (pct > 0) return { label: "Getting Started", note: "Keep going! 🚀", stroke: "30, 100" };
+    return { label: "Ready to Learn", note: "Upload first doc! 📖", stroke: "0, 100" };
+  };
+
+  const focusTier = getFocusTier(avgCompletion);
+
+  // Dynamic Weekly Activity Breakdown (Grouped by Day of Week)
+  const calculateWeeklyActivity = () => {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const daySecs = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+
+    documents.forEach((doc) => {
+      if (doc.progress?.timeSpentSeconds) {
+        const updateDate = new Date(doc.updatedAt || doc.createdAt);
+        const dayName = days[updateDate.getDay()];
+        daySecs[dayName] += doc.progress.timeSpentSeconds;
+      }
+    });
+
+    const orderedDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const maxSecs = Math.max(...Object.values(daySecs), 1);
+
+    return orderedDays.map((day) => {
+      const secs = daySecs[day] || 0;
+      const hours = (secs / 3600).toFixed(1);
+      const height = Math.max(12, Math.round((secs / maxSecs) * 100));
+      return { day, hours: secs > 0 ? `${hours}h` : "0h", height };
+    });
+  };
+
+  const dynamicWeekDays = calculateWeeklyActivity();
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-7 max-w-[1500px] mx-auto font-sans transition-colors duration-200">
@@ -182,22 +217,22 @@ export const DashboardPage = () => {
           </div>
 
           {/* Hero Main Content */}
-    <div className="space-y-2 mt-4 relative z-10">
-  <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
-    {getTimeGreeting()}, 👋{" "}
-    <span className="text-white">
-      {user?.name || "Manoj Chougule"}
-    </span>
-  </h1>
+          <div className="space-y-2 mt-4 relative z-10">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
+              {getTimeGreeting()}, 👋{" "}
+              <span className="text-white">
+                {user?.name || "Manoj Chougule"}
+              </span>
+            </h1>
 
-  <p className="text-white/90 text-xs sm:text-sm max-w-xl leading-relaxed drop-shadow">
-    Keep going! Every chapter you complete brings you closer to your dreams. You got this! 🚀
-  </p>
-</div>
+            <p className="text-white/90 text-xs sm:text-sm max-w-xl leading-relaxed drop-shadow">
+              Keep going! Every chapter you complete brings you closer to your dreams. You got this! 🚀
+            </p>
+          </div>
 
           {/* Better Than Yesterday Slogan Badge */}
           <div className="absolute right-6 bottom-6 hidden sm:block">
-            <span className="text-xs italic font-serif text-amber-200/90 tracking-wide bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-amber-300/20">
+            <span className="water-brush-regular text-2xl text-amber-200 drop-shadow select-none">
               Better Than Yesterday ✨
             </span>
           </div>
@@ -223,7 +258,7 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* 4 Quantitative Metric Cards with Sparklines & Gauge */}
+      {/* 4 Dynamic Quantitative Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Metric 1: Total Documents */}
@@ -232,14 +267,14 @@ export const DashboardPage = () => {
             <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-semibold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              ↑ +3 this week
+            <span className="text-[11px] font-semibold font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+              +{newDocsThisWeek} this week
             </span>
           </div>
           <div className="mt-4 relative z-10">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Documents</span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {documents.length || 12}
+              {documents.length}
             </h3>
           </div>
           {/* Mini Sparkline Background Graph */}
@@ -256,11 +291,11 @@ export const DashboardPage = () => {
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-[11px] font-semibold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              ↑ +5h 12m this week
+              ⚡ Active Time
             </span>
           </div>
           <div className="mt-4 relative z-10">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Study Time</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Study Time</span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
               {formatReadingTime(totalReadingSeconds)}
             </h3>
@@ -279,13 +314,13 @@ export const DashboardPage = () => {
               <Bookmark className="w-5 h-5" />
             </div>
             <span className="text-[11px] font-semibold font-mono text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              ↑ +12 this week
+              📌 {bookmarksCount} Bookmarks
             </span>
           </div>
           <div className="mt-4 relative z-10">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Saved Annotations</span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {(bookmarksCount + highlightsCount) || 28}
+              {bookmarksCount + highlightsCount}
             </h3>
           </div>
           {/* Mini Sparkline Background Graph */}
@@ -295,19 +330,19 @@ export const DashboardPage = () => {
           </svg>
         </div>
 
-        {/* Metric 4: Focus Level with Gauge */}
+        {/* Metric 4: Focus Level with Dynamic Gauge */}
         <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex items-center justify-between">
           <div>
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 flex items-center justify-center mb-3">
               <Target className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Focus Level</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Completion Rate</span>
             <div className="flex items-center gap-2 mt-0.5">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">High Focus</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{focusTier.label}</h3>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">
-              You're on fire! 🔥
+              {focusTier.note}
             </span>
           </div>
 
@@ -326,7 +361,7 @@ export const DashboardPage = () => {
                 fill="none"
                 stroke="url(#cyan-gradient)"
                 strokeWidth="3.5"
-                strokeDasharray="92, 100"
+                strokeDasharray={`${avgCompletion}, 100`}
                 strokeLinecap="round"
               />
               <defs>
@@ -337,7 +372,7 @@ export const DashboardPage = () => {
               </defs>
             </svg>
             <span className="absolute text-xs font-extrabold text-slate-900 dark:text-white font-mono">
-              92%
+              {avgCompletion}%
             </span>
           </div>
         </div>
@@ -347,27 +382,26 @@ export const DashboardPage = () => {
       {/* 3-Column Lower Section: Weekly Activity | Recent Documents | Goals & Quick Links */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        {/* Col 1: Weekly Activity Bar Chart (5 cols) */}
+        {/* Col 1: Dynamic Weekly Activity Bar Chart (5 cols) */}
         <div className="lg:col-span-5 bg-white dark:bg-[#111827] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Weekly Activity
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your study progress this week</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Live reading time per day</p>
             </div>
-            <select className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs rounded-xl py-1.5 px-3 focus:outline-none">
-              <option>7 Days</option>
-              <option>30 Days</option>
-            </select>
+            <span className="text-[11px] font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
+              This Week
+            </span>
           </div>
 
           {/* Bar Columns Container */}
           <div className="flex items-end justify-between gap-3 pt-6 h-48">
-            {weekDays.map((w, i) => (
+            {dynamicWeekDays.map((w, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
                 <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {w.hours}h
+                  {w.hours}
                 </span>
                 <div className="w-full bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden h-36 flex flex-col justify-end p-1 border border-slate-200 dark:border-white/5">
                   <div
@@ -388,48 +422,55 @@ export const DashboardPage = () => {
               <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Recent Documents
             </h3>
             <Link to="/library" className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1">
-              <span>View All ({documents.length || 12})</span>
+              <span>View All ({documents.length})</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="space-y-3">
-            {(documents.length > 0 ? documents.slice(0, 4) : [
-              { _id: "1", title: "JavaScript Complete Deep & Industry-Level Notes.docx", subject: "JavaScript", time: "2 hours ago", format: "DOCX", color: "#6366F1" },
-              { _id: "2", title: "React Notes - Hooks & Context API Architecture.pdf", subject: "ReactJS", time: "5 hours ago", format: "PDF", color: "#10B981" },
-              { _id: "3", title: "Node.js + Express.js Backend Guide.pdf", subject: "Backend", time: "1 day ago", format: "PDF", color: "#8B5CF6" },
-              { _id: "4", title: "MongoDB Basics & Aggregation Pipelines.docx", subject: "Database", time: "2 days ago", format: "DOCX", color: "#F59E0B" }
-            ]).map((doc, idx) => (
-              <div
-                key={doc._id || idx}
-                onClick={() => navigate(doc._id ? `/document/${doc._id}` : "/library")}
-                className="p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer flex items-center justify-between gap-3 group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div 
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm"
-                    style={{ backgroundColor: doc.subjectId?.color || doc.color || "#6366F1" }}
-                  >
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {doc.title}
-                    </h4>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
-                        {doc.subjectId?.name || doc.subject || "General"}
-                      </span>
-                      <span className="text-[10px] text-slate-400">• {doc.time || "Recently active"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1">
-                  <MoreVertical className="w-4 h-4" />
+            {documents.length === 0 ? (
+              <div className="p-6 text-center rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-white/10 space-y-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400">No documents uploaded yet.</p>
+                <button
+                  onClick={() => navigate("/library")}
+                  className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm cursor-pointer"
+                >
+                  Upload First Document
                 </button>
               </div>
-            ))}
+            ) : (
+              documents.slice(0, 4).map((doc) => (
+                <div
+                  key={doc._id}
+                  onClick={() => navigate(`/document/${doc._id}`)}
+                  className="p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div 
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm"
+                      style={{ backgroundColor: doc.subjectId?.color || "#6366F1" }}
+                    >
+                      {doc.fileType === "youtube" ? <Youtube size={18} /> : <FileText size={18} />}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {doc.title}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
+                          {doc.subjectId?.name || "General"}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          • {doc.progress?.completionPercentage || 0}% read
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -506,198 +547,67 @@ export const DashboardPage = () => {
 
       </div>
 
-      {/* Your Subjects Section */}
-      <div className="space-y-5 pt-2">
-        <div className="flex items-center justify-between">
+      {/* Add Subject Modal */}
+      <Modal
+        isOpen={showSubjectModal}
+        onClose={() => setShowSubjectModal(false)}
+        title="Add New Subject"
+        icon={FolderPlus}
+      >
+        <form onSubmit={handleCreateSubject} className="space-y-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Your Subjects</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Organize course materials by subject modules.</p>
+            <label className="block text-xs font-bold text-slate-300 mb-1">Subject Name</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. System Design, Computer Networks"
+              value={newSubjectName}
+              onChange={(e) => setNewSubjectName(e.target.value)}
+              className="w-full bg-[#0F172A] border border-dark-border/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
           </div>
-          <button
-            onClick={() => setShowSubjectModal(true)}
-            className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Subject</span>
-          </button>
-        </div>
 
-        {loading ? (
-          <div className="text-xs text-slate-500 py-6">Loading subjects...</div>
-        ) : subjects.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900/80 p-10 text-center rounded-2xl border border-dashed border-slate-300 dark:border-white/10 max-w-md mx-auto shadow-sm">
-            <FolderPlus className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">No Subjects Created</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Create your first subject category to group your study materials.</p>
-            <button
-              onClick={() => setShowSubjectModal(true)}
-              className="mt-4 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm cursor-pointer"
-            >
-              + Create Subject
-            </button>
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-1">Description (Optional)</label>
+            <input
+              type="text"
+              placeholder="e.g. Advanced distributed systems architecture"
+              value={newSubjectDesc}
+              onChange={(e) => setNewSubjectDesc(e.target.value)}
+              className="w-full bg-[#0F172A] border border-dark-border/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {subjects.map((subj) => {
-              const count = documents.filter((d) => d.subjectId?._id === subj._id || d.subjectId === subj._id).length;
-              return (
-                <div
-                  key={subj._id}
-                  onClick={() => navigate(`/library?subjectId=${subj._id}`)}
-                  className="bg-white dark:bg-[#111827] p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 shadow-sm hover:shadow-md transition-all group cursor-pointer flex flex-col justify-between space-y-4 relative overflow-hidden"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-extrabold shadow-sm"
-                        style={{ backgroundColor: subj.color || "#6366F1" }}
-                      >
-                        {subj.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-white/5">
-                        {count} {count === 1 ? "doc" : "docs"}
-                      </span>
-                    </div>
 
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {subj.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                      {subj.description || "No description specified"}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs text-indigo-600 dark:text-indigo-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    <span>View Materials</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Modal for Creating New Subject */}
-      {showSubjectModal && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-slate-950/80 dark:bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-white/15 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <FolderPlus className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Create New Subject
-              </h3>
-              <button
-                onClick={() => setShowSubjectModal(false)}
-                className="text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateSubject} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Subject Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Computer Networks, DBMS"
-                  value={newSubjectName}
-                  onChange={(e) => setNewSubjectName(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 px-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Description (Optional)</label>
-                <textarea
-                  rows={2}
-                  placeholder="Brief description of subject topics..."
-                  value={newSubjectDesc}
-                  onChange={(e) => setNewSubjectDesc(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              {/* Color Palette Picker */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Theme Color Accent</label>
-                <div className="flex items-center gap-2.5 pt-1">
-                  {colorPresets.map((c) => (
-                    <button
-                      key={c.hex}
-                      type="button"
-                      onClick={() => setNewSubjectColor(c.hex)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-sm relative"
-                      style={{ backgroundColor: c.hex }}
-                      title={c.name}
-                    >
-                      {newSubjectColor === c.hex && (
-                        <Check className="w-4 h-4 text-white drop-shadow-md" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Icon Selector */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Category Icon</label>
-                <div className="flex items-center gap-2">
-                  {iconOptions.map(({ id, label, Icon }) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setNewSubjectIcon(id)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 border transition-all ${
-                        newSubjectIcon === id
-                          ? "bg-indigo-600/15 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                          : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-400"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="text-[10px]">{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Live Subject Preview Card */}
-              <div className="p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/60 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Live Preview</span>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm"
-                    style={{ backgroundColor: newSubjectColor }}
-                  >
-                    {newSubjectName ? newSubjectName.charAt(0).toUpperCase() : "S"}
-                  </div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    {newSubjectName || "Subject Name Preview"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-200 dark:border-white/10">
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">Color Theme</label>
+            <div className="flex items-center gap-3">
+              {colorPresets.map((c) => (
                 <button
                   type="button"
-                  onClick={() => setShowSubjectModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md cursor-pointer transition-all hover:scale-105"
-                >
-                  Create Subject
-                </button>
-              </div>
-            </form>
+                  key={c.hex}
+                  onClick={() => setNewSubjectColor(c.hex)}
+                  className={`w-7 h-7 rounded-full transition-transform ${
+                    newSubjectColor === c.hex ? "scale-125 ring-2 ring-white" : "hover:scale-110"
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
           </div>
-        </div>,
-        document.body
-      )}
+
+          <div className="pt-2 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setShowSubjectModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="gradient">
+              Save Subject
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 };
+
+export default DashboardPage;

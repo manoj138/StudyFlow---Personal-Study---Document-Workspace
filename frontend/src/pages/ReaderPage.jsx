@@ -971,10 +971,11 @@ export const ReaderPage = () => {
                     </div>
                     <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-inner bg-black">
                       <iframe
-                        src={`https://www.youtube.com/embed/${document.youtubeVideoId || extractYouTubeVideoId(document.youtubeUrl)}?autoplay=0&rel=0`}
+                        src={`https://www.youtube-nocookie.com/embed/${document.youtubeVideoId || extractYouTubeVideoId(document.youtubeUrl)}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&rel=0`}
                         title={document.title}
                         className="w-full h-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                       />
                     </div>
