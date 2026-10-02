@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Water+Brush&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.water-brush-regular {
+  font-family: "Water Brush", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@layer base {
+  body {
+    @apply bg-[#080C14] text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500/30 selection:text-indigo-200 transition-colors duration-200;
+  }
+
+  html.light body {
+    background-color: #F8FAFC !important;
+    color: #0F172A !important;
+  }
+}
+
+/* Glassmorphism & Matte Surface Tokens */
+.glass-panel {
+  background: rgba(15, 22, 35, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(21, 29, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-card:hover {
+  background: rgba(28, 38, 59, 0.8);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+/* Light Mode Overrides for Glass Panels, Cards, Text, and Form Elements */
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .glass-card {
+  background: #FFFFFF !important;
+  backdrop-filter: none;
+  border: 1px solid #E2E8F0 !important;
+  color: #1E293B !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .glass-card:hover {
+  background: #FFFFFF !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Light Mode default typography fallback without !important so Tailwind text classes work */
+html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6 {
+  color: #0F172A;
+}
+
+html.light p {
+  color: #475569;
+}
+
+/* Enforce pristine white typography on dark panels and banners across both light & dark themes */
+.dark-panel,
+.dark-panel h1,
+.dark-panel h2,
+.dark-panel h3,
+.dark-panel h4,
+.dark-panel h5,
+.dark-panel h6,
+.dark-panel p,
+html.light .dark-panel h1,
+html.light .dark-panel h2,
+html.light .dark-panel h3,
+html.light .dark-panel h4,
+html.light .dark-panel h5,
+html.light .dark-panel h6,
+html.light .dark-panel p {
+  color: #FFFFFF !important;
+}
+
+html.light .dark-panel p.text-slate-300,
+html.light .dark-panel p.text-slate-200,
+html.light .dark-panel span.text-slate-300,
+html.light .dark-panel span.text-slate-200 {
+  color: #CBD5E1 !important;
+}
+
+html.light .dark-panel p.text-slate-400,
+html.light .dark-panel span.text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+html.light input:not([type="color"]), html.light select, html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light input::placeholder, html.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Light Mode CodeBlock Overrides */
+html.light .code-block-container {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .code-block-header {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .code-text-plain {
+  color: #1E293B !important;
+}
+
+html.light .code-text-kw {
+  color: #7C3AED !important;
+  font-weight: 700 !important;
+}
+
+html.light .code-text-str {
+  color: #059669 !important;
+}
+
+html.light .code-text-num {
+  color: #D97706 !important;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+}
+
+/* Custom Clean Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080C14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Custom Highlight Classes for StudyReader (Clean, non-tacky colors) */
+mark.studyflow-mark-yellow {
+  background-color: rgba(234, 179, 8, 0.25) !important;
+  color: #FEF08A !important;
+  border-bottom: 2px solid #EAB308 !important;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+mark.studyflow-mark-green {
+  background-color: rgba(16, 185, 129, 0.25) !important;
+  color: #A7F3D0 !important;
+  border-bottom: 2px solid #10B981 !important;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+mark.studyflow-mark-blue {
+  background-color: rgba(14, 165, 233, 0.25) !important;
+  color: #BAE6FD !important;
+  border-bottom: 2px solid #0EA5E9 !important;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+mark.studyflow-mark-pink {
+  background-color: rgba(236, 72, 153, 0.25) !important;
+  color: #FBCFE8 !important;
+  border-bottom: 2px solid #EC4899 !important;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/* Light Mode Highlight Text Colors */
+html.light mark.studyflow-mark-yellow {
+  background-color: rgba(254, 240, 138, 0.9) !important;
+  color: #713F12 !important;
+  border-bottom: 2px solid #EAB308 !important;
+}
+
+html.light mark.studyflow-mark-green {
+  background-color: rgba(167, 243, 208, 0.9) !important;
+  color: #064E3B !important;
+  border-bottom: 2px solid #10B981 !important;
+}
+
+html.light mark.studyflow-mark-blue {
+  background-color: rgba(186, 230, 253, 0.9) !important;
+  color: #0C4A6E !important;
+  border-bottom: 2px solid #0EA5E9 !important;
+}
+
+html.light mark.studyflow-mark-pink {
+  background-color: rgba(251, 207, 232, 0.9) !important;
+  color: #831843 !important;
+  border-bottom: 2px solid #EC4899 !important;
+}
