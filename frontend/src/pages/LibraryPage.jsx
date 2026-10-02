@@ -17,6 +17,8 @@ import { EmptyState } from "../components/common/EmptyState";
 import { DocumentCard } from "../components/common/DocumentCard";
 import { VideoCard } from "../components/common/VideoCard";
 
+import { DocumentScannerLoader } from "../components/common/DocumentScannerLoader";
+
 export const LibraryPage = () => {
   const [searchParams] = useSearchParams();
   const urlSubjectId = searchParams.get("subjectId") || "";
@@ -372,10 +374,7 @@ export const LibraryPage = () => {
 
       {/* Document Grid / List */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Loading library materials...</span>
-        </div>
+        <DocumentScannerLoader message="Loading Study Library Materials..." fullScreen={false} />
       ) : documents.filter((d) => {
           if (libraryCategory === "documents") return d.fileType !== "youtube";
           if (libraryCategory === "videos") return d.fileType === "youtube";

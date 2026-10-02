@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { EmptyState } from "../components/common/EmptyState";
 import { SubjectBadge } from "../components/ui/SubjectBadge";
 
+import { DocumentScannerLoader } from "../components/common/DocumentScannerLoader";
+
 export const RevisionPage = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,10 +70,7 @@ export const RevisionPage = () => {
 
       {/* Revision Documents Grid */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Loading revision feed...</span>
-        </div>
+        <DocumentScannerLoader message="Loading Revision Feed..." fullScreen={false} />
       ) : documents.length === 0 ? (
         <div className="bg-white dark:bg-slate-900/80 p-12 text-center rounded-3xl border border-dashed border-slate-300 dark:border-white/10 max-w-md mx-auto my-8 shadow-sm">
           <div className="w-16 h-16 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-100 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto mb-4">

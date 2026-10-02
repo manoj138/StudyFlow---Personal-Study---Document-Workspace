@@ -11,15 +11,15 @@ import { LibraryPage } from "./pages/LibraryPage";
 import { ReaderPage } from "./pages/ReaderPage";
 import { RevisionPage } from "./pages/RevisionPage";
 
+import { DocumentScannerLoader } from "./components/common/DocumentScannerLoader";
+
 // Protected Route Guard
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#080C14] text-slate-600 dark:text-slate-400 flex items-center justify-center text-xs">
-        Loading StudyFlow Workspace...
-      </div>
+      <DocumentScannerLoader message="Loading StudyFlow Workspace..." fullScreen={true} />
     );
   }
 

@@ -15,6 +15,8 @@ import {
   GraduationCap, Brain
 } from "lucide-react";
 
+import { DocumentScannerLoader } from "../components/common/DocumentScannerLoader";
+
 const extractYouTubeVideoId = (url) => {
   if (!url) return "";
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -320,9 +322,7 @@ export const ReaderPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#080C14] text-slate-600 dark:text-slate-400 flex items-center justify-center text-xs">
-        Loading StudyFlow Workspace Reader...
-      </div>
+      <DocumentScannerLoader message="Loading StudyFlow Workspace Reader..." fullScreen={true} />
     );
   }
 
