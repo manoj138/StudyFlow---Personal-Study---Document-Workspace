@@ -343,33 +343,33 @@ export const ReaderPage = () => {
   return (
     <div className="h-[calc(100vh-57px)] bg-slate-100 dark:bg-[#080C14] text-slate-900 dark:text-slate-100 flex flex-col overflow-hidden font-sans transition-colors duration-200">
       {/* Reader Header Toolbar */}
-      <div className="glass-panel border-b border-slate-200 dark:border-white/5 px-4 py-2.5 flex items-center justify-between z-20 shrink-0">
-        {/* Left: Back & Title */}
-        <div className="flex items-center gap-2">
+      <div className="glass-panel border-b border-slate-200 dark:border-white/5 px-3 sm:px-6 py-2.5 flex items-center justify-between z-20 shrink-0 gap-2">
+        {/* Left: Back, Sidebar Toggle & Title */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <button
             onClick={() => navigate("/library")}
-            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0"
             title="Back to Library"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0"
             title="Toggle Sidebar"
           >
             <Layers className="w-4 h-4" />
           </button>
-          <div className="flex flex-col">
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white max-w-[110px] sm:max-w-xs truncate">{document.title}</h2>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+          <div className="flex flex-col min-w-0 flex-1">
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-full sm:max-w-xs">{document.title}</h2>
+            <p className="hidden sm:block text-[10px] text-slate-500 dark:text-slate-400 font-mono">
               Page {currentPage} of {document.totalPages}
             </p>
           </div>
         </div>
 
-        {/* Center: Mode Switcher */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/5 rounded-xl p-1 gap-1">
+        {/* Center: Mode Switcher (Desktop / Tablet) */}
+        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/5 rounded-xl p-1 gap-1 shrink-0">
           <button
             onClick={() => setMode("study")}
             className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
@@ -380,7 +380,7 @@ export const ReaderPage = () => {
             title="Study Reflow Mode"
           >
             <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
-            <span className="hidden sm:inline">Study Mode</span>
+            <span>Study Mode</span>
           </button>
           <button
             onClick={() => setMode("original")}
@@ -392,12 +392,12 @@ export const ReaderPage = () => {
             title="Original PDF Mode"
           >
             <Layers className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden sm:inline">PDF Mode</span>
+            <span>PDF Mode</span>
           </button>
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {mode === "study" && (
             <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-xl px-2 py-1">
               <button
@@ -420,15 +420,15 @@ export const ReaderPage = () => {
 
           <button
             onClick={handleAddBookmark}
-            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all text-xs font-medium flex items-center gap-1"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all text-xs font-medium flex items-center gap-1"
             title="Bookmark Current Page"
           >
-            <Bookmark className="w-3.5 h-3.5" />
+            <Bookmark className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden lg:inline">Bookmark</span>
           </button>
 
-          {/* Direct Page Jump Control (< 4/52 >) */}
-          <form onSubmit={handlePageInputSubmit} className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
+          {/* Desktop Direct Page Jump Control (< 4/52 >) */}
+          <form onSubmit={handlePageInputSubmit} className="hidden sm:flex items-center gap-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
             <button
               type="button"
               disabled={currentPage <= 1}
@@ -1031,6 +1031,66 @@ export const ReaderPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Mobile Reader Toolbar (Kindle & Notion Style Bottom Control Strip) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 sm:hidden flex items-center gap-2 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md border border-slate-700/80 dark:border-white/15 px-3 py-1.5 rounded-full shadow-2xl">
+        {/* Mode Switcher */}
+        <div className="flex items-center bg-white/10 rounded-full p-0.5">
+          <button
+            onClick={() => setMode("study")}
+            className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all ${
+              mode === "study" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-300"
+            }`}
+          >
+            <GraduationCap className="w-3 h-3 text-amber-300" />
+            <span>Study</span>
+          </button>
+          <button
+            onClick={() => setMode("original")}
+            className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all ${
+              mode === "original" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-300"
+            }`}
+          >
+            <Layers className="w-3 h-3" />
+            <span>PDF</span>
+          </button>
+        </div>
+
+        <div className="w-px h-4 bg-white/20" />
+
+        {/* Mobile Page Controls */}
+        <form onSubmit={handlePageInputSubmit} className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => handlePageOrScrollChange(currentPage - 1)}
+            className="p-1 rounded-full text-slate-300 hover:text-white disabled:opacity-30"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="flex items-center text-xs font-mono">
+            <input
+              type="number"
+              min={1}
+              max={document.totalPages || 1}
+              value={inputPageVal}
+              onChange={(e) => setInputPageVal(e.target.value)}
+              onBlur={handlePageInputSubmit}
+              className="w-7 bg-transparent text-center font-bold text-indigo-400 focus:outline-none"
+            />
+            <span className="text-slate-400">/{document.totalPages || 1}</span>
+          </div>
+          <button
+            type="button"
+            disabled={currentPage >= (document.totalPages || 1)}
+            onClick={() => handlePageOrScrollChange(currentPage + 1)}
+            className="p-1 rounded-full text-slate-300 hover:text-white disabled:opacity-30"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </form>
+      </div>
+
     </div>
   );
 };
