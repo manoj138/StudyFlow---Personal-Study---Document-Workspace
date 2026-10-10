@@ -16,15 +16,15 @@ const applyInlineFormatting = (str) => {
     .replace(/\b([A-Z])\s+([a-z]{2,})\b/g, "$1$2") // Clean split-word typos (V alue -> Value)
     .replace(/(?:उदा\.\s*:?\s*)?`?(?:Click Me|Click Me!)`?/gi, '<span class="studyflow-demo-btn">Click Me</span>')
     // Markdown links: [title](url)
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 underline font-medium transition-colors">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium transition-colors">$1</a>')
     // Inline code: `code`
-    .replace(/`([^`]+)`/g, '<code class="bg-[#161f36] border border-indigo-500/30 px-1.5 py-0.5 rounded text-xs font-mono text-cyan-300">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="bg-indigo-50 dark:bg-[#161f36] border border-indigo-500/30 px-1.5 py-0.5 rounded text-xs font-mono text-indigo-700 dark:text-cyan-300">$1</code>')
     // Bold: **text** or __text__
-    .replace(/(\*\*|__)(.*?)\1/g, '<strong class="font-bold text-white">$2</strong>')
+    .replace(/(\*\*|__)(.*?)\1/g, '<strong class="font-bold text-slate-900 dark:text-white">$2</strong>')
     // Italic: *text* or _text_
-    .replace(/(\*|_)(.*?)\1/g, '<em class="italic text-slate-200">$2</em>')
+    .replace(/(\*|_)(.*?)\1/g, '<em class="italic text-slate-800 dark:text-slate-200">$2</em>')
     // Strikethrough: ~~text~~
-    .replace(/~~(.*?)~~/g, '<del class="line-through text-slate-400">$1</del>');
+    .replace(/~~(.*?)~~/g, '<del class="line-through text-slate-400 dark:text-slate-500">$1</del>');
 };
 
 /**
@@ -60,8 +60,10 @@ const isExecutableCodeLine = (line) => {
   return isVarDecl || isFuncDecl || isConsole || isImportExport || isControlFlow || isExprWithSemi;
 };
 
-export const transformToNotionStyleHtml = (text) => {
+export const transformToNotionStyleHtml = (text, fileType = "") => {
   if (!text) return "";
+
+  const isMarkdown = fileType === "md" || fileType === "markdown" || /^#{1,4}\s/m.test(text) || text.includes("```");
 
   // 1. Normalize line breaks and clean existing raw tags
   let cleanText = text
@@ -77,6 +79,7 @@ export const transformToNotionStyleHtml = (text) => {
     const next = unmergedLines[i + 1] ? unmergedLines[i + 1].trim() : "";
 
     if (
+      !isMarkdown &&
       /^(let|const|var|function|class|import|export)$/i.test(current) &&
       next &&
       !next.startsWith("```") &&
@@ -114,19 +117,19 @@ export const transformToNotionStyleHtml = (text) => {
     if (tableRows.length > 0) {
       const validRows = tableRows.filter(r => !/^[|\s-:]+$/.test(r));
       if (validRows.length > 0) {
-        let tableHtml = `<div class="my-6 overflow-x-auto rounded-xl border border-slate-800 bg-[#0D121F] shadow-lg"><table class="w-full text-left text-sm text-slate-300 border-collapse">`;
+        let tableHtml = `<div class="my-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D121F] shadow-md"><table class="w-full text-left text-sm text-slate-700 dark:text-slate-300 border-collapse">`;
         validRows.forEach((rowStr, rowIndex) => {
           const cells = rowStr.split("|").slice(1, -1).map(c => c.trim());
           if (cells.length === 0) return;
           
           if (rowIndex === 0) {
-            tableHtml += `<thead class="bg-indigo-950/60 text-indigo-300 font-semibold border-b border-slate-800"><tr>`;
+            tableHtml += `<thead class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border-b border-slate-200 dark:border-slate-800"><tr>`;
             cells.forEach(cell => {
               tableHtml += `<th class="px-4 py-3 font-semibold">${applyInlineFormatting(cell)}</th>`;
             });
             tableHtml += `</tr></thead><tbody>`;
           } else {
-            tableHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors">`;
+            tableHtml += `<tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">`;
             cells.forEach(cell => {
               tableHtml += `<td class="px-4 py-3">${applyInlineFormatting(cell)}</td>`;
             });
@@ -187,7 +190,7 @@ export const transformToNotionStyleHtml = (text) => {
     if (/^(---|[*]{3,}|_{3,})$/.test(trimmed)) {
       flushAutoCodeBuffer();
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<hr class="my-8 border-slate-800/80 border-t" />`;
+      htmlResult += `<hr class="my-8 border-slate-200 dark:border-slate-800/80 border-t" />`;
       return;
     }
 
@@ -196,12 +199,12 @@ export const transformToNotionStyleHtml = (text) => {
       flushAutoCodeBuffer();
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const quoteText = trimmed.replace(/^>\s*/, "");
-      htmlResult += `<blockquote class="my-4 p-4 rounded-xl bg-indigo-950/40 border-l-4 border-indigo-500 text-slate-200 text-sm leading-relaxed shadow-sm flex items-start gap-3"><span class="text-indigo-400 text-lg leading-none">💡</span><div class="flex-1">${applyInlineFormatting(quoteText)}</div></blockquote>`;
+      htmlResult += `<blockquote class="my-4 p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border-l-4 border-indigo-500 text-slate-800 dark:text-slate-200 text-sm leading-relaxed shadow-sm flex items-start gap-3"><span class="text-indigo-500 dark:text-indigo-400 text-lg leading-none shrink-0">💡</span><div class="flex-1 min-w-0">${applyInlineFormatting(quoteText)}</div></blockquote>`;
       return;
     }
 
-    // Check if line is a strict standalone code line
-    if (!inList && isExecutableCodeLine(line)) {
+    // Check if line is a strict standalone code line (ONLY for non-markdown raw text documents)
+    if (!isMarkdown && !inList && isExecutableCodeLine(line)) {
       autoCodeBuffer.push(line);
       return;
     }
@@ -212,28 +215,28 @@ export const transformToNotionStyleHtml = (text) => {
     if (trimmed.startsWith("# ")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const title = trimmed.replace(/^#\s+/, "");
-      htmlResult += `<h1 class="text-3xl font-extrabold text-white mt-10 mb-4 border-b border-dark-border/80 pb-3 tracking-tight">${applyInlineFormatting(title)}</h1>`;
+      htmlResult += `<h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">${applyInlineFormatting(title)}</h1>`;
       return;
     }
 
     if (trimmed.startsWith("## ")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const title = trimmed.replace(/^##\s+/, "");
-      htmlResult += `<h2 class="text-2xl font-bold text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-sm shadow-indigo-500/50"></span> ${applyInlineFormatting(title)}</h2>`;
+      htmlResult += `<h2 class="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-300 mt-7 mb-3 tracking-tight flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-sm"></span> ${applyInlineFormatting(title)}</h2>`;
       return;
     }
 
     if (trimmed.startsWith("### ")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const title = trimmed.replace(/^###\s+/, "");
-      htmlResult += `<h3 class="text-xl font-bold text-purple-300 mt-6 mb-2 tracking-tight flex items-center gap-2"><span class="text-purple-400">❖</span> ${applyInlineFormatting(title)}</h3>`;
+      htmlResult += `<h3 class="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-300 mt-6 mb-2 tracking-tight flex items-center gap-2"><span class="text-purple-500 dark:text-purple-400">❖</span> ${applyInlineFormatting(title)}</h3>`;
       return;
     }
 
     if (trimmed.startsWith("#### ")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const title = trimmed.replace(/^####\s+/, "");
-      htmlResult += `<h4 class="text-base font-semibold text-slate-200 mt-4 mb-2 tracking-tight">${applyInlineFormatting(title)}</h4>`;
+      htmlResult += `<h4 class="text-base font-semibold text-slate-800 dark:text-slate-200 mt-4 mb-2 tracking-tight">${applyInlineFormatting(title)}</h4>`;
       return;
     }
 
@@ -241,53 +244,55 @@ export const transformToNotionStyleHtml = (text) => {
     if (/^(📙|🟢|📘|📕|⚡|🧠|💡)/.test(trimmed)) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const title = trimmed.replace(/^[📙🟢📘📕⚡🧠💡]\s*/, "");
-      htmlResult += `<h2 class="text-2xl font-extrabold text-white mt-10 mb-4 border-b border-dark-border/80 pb-3 tracking-tight">${applyInlineFormatting(title)}</h2>`;
+      htmlResult += `<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">${applyInlineFormatting(title)}</h2>`;
       return;
     }
 
     // Numbered Section Topic Title (e.g. 1. Introduction)
-    if (/^\d+\.\s+/.test(trimmed) && trimmed.length < 90) {
+    if (!isMarkdown && /^\d+\.\s+/.test(trimmed) && trimmed.length < 90) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<h3 class="text-xl font-bold text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> ${applyInlineFormatting(trimmed)}</h3>`;
+      htmlResult += `<h3 class="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-300 mt-7 mb-3 tracking-tight flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> ${applyInlineFormatting(trimmed)}</h3>`;
       return;
     }
 
     // Task Checkboxes (- [ ] or - [x])
     if (/^-\s*\[([ xX])\]\s+/.test(trimmed)) {
       if (!inList) {
-        htmlResult += `<ul class="space-y-2 my-3 text-slate-300 text-sm pl-2">`;
+        htmlResult += `<ul class="space-y-2 my-3 text-slate-700 dark:text-slate-300 text-sm pl-2">`;
         inList = true;
       }
       const isChecked = /^-\s*\[[xX]\]\s+/.test(trimmed);
       const itemText = trimmed.replace(/^-\s*\[([ xX])\]\s+/, "");
       if (isChecked) {
-        htmlResult += `<li class="flex items-center gap-2.5 text-slate-400 line-through"><span class="w-4 h-4 rounded bg-indigo-600 border border-indigo-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">✓</span> ${applyInlineFormatting(itemText)}</li>`;
+        htmlResult += `<li class="flex items-center gap-2.5 text-slate-400 dark:text-slate-500 line-through"><span class="w-4 h-4 rounded bg-indigo-600 border border-indigo-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">✓</span> ${applyInlineFormatting(itemText)}</li>`;
       } else {
-        htmlResult += `<li class="flex items-center gap-2.5 text-slate-300"><span class="w-4 h-4 rounded border border-slate-600 bg-slate-800/80 inline-block"></span> ${applyInlineFormatting(itemText)}</li>`;
+        htmlResult += `<li class="flex items-center gap-2.5 text-slate-700 dark:text-slate-300"><span class="w-4 h-4 rounded border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 inline-block"></span> ${applyInlineFormatting(itemText)}</li>`;
       }
       return;
     }
 
     // Sub-headers & Definitions
     if (
-      /^(Definition|Why\s+JavaScript\?|JavaScript\s*कुठे\s*वापरतो\?|Why\s+Runtime\?|Summary)/i.test(trimmed) ||
-      (trimmed.length < 50 && trimmed.endsWith(":") && !trimmed.includes("."))
+      !isMarkdown && (
+        /^(Definition|Why\s+JavaScript\?|JavaScript\s*कुठे\s*वापरतो\?|Why\s+Runtime\?|Summary)/i.test(trimmed) ||
+        (trimmed.length < 50 && trimmed.endsWith(":") && !trimmed.includes("."))
+      )
     ) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<h4 class="text-sm font-bold text-purple-300 uppercase tracking-wider mt-6 mb-2 flex items-center gap-1.5"><span class="text-purple-400">❖</span> ${applyInlineFormatting(trimmed)}</h4>`;
+      htmlResult += `<h4 class="text-sm font-bold text-purple-600 dark:text-purple-300 uppercase tracking-wider mt-6 mb-2 flex items-center gap-1.5"><span class="text-purple-500 dark:text-purple-400">❖</span> ${applyInlineFormatting(trimmed)}</h4>`;
       return;
     }
 
     // Language Badges (English / Marathi)
     if (/^English$/i.test(trimmed)) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<div class="my-2"><span class="inline-flex items-center gap-1.5 bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">🇬🇧 English</span></div>`;
+      htmlResult += `<div class="my-2"><span class="inline-flex items-center gap-1.5 bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">🇬🇧 English</span></div>`;
       return;
     }
 
     if (/^Marathi$/i.test(trimmed)) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      htmlResult += `<div class="my-2"><span class="inline-flex items-center gap-1.5 bg-purple-950/80 border border-purple-500/30 text-purple-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">🇮🇳 Marathi</span></div>`;
+      htmlResult += `<div class="my-2"><span class="inline-flex items-center gap-1.5 bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">🇮🇳 Marathi</span></div>`;
       return;
     }
 
@@ -301,11 +306,11 @@ export const transformToNotionStyleHtml = (text) => {
 
       if (steps.length > 0) {
         const stepsHtml = steps
-          .map((s) => `<div class="px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono text-xs font-semibold inline-block shadow-sm">${applyInlineFormatting(s)}</div>`)
-          .join('<div class="text-indigo-400 font-bold text-xs my-1 pl-3 flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs">↓</span></div>');
-        htmlResult += `<div class="my-4 p-4 bg-[#0D121F] border border-dark-border rounded-2xl flex flex-col items-start gap-1.5">${stepsHtml}</div>`;
+          .map((s) => `<div class="px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-mono text-xs font-semibold inline-block shadow-sm">${applyInlineFormatting(s)}</div>`)
+          .join('<div class="text-indigo-600 dark:text-indigo-400 font-bold text-xs my-1 pl-3 flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs">↓</span></div>');
+        htmlResult += `<div class="my-4 p-4 bg-slate-50 dark:bg-[#0D121F] border border-slate-200 dark:border-dark-border rounded-2xl flex flex-col items-start gap-1.5">${stepsHtml}</div>`;
       } else {
-        htmlResult += `<div class="my-2.5 pl-4 flex items-center"><div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold flex items-center justify-center shadow-sm">↓</div></div>`;
+        htmlResult += `<div class="my-2.5 pl-4 flex items-center"><div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center shadow-sm">↓</div></div>`;
       }
       return;
     }
@@ -319,11 +324,11 @@ export const transformToNotionStyleHtml = (text) => {
 
       if (steps.length > 0) {
         const stepsHtml = steps
-          .map((s) => `<span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono text-xs font-semibold">${applyInlineFormatting(s)}</span>`)
-          .join('<span class="text-indigo-400 font-bold text-xs mx-1">→</span>');
-        htmlResult += `<div class="my-3 p-3.5 bg-[#0D121F] border border-dark-border rounded-xl font-mono text-xs text-indigo-300 flex flex-wrap items-center gap-1.5">${stepsHtml}</div>`;
+          .map((s) => `<span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-mono text-xs font-semibold">${applyInlineFormatting(s)}</span>`)
+          .join('<span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mx-1">→</span>');
+        htmlResult += `<div class="my-3 p-3.5 bg-slate-50 dark:bg-[#0D121F] border border-slate-200 dark:border-dark-border rounded-xl font-mono text-xs text-indigo-700 dark:text-indigo-300 flex flex-wrap items-center gap-1.5">${stepsHtml}</div>`;
       } else {
-        htmlResult += `<div class="inline-flex items-center justify-center my-2 text-indigo-400 font-bold text-sm">→</div>`;
+        htmlResult += `<div class="inline-flex items-center justify-center my-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">→</div>`;
       }
       return;
     }
@@ -331,7 +336,7 @@ export const transformToNotionStyleHtml = (text) => {
     // Bullet Lists (•, -, *, 1.)
     if (/^(•|▪|-|\*|\d+\.)\s+/.test(trimmed)) {
       if (!inList) {
-        htmlResult += `<ul class="list-disc list-inside space-y-2 my-3 text-slate-300 text-sm pl-2">`;
+        htmlResult += `<ul class="list-disc list-inside space-y-2 my-3 text-slate-700 dark:text-slate-300 text-sm pl-2">`;
         inList = true;
       }
       const itemText = trimmed.replace(/^(•|▪|-|\*|\d+\.)\s+/, "");
@@ -345,7 +350,7 @@ export const transformToNotionStyleHtml = (text) => {
     }
 
     // Regular Text Paragraphs
-    htmlResult += `<p class="text-sm leading-relaxed text-slate-300 my-3 font-sans">${applyInlineFormatting(trimmed)}</p>`;
+    htmlResult += `<p class="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300 my-3 font-sans">${applyInlineFormatting(trimmed)}</p>`;
   });
 
   flushAutoCodeBuffer();
@@ -384,7 +389,7 @@ export const processUploadedDocument = async (filePath, fileType) => {
     }
 
     // Generate Notion/Linear Style Editorial Technical Docs HTML
-    const formattedHtml = transformToNotionStyleHtml(rawText);
+    const formattedHtml = transformToNotionStyleHtml(rawText, fileType);
 
     // Generate Table of Contents with levels for Markdown & text docs
     const lines = rawText.split("\n").filter((line) => line.trim().length > 0);

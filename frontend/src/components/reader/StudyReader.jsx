@@ -69,10 +69,11 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
       if (containsDevanagari || isOrphanKeyword || isProseLine) {
         parts.push({
           type: "html",
-          content: `<p class="text-sm leading-relaxed text-slate-300 my-3 font-sans">${rawCode}</p>`
+          content: `<p class="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300 my-3 font-sans">${rawCode}</p>`
         });
       } else {
-        const formattedCode = formatJavaScriptCode(rawCode);
+        const isJsLang = ["javascript", "js", "jsx"].includes(lang.toLowerCase());
+        const formattedCode = isJsLang ? formatJavaScriptCode(rawCode) : rawCode;
         parts.push({ type: "code", lang, code: formattedCode });
       }
     } else if (match[0].startsWith("<span")) {

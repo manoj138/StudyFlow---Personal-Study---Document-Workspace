@@ -35,7 +35,8 @@ export const formatJavaScriptCode = (codeStr) => {
 };
 
 export const CodeBlock = ({ initialCode = "", language = "javascript", title = "" }) => {
-  const formattedInitial = formatJavaScriptCode(initialCode);
+  const isJs = ["javascript", "js", "jsx"].includes(language.toLowerCase());
+  const formattedInitial = isJs ? formatJavaScriptCode(initialCode) : initialCode;
   const [code, setCode] = useState(formattedInitial);
   const [activeLang, setActiveLang] = useState(language.toLowerCase());
   const [isEditing, setIsEditing] = useState(false);
@@ -45,8 +46,10 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
   const [activeTab, setActiveTab] = useState("code"); // "code" or "preview" (for HTML/CSS)
 
   useEffect(() => {
-    setCode(formatJavaScriptCode(initialCode));
-  }, [initialCode]);
+    const isLangJs = ["javascript", "js", "jsx"].includes(language.toLowerCase());
+    setCode(isLangJs ? formatJavaScriptCode(initialCode) : initialCode);
+    setActiveLang(language.toLowerCase());
+  }, [initialCode, language]);
 
   const isExecutable = ["javascript", "js", "jsx"].includes(activeLang);
   const isHtmlCss = ["html", "css"].includes(activeLang);
@@ -58,7 +61,8 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
   };
 
   const handleReset = () => {
-    setCode(formatJavaScriptCode(initialCode));
+    const isLangJs = ["javascript", "js", "jsx"].includes(activeLang);
+    setCode(isLangJs ? formatJavaScriptCode(initialCode) : initialCode);
     setOutput(null);
   };
 
@@ -193,14 +197,14 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
                 rows={Math.max(3, lines.length)}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full bg-transparent text-slate-100 font-mono text-xs sm:text-sm outline-none resize-none leading-6 focus:ring-0 border-none p-0"
+                className="w-full bg-transparent code-text-plain text-slate-800 dark:text-slate-100 font-mono text-xs sm:text-sm outline-none resize-none leading-6 focus:ring-0 border-none p-0"
                 spellCheck={false}
               />
             ) : (
-              <pre className="font-mono text-xs sm:text-sm text-slate-200 leading-6 whitespace-pre-wrap break-words">
+              <pre className="font-mono text-xs sm:text-sm code-text-plain text-slate-800 dark:text-slate-200 leading-6 whitespace-pre-wrap break-words">
                 {lines.map((line, idx) => (
                   <div key={idx} className="min-h-[1.5rem]">
-                    {highlightLineSyntax(line) || <span className="text-slate-200">{line}</span>}
+                    {highlightLineSyntax(line) || <span className="code-text-plain text-slate-800 dark:text-slate-200">{line}</span>}
                   </div>
                 ))}
               </pre>
