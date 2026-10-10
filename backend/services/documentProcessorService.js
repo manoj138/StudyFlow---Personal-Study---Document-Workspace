@@ -18,7 +18,7 @@ const applyInlineFormatting = (str) => {
     // Markdown links: [title](url)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium transition-colors">$1</a>')
     // Inline code: `code`
-    .replace(/`([^`]+)`/g, '<code class="bg-indigo-50 dark:bg-[#161f36] border border-indigo-500/30 px-1.5 py-0.5 rounded text-xs font-mono text-indigo-700 dark:text-cyan-300">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="studyflow-inline-code">$1</code>')
     // Bold: **text** or __text__
     .replace(/(\*\*|__)(.*?)\1/g, '<strong class="font-bold text-slate-900 dark:text-white">$2</strong>')
     // Italic: *text* or _text_
