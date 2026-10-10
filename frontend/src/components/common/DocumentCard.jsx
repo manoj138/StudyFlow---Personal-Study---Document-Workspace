@@ -23,6 +23,10 @@ export const DocumentCard = ({
       case "docx":
       case "doc":
         return { label: "DOCX", bg: "bg-blue-500/20 border-blue-500/40 text-blue-300" };
+      case "md":
+        return { label: "MD", bg: "bg-cyan-500/20 border-cyan-500/40 text-cyan-300" };
+      case "txt":
+        return { label: "TXT", bg: "bg-amber-500/20 border-amber-500/40 text-amber-300" };
       default:
         return { label: fileType?.toUpperCase() || "DOC", bg: "bg-purple-500/20 border-purple-500/40 text-purple-300" };
     }
@@ -57,7 +61,11 @@ export const DocumentCard = ({
           {/* Center 3D Icon Artwork */}
           <div className="flex items-center justify-center my-auto relative z-10">
             <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-              <FileText className="w-7 h-7 text-indigo-300 drop-shadow" />
+              {doc.fileType?.toLowerCase() === "md" ? (
+                <FileCode className="w-7 h-7 text-cyan-300 drop-shadow" />
+              ) : (
+                <FileText className="w-7 h-7 text-indigo-300 drop-shadow" />
+              )}
             </div>
           </div>
 

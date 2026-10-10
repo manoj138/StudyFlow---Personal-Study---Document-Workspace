@@ -1012,18 +1012,8 @@ export const ReaderPage = () => {
                     title={document.title}
                   />
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-4 min-h-[400px]">
-                    <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                      <BookOpen className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-white mb-1">
-                        {document.fileType ? document.fileType.toUpperCase() : "Document"} File View
-                      </h3>
-                      <p className="text-xs text-slate-400 max-w-md leading-relaxed">
-                        For {document.fileType ? document.fileType.toUpperCase() : "Word/Text"} files, switch to <span className="text-indigo-400 font-semibold">Study Reflow Mode</span> above for full interactive code learning & Notion-style workspace reading!
-                      </p>
-                    </div>
+                  <div className="flex-1 p-4 bg-slate-900/60 rounded-2xl border border-slate-800 overflow-y-auto">
+                    <StudyReader htmlContent={document.extractedText} highlights={highlights} />
                   </div>
                 )}
               </div>

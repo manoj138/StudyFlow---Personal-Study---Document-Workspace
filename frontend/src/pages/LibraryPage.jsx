@@ -172,14 +172,15 @@ export const LibraryPage = () => {
     if (type === "youtube") return { label: "YT VIDEO", bg: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" };
     if (type === "pdf" || filename?.toLowerCase().endsWith(".pdf")) return { label: "PDF", bg: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" };
     if (type === "docx" || type === "doc" || filename?.toLowerCase().endsWith(".docx") || filename?.toLowerCase().endsWith(".doc")) return { label: "DOCX", bg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" };
-    if (type === "txt" || type === "md" || filename?.toLowerCase().endsWith(".txt") || filename?.toLowerCase().endsWith(".md")) return { label: type ? type.toUpperCase() : "TXT", bg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" };
+    if (type === "md" || filename?.toLowerCase().endsWith(".md")) return { label: "MD", bg: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" };
+    if (type === "txt" || filename?.toLowerCase().endsWith(".txt")) return { label: "TXT", bg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" };
     return { label: type ? type.toUpperCase() : "DOC", bg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" };
   };
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      setUploadError("Please choose or drag a document file (.pdf, .docx, .txt) first.");
+      setUploadError("Please choose or drag a document file (.pdf, .docx, .txt, .md) first.");
       return;
     }
     if (!subjectId) {

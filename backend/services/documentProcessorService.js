@@ -5,13 +5,30 @@ import mammoth from "mammoth";
 /**
  * Notion / Linear Style Technical Workspace Parser for StudyFlow
  * Preserves 100% of all original content without deleting a single word.
- * Groups headings, subtopics, language notes, bullet lists, and code blocks
- * into a beautiful distraction-free editorial layout without random dark boxes.
+ * Groups headings, subtopics, language notes, bullet lists, code blocks,
+ * tables, blockquotes, task lists, and links into a beautiful distraction-free editorial layout.
  */
+
+// Inline formatting parser: links, code, bold, italic, strikethrough, interactive demo buttons
+const applyInlineFormatting = (str) => {
+  if (!str) return "";
+  return str
+    .replace(/\b([A-Z])\s+([a-z]{2,})\b/g, "$1$2") // Clean split-word typos (V alue -> Value)
+    .replace(/(?:उदा\.\s*:?\s*)?`?(?:Click Me|Click Me!)`?/gi, '<span class="studyflow-demo-btn">Click Me</span>')
+    // Markdown links: [title](url)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 underline font-medium transition-colors">$1</a>')
+    // Inline code: `code`
+    .replace(/`([^`]+)`/g, '<code class="bg-[#161f36] border border-indigo-500/30 px-1.5 py-0.5 rounded text-xs font-mono text-cyan-300">$1</code>')
+    // Bold: **text** or __text__
+    .replace(/(\*\*|__)(.*?)\1/g, '<strong class="font-bold text-white">$2</strong>')
+    // Italic: *text* or _text_
+    .replace(/(\*|_)(.*?)\1/g, '<em class="italic text-slate-200">$2</em>')
+    // Strikethrough: ~~text~~
+    .replace(/~~(.*?)~~/g, '<del class="line-through text-slate-400">$1</del>');
+};
+
 /**
  * Check if a line is strictly a standalone executable JavaScript statement.
- * Prevents explanatory text like "let block-scoped variable declaration आहे."
- * from being mistakenly classified as executable code blocks.
  */
 const isExecutableCodeLine = (line) => {
   if (!line) return false;
@@ -22,14 +39,14 @@ const isExecutableCodeLine = (line) => {
 
   // 2. Must NOT match section headings, bullets, flow arrows, badges, or explanations
   if (
-    /^(📙|🟢|📘|📕|⚡|🧠|💡|#|\d+\.|\*|-|•|▪)/.test(trimmed) ||
+    /^(📙|🟢|📘|📕|⚡|🧠|💡|#|\d+\.|\*|-|•|▪|>|\|)/.test(trimmed) ||
     /^(Definition|Explanation|Summary|Why|What|Marathi|English|JavaScript|Notes?)\b/i.test(trimmed) ||
     trimmed.includes("↓") || trimmed.includes("→")
   ) {
     return false;
   }
 
-  // 3. Must NOT be an orphan keyword like "let", "const", "var" alone on 1 line
+  // 3. Must NOT be an orphan keyword alone on 1 line
   if (/^(let|const|var|function|class|import|export)$/i.test(trimmed)) return false;
 
   // 4. Strict JS Syntax Validation:
@@ -59,15 +76,14 @@ export const transformToNotionStyleHtml = (text) => {
     const current = unmergedLines[i].trim();
     const next = unmergedLines[i + 1] ? unmergedLines[i + 1].trim() : "";
 
-    // If current line is an orphan JS keyword (let, const, var, function) and next line exists and is not a header/fence
     if (
       /^(let|const|var|function|class|import|export)$/i.test(current) &&
       next &&
       !next.startsWith("```") &&
-      !/^(📙|🟢|📘|📕|⚡|🧠|💡|#|\d+\.)/.test(next)
+      !/^(📙|🟢|📘|📕|⚡|🧠|💡|#|\d+\.|>|\|)/.test(next)
     ) {
       rawLines.push(`${current} ${next}`);
-      i++; // skip next line since it was merged with current keyword
+      i++;
     } else {
       rawLines.push(unmergedLines[i]);
     }
@@ -78,6 +94,8 @@ export const transformToNotionStyleHtml = (text) => {
   let codeBuffer = [];
   let detectedCodeLang = "javascript";
   let inList = false;
+  let inTable = false;
+  let tableRows = [];
   let autoCodeBuffer = [];
 
   const flushAutoCodeBuffer = () => {
@@ -92,10 +110,52 @@ export const transformToNotionStyleHtml = (text) => {
     }
   };
 
+  const flushTable = () => {
+    if (tableRows.length > 0) {
+      const validRows = tableRows.filter(r => !/^[|\s-:]+$/.test(r));
+      if (validRows.length > 0) {
+        let tableHtml = `<div class="my-6 overflow-x-auto rounded-xl border border-slate-800 bg-[#0D121F] shadow-lg"><table class="w-full text-left text-sm text-slate-300 border-collapse">`;
+        validRows.forEach((rowStr, rowIndex) => {
+          const cells = rowStr.split("|").slice(1, -1).map(c => c.trim());
+          if (cells.length === 0) return;
+          
+          if (rowIndex === 0) {
+            tableHtml += `<thead class="bg-indigo-950/60 text-indigo-300 font-semibold border-b border-slate-800"><tr>`;
+            cells.forEach(cell => {
+              tableHtml += `<th class="px-4 py-3 font-semibold">${applyInlineFormatting(cell)}</th>`;
+            });
+            tableHtml += `</tr></thead><tbody>`;
+          } else {
+            tableHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors">`;
+            cells.forEach(cell => {
+              tableHtml += `<td class="px-4 py-3">${applyInlineFormatting(cell)}</td>`;
+            });
+            tableHtml += `</tr>`;
+          }
+        });
+        tableHtml += `</tbody></table></div>`;
+        htmlResult += tableHtml;
+      }
+      tableRows = [];
+    }
+    inTable = false;
+  };
+
   rawLines.forEach((line) => {
     const trimmed = line.trim();
 
-    // Check for Markdown Code Fence (```javascript)
+    // Markdown Table Check
+    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+      flushAutoCodeBuffer();
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      inTable = true;
+      tableRows.push(trimmed);
+      return;
+    } else if (inTable) {
+      flushTable();
+    }
+
+    // Markdown Code Fence (```lang)
     if (trimmed.startsWith("```")) {
       flushAutoCodeBuffer();
       if (inCodeBlock) {
@@ -123,31 +183,92 @@ export const transformToNotionStyleHtml = (text) => {
       return;
     }
 
+    // Horizontal Rule (---, ***, ___)
+    if (/^(---|[*]{3,}|_{3,})$/.test(trimmed)) {
+      flushAutoCodeBuffer();
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      htmlResult += `<hr class="my-8 border-slate-800/80 border-t" />`;
+      return;
+    }
+
+    // Blockquote / Notion Callout (> Note)
+    if (trimmed.startsWith(">")) {
+      flushAutoCodeBuffer();
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      const quoteText = trimmed.replace(/^>\s*/, "");
+      htmlResult += `<blockquote class="my-4 p-4 rounded-xl bg-indigo-950/40 border-l-4 border-indigo-500 text-slate-200 text-sm leading-relaxed shadow-sm flex items-start gap-3"><span class="text-indigo-400 text-lg leading-none">💡</span><div class="flex-1">${applyInlineFormatting(quoteText)}</div></blockquote>`;
+      return;
+    }
+
     // Check if line is a strict standalone code line
     if (!inList && isExecutableCodeLine(line)) {
       autoCodeBuffer.push(line);
       return;
     }
 
-    // Flushes any accumulated auto code lines if hitting non-code content
     flushAutoCodeBuffer();
 
-    // 1. Hero Main Topic Header (e.g., 📙 4. JavaScript...)
-    if (/^(📙|🟢|📘|📕|⚡|🧠|💡)/.test(trimmed) || trimmed.startsWith("# ")) {
+    // 1. Headings (Markdown # H1, ## H2, ### H3, #### H4) & Custom Emojis
+    if (trimmed.startsWith("# ")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
-      const title = trimmed.replace(/^[#📙🟢📘📕⚡🧠💡]\s*/, "");
+      const title = trimmed.replace(/^#\s+/, "");
+      htmlResult += `<h1 class="text-3xl font-extrabold text-white mt-10 mb-4 border-b border-dark-border/80 pb-3 tracking-tight">${applyInlineFormatting(title)}</h1>`;
+      return;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      const title = trimmed.replace(/^##\s+/, "");
+      htmlResult += `<h2 class="text-2xl font-bold text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-sm shadow-indigo-500/50"></span> ${applyInlineFormatting(title)}</h2>`;
+      return;
+    }
+
+    if (trimmed.startsWith("### ")) {
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      const title = trimmed.replace(/^###\s+/, "");
+      htmlResult += `<h3 class="text-xl font-bold text-purple-300 mt-6 mb-2 tracking-tight flex items-center gap-2"><span class="text-purple-400">❖</span> ${applyInlineFormatting(title)}</h3>`;
+      return;
+    }
+
+    if (trimmed.startsWith("#### ")) {
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      const title = trimmed.replace(/^####\s+/, "");
+      htmlResult += `<h4 class="text-base font-semibold text-slate-200 mt-4 mb-2 tracking-tight">${applyInlineFormatting(title)}</h4>`;
+      return;
+    }
+
+    // Hero Emoji Main Header (📙 4. JavaScript...)
+    if (/^(📙|🟢|📘|📕|⚡|🧠|💡)/.test(trimmed)) {
+      if (inList) { htmlResult += "</ul>"; inList = false; }
+      const title = trimmed.replace(/^[📙🟢📘📕⚡🧠💡]\s*/, "");
       htmlResult += `<h2 class="text-2xl font-extrabold text-white mt-10 mb-4 border-b border-dark-border/80 pb-3 tracking-tight">${applyInlineFormatting(title)}</h2>`;
       return;
     }
 
-    // 2. Numbered Section Topic Title (e.g., 1. JavaScript Introduction, 2. Runtime)
+    // Numbered Section Topic Title (e.g. 1. Introduction)
     if (/^\d+\.\s+/.test(trimmed) && trimmed.length < 90) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       htmlResult += `<h3 class="text-xl font-bold text-indigo-300 mt-8 mb-3 tracking-tight flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> ${applyInlineFormatting(trimmed)}</h3>`;
       return;
     }
 
-    // 3. Sub-headers & Definitions (e.g. Definition, Why JavaScript?, JavaScript कुठे वापरतो?)
+    // Task Checkboxes (- [ ] or - [x])
+    if (/^-\s*\[([ xX])\]\s+/.test(trimmed)) {
+      if (!inList) {
+        htmlResult += `<ul class="space-y-2 my-3 text-slate-300 text-sm pl-2">`;
+        inList = true;
+      }
+      const isChecked = /^-\s*\[[xX]\]\s+/.test(trimmed);
+      const itemText = trimmed.replace(/^-\s*\[([ xX])\]\s+/, "");
+      if (isChecked) {
+        htmlResult += `<li class="flex items-center gap-2.5 text-slate-400 line-through"><span class="w-4 h-4 rounded bg-indigo-600 border border-indigo-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">✓</span> ${applyInlineFormatting(itemText)}</li>`;
+      } else {
+        htmlResult += `<li class="flex items-center gap-2.5 text-slate-300"><span class="w-4 h-4 rounded border border-slate-600 bg-slate-800/80 inline-block"></span> ${applyInlineFormatting(itemText)}</li>`;
+      }
+      return;
+    }
+
+    // Sub-headers & Definitions
     if (
       /^(Definition|Why\s+JavaScript\?|JavaScript\s*कुठे\s*वापरतो\?|Why\s+Runtime\?|Summary)/i.test(trimmed) ||
       (trimmed.length < 50 && trimmed.endsWith(":") && !trimmed.includes("."))
@@ -157,7 +278,7 @@ export const transformToNotionStyleHtml = (text) => {
       return;
     }
 
-    // 4. Language Badges (English / Marathi)
+    // Language Badges (English / Marathi)
     if (/^English$/i.test(trimmed)) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       htmlResult += `<div class="my-2"><span class="inline-flex items-center gap-1.5 bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">🇬🇧 English</span></div>`;
@@ -170,7 +291,7 @@ export const transformToNotionStyleHtml = (text) => {
       return;
     }
 
-    // 5. Flow Diagram Mappings (↓ Down Flows - Rendered vertically one below the other)
+    // Flow Diagram Mappings (↓ Down Flows)
     if (trimmed.includes("↓") || trimmed.includes("⬇")) {
       if (inList) { htmlResult += "</ul>"; inList = false; }
       const steps = trimmed
@@ -207,13 +328,13 @@ export const transformToNotionStyleHtml = (text) => {
       return;
     }
 
-    // 6. Bullet Lists (In browsers, On servers using Node.js, In mobile apps...)
-    if (/^(In\s|On\s|For\s|•|▪|-|\*|\d+\.)/i.test(trimmed) && trimmed.length < 120 && !trimmed.endsWith(".")) {
+    // Bullet Lists (•, -, *, 1.)
+    if (/^(•|▪|-|\*|\d+\.)\s+/.test(trimmed)) {
       if (!inList) {
         htmlResult += `<ul class="list-disc list-inside space-y-2 my-3 text-slate-300 text-sm pl-2">`;
         inList = true;
       }
-      const itemText = trimmed.replace(/^(•|▪|-|\*)\s*/, "");
+      const itemText = trimmed.replace(/^(•|▪|-|\*|\d+\.)\s+/, "");
       htmlResult += `<li class="leading-relaxed">${applyInlineFormatting(itemText)}</li>`;
       return;
     }
@@ -223,11 +344,12 @@ export const transformToNotionStyleHtml = (text) => {
       inList = false;
     }
 
-    // 7. Regular Text Paragraphs
+    // Regular Text Paragraphs
     htmlResult += `<p class="text-sm leading-relaxed text-slate-300 my-3 font-sans">${applyInlineFormatting(trimmed)}</p>`;
   });
 
   flushAutoCodeBuffer();
+  flushTable();
   if (inList) htmlResult += "</ul>";
   if (inCodeBlock && codeBuffer.length > 0) {
     const codeText = codeBuffer.join("\n").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -235,16 +357,6 @@ export const transformToNotionStyleHtml = (text) => {
   }
 
   return htmlResult;
-};
-
-// Inline bold (**text**), italic (*text*), inline code (`code`), interactive demo buttons
-const applyInlineFormatting = (str) => {
-  return str
-    .replace(/\b([A-Z])\s+([a-z]{2,})\b/g, "$1$2") // Clean split-word typos (V alue -> Value)
-    .replace(/(?:उदा\.\s*:?\s*)?`?(?:Click Me|Click Me!)`?/gi, '<span class="studyflow-demo-btn">Click Me</span>')
-    .replace(/`([^`]+)`/g, '<code class="bg-dark-card border border-dark-border px-1.5 py-0.5 rounded text-xs font-mono text-purple-300">$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em class="italic text-slate-200">$1</em>');
 };
 
 export const processUploadedDocument = async (filePath, fileType) => {
@@ -274,21 +386,37 @@ export const processUploadedDocument = async (filePath, fileType) => {
     // Generate Notion/Linear Style Editorial Technical Docs HTML
     const formattedHtml = transformToNotionStyleHtml(rawText);
 
-    // Generate Table of Contents
+    // Generate Table of Contents with levels for Markdown & text docs
     const lines = rawText.split("\n").filter((line) => line.trim().length > 0);
     const toc = [];
     
     lines.forEach((line, index) => {
       const trimmed = line.trim();
-      if (
+      let level = 1;
+      let title = "";
+
+      if (trimmed.startsWith("# ")) {
+        level = 1;
+        title = trimmed.replace(/^#\s+/, "");
+      } else if (trimmed.startsWith("## ")) {
+        level = 2;
+        title = trimmed.replace(/^##\s+/, "");
+      } else if (trimmed.startsWith("### ")) {
+        level = 3;
+        title = trimmed.replace(/^###\s+/, "");
+      } else if (
         /^(📙|🟢|📘|📕|⚡|🧠|💡)/.test(trimmed) ||
-        (/^\d+\.\s+/.test(trimmed) && trimmed.length < 60) ||
-        trimmed.startsWith("#")
+        (/^\d+\.\s+/.test(trimmed) && trimmed.length < 60)
       ) {
+        level = 1;
+        title = trimmed.replace(/^[#📙🟢📘📕⚡🧠💡\d+.]\s*/, "");
+      }
+
+      if (title) {
         toc.push({
-          title: trimmed.replace(/^[#📙🟢📘📕⚡🧠💡\d+.]\s*/, "").slice(0, 40),
+          title: title.slice(0, 45),
           pageNumber: Math.min(totalPages, Math.floor((index / lines.length) * totalPages) + 1),
-          level: 1
+          level
         });
       }
     });
@@ -313,3 +441,4 @@ export const processUploadedDocument = async (filePath, fileType) => {
     };
   }
 };
+
