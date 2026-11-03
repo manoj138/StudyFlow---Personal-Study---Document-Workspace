@@ -10,6 +10,7 @@ import subjectRoutes from "./routes/subjectRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import annotationRoutes from "./routes/annotationRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,6 +67,7 @@ app.use("/api/subjects", subjectRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/annotations", annotationRoutes);
+app.use("/api/interviews", interviewRoutes);
 
 // Serve frontend static build files from backend/dist
 const distPath = path.join(__dirname, "dist");

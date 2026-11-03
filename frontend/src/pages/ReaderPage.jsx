@@ -8,11 +8,12 @@ import {
   getHighlights, createHighlight, updateHighlight, deleteHighlight,
   getNotes, createNote, deleteNote
 } from "../services/annotationService";
+import { createInterviewFromDocument } from "../services/interviewService";
 import { StudyReader } from "../components/reader/StudyReader";
 import {
   BookOpen, Layers, Bookmark, Highlighter, MessageSquare, ChevronLeft, ChevronRight,
   ArrowLeft, Plus, Trash2, CheckCircle, Sparkles, Sun, Moon, Edit3, X, Youtube, Play, Video,
-  GraduationCap, Brain
+  GraduationCap, Brain, Mic
 } from "lucide-react";
 
 import { DocumentScannerLoader } from "../components/common/DocumentScannerLoader";
@@ -58,6 +59,27 @@ export const ReaderPage = () => {
 
   // Edit Existing Highlight Modal State
   const [editingHighlight, setEditingHighlight] = useState(null);
+  const [startingInterview, setStartingInterview] = useState(false);
+
+  const handleStartDocInterview = async () => {
+    if (!document) return;
+    try {
+      setStartingInterview(true);
+      const res = await createInterviewFromDocument({
+        documentId: id,
+        title: `Interview: ${document.title}`,
+        topic: document.subjectTitle || "General"
+      });
+      if (res?.success && res.interviewSet?._id) {
+        navigate(`/interview/${res.interviewSet._id}`);
+      }
+    } catch (err) {
+      console.error("Failed to start mock interview from document:", err);
+      alert("Could not extract interview questions from this document. Try copying text and creating a set in the Interview Hub.");
+    } finally {
+      setStartingInterview(false);
+    }
+  };
 
   const mainCanvasRef = useRef(null);
   const saveTimeoutRef = useRef(null);
@@ -425,6 +447,25 @@ export const ReaderPage = () => {
           >
             <Bookmark className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden lg:inline">Bookmark</span>
+          </button>
+
+          <button
+            onClick={handleStartDocInterview}
+            disabled={startingInterview}
+            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white disabled:opacity-40 transition-all text-xs font-semibold flex items-center gap-1.5"
+            title="Generate Voice Mock Interview from this document"
+          >
+            {startingInterview ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <span className="hidden sm:inline">Generating...</span>
+              </>
+            ) : (
+              <>
+                <Mic className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Mock Interview</span>
+              </>
+            )}
           </button>
 
           {/* Desktop Direct Page Jump Control (< 4/52 >) */}

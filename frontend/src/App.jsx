@@ -10,6 +10,8 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { ReaderPage } from "./pages/ReaderPage";
 import { RevisionPage } from "./pages/RevisionPage";
+import { InterviewHubPage } from "./pages/InterviewHubPage";
+import { InterviewRoomPage } from "./pages/InterviewRoomPage";
 
 import { DocumentScannerLoader } from "./components/common/DocumentScannerLoader";
 
@@ -69,6 +71,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <RevisionPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/interview"
+                element={
+                  <ProtectedRoute>
+                    <InterviewHubPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/interview/:id"
+                element={
+                  <ProtectedRoute>
+                    <InterviewRoomPage />
                   </ProtectedRoute>
                 }
               />

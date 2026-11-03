@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { BookOpen, LogOut, User, Sun, Moon, Search, Menu, X, ChevronRight } from "lucide-react";
+import { BookOpen, LogOut, User, Sun, Moon, Search, Menu, X, ChevronRight, Mic } from "lucide-react";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -75,6 +75,17 @@ export const Navbar = () => {
             }`}
           >
             Revision
+          </Link>
+          <Link
+            to="/interview"
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              isActive("/interview") || location.pathname.startsWith("/interview")
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/5"
+            }`}
+          >
+            <Mic className="w-3.5 h-3.5" />
+            <span>Interview</span>
           </Link>
         </nav>
       )}
@@ -222,6 +233,22 @@ export const Navbar = () => {
               }`}
             >
               <span>Revision Workspace</span>
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            </Link>
+
+            <Link
+              to="/interview"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`w-full p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+                isActive("/interview") || location.pathname.startsWith("/interview")
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Mic className="w-4 h-4 text-indigo-500" />
+                <span>Mock Interview</span>
+              </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </Link>
           </div>

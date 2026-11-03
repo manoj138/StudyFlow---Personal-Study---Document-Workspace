@@ -462,4 +462,38 @@ gantt
 3. **Reliability**: Centralized backend error handler, API response wrappers (`{ success, data, error }`), frontend error boundaries.
 
 ---
+
+## 🎙️ 9. AI Voice Mock Interview System Architecture & Specifications
+
+### 9.1 Product Vision & Workflow
+The **AI Voice Mock Interview System** bridges the critical gap between passive reading and confident spoken interview delivery. Learners can convert any study notes, PDFs, or Word documents into an interactive voice mock interview.
+
+```mermaid
+graph LR
+    Doc[PDF / DOCX / MD / Notes] --> AIParser[Gemini AI & Regex Parser]
+    AIParser --> QABank[Structured Q&A Bank + Keywords]
+    QABank --> TTS[Interviewer Voice TTS]
+    TTS --> UserSpeak[Mic Live Transcription STT]
+    UserSpeak --> Evaluator[Live Keyword Match & AI Score]
+    Evaluator --> Report[Performance Summary & Retake]
+```
+
+### 9.2 Key Features
+1. **Multi-Source Ingestion**:
+   - Upload PDF, Word (`.docx`), Markdown (`.md`), or Text files.
+   - Direct text/notes paste with auto-structuring.
+   - 1-click **"Mock Interview"** button inside `ReaderPage` on any open document.
+2. **Dual-Mode Practice**:
+   - **Learn / Practice Mode**: Model answer visible; read along and build articulation confidence.
+   - **Real Mock Mode**: Answers hidden, 60s countdown timer, microphone auto-listening, real interview pressure simulation.
+3. **Voice & Visual Immersion**:
+   - Cross-browser Speech Synthesis (natural interviewer accent).
+   - Real-time continuous Speech-to-Text (`useSpeechRecognition`) with fallback to keyboard typing.
+   - Glowing audio waveform visualizer (`VoiceWaveVisualizer`) with animated response states.
+4. **Intelligent Answer Evaluation**:
+   - Expected technical keywords detection (Green matched chips / Amber missed chips).
+   - Quantitative accuracy score (0–100%) and actionable feedback advice.
+   - Full session attempts stored in MongoDB (`InterviewSet.attempts`).
+
+---
 *Created and approved for immediate development execution.*

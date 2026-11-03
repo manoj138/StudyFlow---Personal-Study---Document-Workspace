@@ -6,7 +6,7 @@ import API from "../services/api";
 import {
   BookOpen, Clock, Bookmark, FileText, ArrowRight, Plus, FolderPlus,
   Sparkles, Activity, Upload, Flame, Target, TrendingUp, ChevronRight, BarChart2, CheckCircle2,
-  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap
+  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap, Mic
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -239,18 +239,26 @@ export const DashboardPage = () => {
         </div>
 
         {/* Primary Header CTA Buttons Stack */}
-        <div className="flex flex-row sm:flex-col items-center justify-center gap-3 shrink-0 lg:w-48 w-full sm:w-auto">
+        <div className="flex flex-row sm:flex-col items-center justify-center gap-2.5 shrink-0 lg:w-48 w-full sm:w-auto">
+          <button
+            onClick={() => navigate("/interview")}
+            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <Mic className="w-4 h-4 text-emerald-100 animate-pulse" />
+            <span>Mock Interview</span>
+          </button>
+
           <button
             onClick={() => setShowSubjectModal(true)}
-            className="w-full py-3.5 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <GraduationCap className="w-4 h-4 text-amber-300" />
-            <span> Add Subject</span>
+            <span>Add Subject</span>
           </button>
 
           <button
             onClick={() => navigate("/library")}
-            className="w-full py-3.5 px-4 sm:px-5 rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-white/15 flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-white/15 flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Upload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Upload Document</span>
