@@ -27,6 +27,38 @@ const questionItemSchema = new mongoose.Schema(
       type: String,
       default: "General",
       trim: true
+    },
+    marathiExplanation: {
+      type: String,
+      default: "",
+      trim: true
+    },
+    track: {
+      type: String,
+      default: "general",
+      trim: true
+    },
+    spacedRepetition: {
+      status: {
+        type: String,
+        enum: ["new", "learning", "review", "mastered"],
+        default: "new"
+      },
+      intervalDays: {
+        type: Number,
+        default: 1
+      },
+      nextReviewDate: {
+        type: Date,
+        default: Date.now
+      },
+      lastReviewedDate: {
+        type: Date
+      },
+      reviewCount: {
+        type: Number,
+        default: 0
+      }
     }
   },
   { _id: true }

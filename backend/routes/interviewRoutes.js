@@ -10,7 +10,10 @@ import {
   updateInterviewSet,
   deleteInterviewSet,
   saveAttempt,
-  evaluateSpokenAnswer
+  evaluateSpokenAnswer,
+  reviewQuestion,
+  getDailySprint,
+  seedMernCurriculum
 } from "../controllers/interviewController.js";
 
 const router = express.Router();
@@ -26,6 +29,10 @@ router.post("/create-from-document", createFromDocument);
 // Live Spoken Evaluation Endpoint
 router.post("/evaluate", evaluateSpokenAnswer);
 
+// Spaced Repetition Sprint & Seeder Endpoints
+router.get("/sprint", getDailySprint);
+router.post("/seed-mern", seedMernCurriculum);
+
 // Management & Query Endpoints
 router.get("/", getInterviewSets);
 router.get("/:id", getInterviewSetById);
@@ -34,6 +41,7 @@ router.delete("/:id", deleteInterviewSet);
 
 // Attempt & Analytics Recording
 router.post("/:id/attempt", saveAttempt);
+router.post("/:id/questions/:questionId/review", reviewQuestion);
 
 export default router;
 

@@ -6,7 +6,7 @@ import API from "../services/api";
 import {
   BookOpen, Clock, Bookmark, FileText, ArrowRight, Plus, FolderPlus,
   Sparkles, Activity, Upload, Flame, Target, TrendingUp, ChevronRight, BarChart2, CheckCircle2,
-  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap, Mic
+  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap, Mic, RotateCcw
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,6 +17,7 @@ import { Modal } from "../components/common/Modal";
 import { EmptyState } from "../components/common/EmptyState";
 import { DocumentCard } from "../components/common/DocumentCard";
 import { VideoCard } from "../components/common/VideoCard";
+import { getDailySprint, seedMernCurriculum } from "../services/interviewService";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
@@ -30,6 +31,7 @@ export const DashboardPage = () => {
   const [continueDoc, setContinueDoc] = useState(null);
   const [totalReadingSeconds, setTotalReadingSeconds] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [sprintData, setSprintData] = useState(null);
 
   // Modal State for Add Subject
   const [newSubjectName, setNewSubjectName] = useState("");
@@ -67,12 +69,14 @@ export const DashboardPage = () => {
       }
 
       try {
-        const [bRes, hRes] = await Promise.all([
+        const [bRes, hRes, spRes] = await Promise.all([
           API.get("/annotations/bookmarks"),
-          API.get("/annotations/highlights")
+          API.get("/annotations/highlights"),
+          getDailySprint()
         ]);
         if (bRes.data?.success) setBookmarksCount(bRes.data.data.length);
         if (hRes.data?.success) setHighlightsCount(hRes.data.data.length);
+        if (spRes?.success) setSprintData(spRes);
       } catch (e) {
         // Fallback
       }
@@ -199,72 +203,159 @@ export const DashboardPage = () => {
       {/* Top Banner & Header CTA Bar */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
         
-        {/* Main Sunset Artwork Hero Banner */}
+        {/* Main Developer Command Center Hero Banner */}
         <div 
-          className="flex-1 rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg relative min-h-[220px] p-6 sm:p-8 flex flex-col justify-between bg-cover bg-center dark-panel"
-          style={{ backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.2) 100%), url('/hero_banner.jpg')` }}
+          className="flex-1 rounded-3xl overflow-hidden border border-slate-700/60 dark:border-indigo-500/20 shadow-2xl relative min-h-[220px] p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-br from-[#0c1222] via-[#0f172a] to-[#090d16] text-white"
         >
-          {/* Date Badge */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-medium border border-white/20">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-300" /> Workspace Active
+          {/* Top Badges Row */}
+          <div className="flex flex-wrap items-center justify-between gap-3 relative z-10">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                <Code className="w-3.5 h-3.5 text-indigo-400" /> MERN Stack Engineer
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+                ⚡ 11M Experience
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+                🎯 Target: Q4 2026
               </span>
             </div>
-            <div className="text-xs font-semibold text-white/80 font-mono bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5">
+            <div className="text-xs font-mono font-bold text-slate-300 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60 flex items-center gap-1.5">
               <span>📅</span> {formattedToday}
             </div>
           </div>
 
           {/* Hero Main Content */}
-          <div className="space-y-2 mt-4 relative z-10">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
-              {getTimeGreeting()}, 👋{" "}
-              <span className="text-white">
-                {user?.name || "Manoj Chougule"}
+          <div className="space-y-2 mt-4 relative z-10 max-w-2xl">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <span>{getTimeGreeting()},</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-teal-300 to-emerald-400">
+                {user?.name || "Manoj"}
               </span>
             </h1>
 
-            <p className="text-white/90 text-xs sm:text-sm max-w-xl leading-relaxed drop-shadow">
-              Keep going! Every chapter you complete brings you closer to your dreams. You got this! 🚀
+            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+              तुम्ही आधीच ११ महिने काम केलं आहे. रोज फक्त १५ मिनिटे ५ प्रश्न मोठ्याने बोला, कन्सेप्ट्स पक्क्या करा आणि आत्मविश्वासाने नोकरी मिळवा! 🚀
             </p>
           </div>
 
-          {/* Better Than Yesterday Slogan Badge */}
-          <div className="absolute right-6 bottom-6 hidden sm:block">
-            <span className="water-brush-regular text-2xl text-amber-200 drop-shadow select-none">
-              Better Than Yesterday ✨
-            </span>
+          {/* Bottom Live Streak & Active Recall Counter */}
+          <div className="pt-4 mt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 relative z-10 text-xs">
+            <div className="flex items-center gap-4 text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                <strong className="text-white font-mono">{sprintData?.stats?.masteredCount || 0}</strong> Mastered
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <RotateCcw className="w-4 h-4 text-indigo-400" />
+                <strong className="text-white font-mono">{sprintData?.stats?.dueCount || 0}</strong> Due for Review
+              </span>
+            </div>
+            <button
+              onClick={() => navigate("/interview")}
+              className="text-xs font-bold text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1"
+            >
+              <span>MERN Interview Studio</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
+
+          {/* Subtle ambient tech glow background */}
+          <div className="absolute -right-16 -top-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute right-32 -bottom-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         </div>
 
         {/* Primary Header CTA Buttons Stack */}
-        <div className="flex flex-row sm:flex-col items-center justify-center gap-2.5 shrink-0 lg:w-48 w-full sm:w-auto">
+        <div className="flex flex-row sm:flex-col items-center justify-center gap-2.5 shrink-0 lg:w-52 w-full sm:w-auto">
           <button
             onClick={() => navigate("/interview")}
-            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Mic className="w-4 h-4 text-emerald-100 animate-pulse" />
-            <span>Mock Interview</span>
-          </button>
-
-          <button
-            onClick={() => setShowSubjectModal(true)}
-            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <GraduationCap className="w-4 h-4 text-amber-300" />
-            <span>Add Subject</span>
+            <span>Daily Voice Drill</span>
           </button>
 
           <button
             onClick={() => navigate("/library")}
-            className="w-full py-2.5 px-3 sm:px-4 rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-white/15 flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="w-full py-2.5 px-4 rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-white/15 flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Upload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Upload Document</span>
+            <span>Upload Notes</span>
+          </button>
+
+          <button
+            onClick={() => setShowSubjectModal(true)}
+            className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <GraduationCap className="w-4 h-4 text-amber-500" />
+            <span>Add Track</span>
           </button>
         </div>
       </div>
+
+      {/* DAILY 15-MINUTE SPRINT SECTION */}
+      {sprintData?.sprintQuestions?.length > 0 && (
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5" /> आजचा १५-मिनिटांचा सराव (Daily Active Sprint)
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  ५ निवडक प्रश्न
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                कंटाळा नको, हे ५ प्रश्न मोठ्याने बोलून सराव करा आणि आजचे टार्गेट पूर्ण करा.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const first = sprintData.sprintQuestions[0];
+                if (first?.setId) navigate(`/interview/${first.setId}`);
+                else navigate("/interview");
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 shrink-0"
+            >
+              <Mic className="w-3.5 h-3.5" />
+              <span>Start Today's Sprint</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {sprintData.sprintQuestions.slice(0, 3).map((q, idx) => (
+              <div
+                key={q.questionId || idx}
+                onClick={() => navigate(`/interview/${q.setId}`)}
+                className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 hover:border-indigo-500/40 transition-all cursor-pointer group space-y-2 flex flex-col justify-between"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold uppercase tracking-wider text-indigo-400 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
+                      {q.category || "MERN"}
+                    </span>
+                    <span className="font-mono text-slate-500">Q#{idx + 1}</span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-200 group-hover:text-white line-clamp-2">
+                    {q.question}
+                  </h4>
+                  {q.marathiExplanation && (
+                    <p className="text-[11px] text-amber-300/80 line-clamp-1 italic">
+                      💡 {q.marathiExplanation}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/80 text-slate-400">
+                  <span>Speak & Drill</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 4 Dynamic Quantitative Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

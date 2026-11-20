@@ -24,12 +24,14 @@ import {
   Edit3,
   Send,
   Flag,
-  Share2
+  Share2,
+  Brain
 } from "lucide-react";
 import {
   getInterviewSetById,
   saveInterviewAttempt,
-  evaluateSpokenAnswer
+  evaluateSpokenAnswer,
+  reviewQuestion
 } from "../services/interviewService";
 import speechEngine from "../utils/speechSynthesis";
 import { useSpeechRecognition } from "../utils/speechRecognition";
@@ -67,6 +69,23 @@ export const InterviewRoomPage = () => {
   const [sessionResults, setSessionResults] = useState({});
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
+
+  // Bilingual & Spaced Repetition States
+  const [showMarathiDrawer, setShowMarathiDrawer] = useState(false);
+  const [reviewStatusMsg, setReviewStatusMsg] = useState("");
+
+  const handleRateQuestion = async (rating) => {
+    if (!currentQuestion?._id || !interviewSet?._id) return;
+    try {
+      const res = await reviewQuestion(interviewSet._id, currentQuestion._id, rating);
+      if (res.success) {
+        setReviewStatusMsg(`✓ ${res.message}`);
+        setTimeout(() => setReviewStatusMsg(""), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to rate question:", err);
+    }
+  };
 
   // Hook for microphone speech recognition
   const {
@@ -123,6 +142,8 @@ export const InterviewRoomPage = () => {
     stopListening();
     resetTranscript();
     setShowIdealAnswer(mode === "practice");
+    setShowMarathiDrawer(false);
+    setReviewStatusMsg("");
     setTimerSeconds(60);
     setIsTimerRunning(true);
 
@@ -632,7 +653,35 @@ export const InterviewRoomPage = () => {
                     <span>{showIdealAnswer ? "Hide Ideal Answer" : "Peek Ideal Answer"}</span>
                   </button>
                 )}
+
+                {currentQuestion.marathiExplanation && (
+                  <button
+                    onClick={() => setShowMarathiDrawer((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 border border-amber-500/25 transition-all shadow-sm"
+                  >
+                    <Brain className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{showMarathiDrawer ? "लपवा (Hide Marathi)" : "💡 संकल्पना समजून घ्या (मराठीत)"}</span>
+                  </button>
+                )}
               </div>
+
+              {/* Marathi Concept Explanation Drawer */}
+              <AnimatePresence>
+                {showMarathiDrawer && currentQuestion.marathiExplanation && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-slate-800 dark:text-amber-100 text-xs sm:text-sm leading-relaxed space-y-1.5 overflow-hidden text-left"
+                  >
+                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
+                      <Brain className="w-4 h-4" />
+                      <span>💡 सोप्या मराठीत स्पष्टीकरण (Concept Logic)</span>
+                    </div>
+                    <p className="whitespace-pre-wrap font-medium">{currentQuestion.marathiExplanation}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -820,6 +869,52 @@ export const InterviewRoomPage = () => {
                       {currentQuestion.answer}
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* Spaced Repetition Anki Rating Bar */}
+              {(currentResult || mode === "practice") && (
+                <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 p-5 shadow-lg space-y-3">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                      <RotateCcw className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>पुढील रिव्हिजन कधी हवी? (Rate for Spaced Repetition)</span>
+                    </span>
+                    {reviewStatusMsg && (
+                      <span className="text-emerald-500 text-xs font-bold animate-pulse">
+                        {reviewStatusMsg}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <button
+                      onClick={() => handleRateQuestion("again")}
+                      className="p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95"
+                    >
+                      <span className="text-sm">🔴 कठीण / विसरलो</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                        उद्या पुन्हा विचारणार
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleRateQuestion("good")}
+                      className="p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95"
+                    >
+                      <span className="text-sm">🟡 मध्यम / आठवलं</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                        ३ दिवसांनी रिव्हिजन
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleRateQuestion("easy")}
+                      className="p-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95"
+                    >
+                      <span className="text-sm">🟢 पक्कं झालं (Mastered)</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                        ७ दिवसांनी विचारणार
+                      </span>
+                    </button>
+                  </div>
                 </div>
               )}
             </motion.div>

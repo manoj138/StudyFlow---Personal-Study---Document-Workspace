@@ -27,7 +27,8 @@ import {
   createInterviewFromText,
   createInterviewFromFile,
   createInterviewFromDocument,
-  deleteInterviewSet
+  deleteInterviewSet,
+  seedMernCurriculum
 } from "../services/interviewService";
 
 export const InterviewHubPage = () => {
@@ -84,6 +85,25 @@ export const InterviewHubPage = () => {
       }
     } catch (err) {
       console.error("Failed to load library documents:", err);
+    }
+  };
+
+  const [loadingMernSeed, setLoadingMernSeed] = useState(false);
+
+  const handleSeedMern = async () => {
+    try {
+      setLoadingMernSeed(true);
+      const res = await seedMernCurriculum();
+      if (res.success) {
+        await loadInterviewSets();
+        if (res.interviewSet?._id) {
+          navigate(`/interview/${res.interviewSet._id}`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to seed MERN curriculum:", err);
+    } finally {
+      setLoadingMernSeed(false);
     }
   };
 
@@ -218,6 +238,48 @@ export const InterviewHubPage = () => {
 
         {/* Ambient background decoration */}
         <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      </div>
+
+      {/* 1-Click MERN Mastery Curriculum Banner */}
+      <div className="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/80 border border-emerald-500/30 rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Brain className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                Official Study Track
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                English + मराठी स्पष्टीकरण
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-extrabold text-white">
+              MERN Stack Complete Interview Guide (250 Qs)
+            </h3>
+            <p className="text-xs text-slate-300 max-w-xl">
+              Covers React Hooks, Event Loop, Express APIs, MongoDB Aggregation, JWT Security & Junior Developer Mock.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleSeedMern}
+          disabled={loadingMernSeed}
+          className="shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+        >
+          {loadingMernSeed ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>Loading 250 Questions...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Load MERN Guide & Practice Now</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Metrics Row */}

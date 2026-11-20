@@ -89,3 +89,29 @@ export const evaluateSpokenAnswer = async ({ question, idealAnswer, userAnswer, 
   return response.data;
 };
 
+/**
+ * Get daily sprint of 5 curated questions for active recall
+ */
+export const getDailySprint = async () => {
+  const response = await API.get("/interviews/sprint");
+  return response.data;
+};
+
+/**
+ * Auto-Seed official MERN Stack Curriculum
+ */
+export const seedMernCurriculum = async () => {
+  const response = await API.post("/interviews/seed-mern");
+  return response.data;
+};
+
+/**
+ * Update Spaced Repetition status for a question (again, hard, good, easy)
+ */
+export const reviewQuestion = async (setId, questionId, rating) => {
+  const response = await API.post(`/interviews/${setId}/questions/${questionId}/review`, {
+    rating
+  });
+  return response.data;
+};
+

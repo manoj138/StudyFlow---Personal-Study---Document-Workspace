@@ -72,15 +72,30 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
   let match;
   while ((match = qaPattern.exec(cleaned)) !== null) {
     const qText = (match[2] || "").trim();
-    const aText = (match[3] || "").trim();
+    let aText = (match[3] || "").trim();
 
     if (qText.length > 5 && aText.length > 5) {
+      let englishAns = aText;
+      let marathiExp = "";
+
+      if (aText.includes("मराठी स्पष्टीकरण:")) {
+        const parts = aText.split(/\*{0,2}मराठी स्पष्टीकरण:\*{0,2}\s*/);
+        englishAns = (parts[0] || "").trim();
+        marathiExp = (parts[1] || "").trim();
+      } else if (/marathi explanation:/i.test(aText)) {
+        const parts = aText.split(/\*{0,2}marathi explanation:\*{0,2}\s*/i);
+        englishAns = (parts[0] || "").trim();
+        marathiExp = (parts[1] || "").trim();
+      }
+
       questions.push({
         question: qText.replace(/^[:.)-\s]+/, "").trim(),
-        answer: aText.trim(),
-        keywords: extractKeywordsHeuristic(aText, 5),
+        answer: englishAns,
+        marathiExplanation: marathiExp,
+        keywords: extractKeywordsHeuristic(englishAns, 5),
         difficulty: "medium",
-        category: defaultTopic
+        category: defaultTopic,
+        track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
       });
     }
   }
@@ -163,7 +178,8 @@ Format:
 [
   {
     "question": "What is ...?",
-    "answer": "Detailed model answer...",
+    "answer": "Detailed model answer in English...",
+    "marathiExplanation": "Simple concept explanation in Marathi if available or concept summary",
     "keywords": ["keyword1", "keyword2", "keyword3"],
     "difficulty": "medium",
     "category": "${defaultTopic}"
@@ -198,13 +214,15 @@ ${truncatedText}
             return parsed.map((item) => ({
               question: String(item.question || "").trim(),
               answer: String(item.answer || "").trim(),
+              marathiExplanation: String(item.marathiExplanation || "").trim(),
               keywords: Array.isArray(item.keywords)
                 ? item.keywords.map((k) => String(k).trim())
                 : extractKeywordsHeuristic(item.answer || "", 4),
               difficulty: ["easy", "medium", "hard"].includes(item.difficulty)
                 ? item.difficulty
                 : "medium",
-              category: String(item.category || defaultTopic).trim()
+              category: String(item.category || defaultTopic).trim(),
+              track: String(item.category || defaultTopic).toLowerCase().replace(/[^a-z0-9]/g, "_")
             }));
           }
         }
