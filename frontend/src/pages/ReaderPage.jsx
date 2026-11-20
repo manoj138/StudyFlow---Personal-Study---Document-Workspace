@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getDocumentById, updateReadingProgress } from "../services/documentService";
 import { SERVER_BASE_URL } from "../services/api";
@@ -120,6 +120,67 @@ export const ReaderPage = () => {
     }
   };
 
+  // Dynamically compute rich Table of Contents from doc.toc, doc.aiChapters, or extracted headings
+  const tableOfContents = useMemo(() => {
+    if (!document) return [];
+
+    if (Array.isArray(document.toc) && document.toc.length > 0) {
+      return document.toc;
+    }
+
+    if (Array.isArray(document.aiChapters) && document.aiChapters.length > 0) {
+      return document.aiChapters.map((chap, idx) => ({
+        id: `chapter-${idx}`,
+        level: 1,
+        title: chap.title || `Chapter ${idx + 1}`,
+        timestamp: chap.timestamp || "00:00",
+        pageNumber: Math.max(1, Math.round((idx + 1) * ((document.totalPages || 1) / Math.max(1, document.aiChapters.length))))
+      }));
+    }
+
+    const rawContent = document.extractedText || document.content || "";
+    if (!rawContent) return [];
+
+    const extracted = [];
+    const headingRegex = /<h([1-3])[^>]*>(.*?)<\/h\1>/gi;
+    let match;
+    let index = 0;
+    while ((match = headingRegex.exec(rawContent)) !== null && index < 60) {
+      const level = parseInt(match[1], 10);
+      const cleanTitle = match[2].replace(/<[^>]+>/g, "").trim();
+      if (cleanTitle && cleanTitle.length >= 2 && cleanTitle.length < 120) {
+        extracted.push({
+          id: `heading-${index++}`,
+          level,
+          title: cleanTitle,
+          pageNumber: document.totalPages > 1
+            ? Math.min(document.totalPages, Math.max(1, Math.round((match.index / rawContent.length) * document.totalPages) + 1))
+            : 1
+        });
+      }
+    }
+    return extracted;
+  }, [document]);
+
+  const handleTocClick = (item) => {
+    if (item.id?.startsWith("heading-")) {
+      const headings = mainCanvasRef.current?.querySelectorAll("h1, h2, h3");
+      if (headings) {
+        for (const h of headings) {
+          const text = h.textContent.trim().toLowerCase();
+          const target = item.title.trim().toLowerCase();
+          if (text === target || text.includes(target) || target.includes(text)) {
+            h.scrollIntoView({ behavior: "smooth", block: "start" });
+            h.classList.add("ring-2", "ring-indigo-500", "rounded", "transition-all");
+            setTimeout(() => h.classList.remove("ring-2", "ring-indigo-500", "rounded"), 2200);
+            return;
+          }
+        }
+      }
+    }
+    handlePageOrScrollChange(item.pageNumber);
+  };
+
   const handleStartDocInterview = async () => {
     if (!document) return;
     try {
@@ -127,7 +188,7 @@ export const ReaderPage = () => {
       const res = await createInterviewFromDocument({
         documentId: id,
         title: `Interview: ${document.title}`,
-        topic: document.subjectTitle || "General"
+        topic: document.subjectId?.name || document.subjectTitle || "General"
       });
       if (res?.success && res.interviewSet?._id) {
         navigate(`/interview/${res.interviewSet._id}`);
@@ -404,7 +465,7 @@ export const ReaderPage = () => {
               {document.title}
             </h2>
             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
-              <span>{document.subjectTitle || "General"}</span>
+              <span>{document.subjectId?.name || document.subjectTitle || "General"}</span>
               <span>•</span>
               <span>Page {currentPage} of {document.totalPages || 1}</span>
             </div>
@@ -530,21 +591,25 @@ export const ReaderPage = () => {
 
           <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5">
             {activeTab === "toc" && (
-              <div className="space-y-1.5">
-                {document.toc && document.toc.length > 0 ? (
-                  document.toc.map((item, idx) => (
+              <div className="space-y-1">
+                {tableOfContents && tableOfContents.length > 0 ? (
+                  tableOfContents.map((item, idx) => (
                     <button
-                      key={idx}
+                      key={item.id || idx}
                       type="button"
-                      onClick={() => handlePageOrScrollChange(item.pageNumber)}
-                      className={`w-full text-left px-3 py-2 rounded-md text-xs flex items-center justify-between transition-colors ${
-                        currentPage === item.pageNumber
-                          ? "bg-zinc-800 text-white font-semibold border border-white/[0.1]"
-                          : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
-                      }`}
+                      onClick={() => handleTocClick(item)}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs flex items-center justify-between transition-colors ${
+                        item.level === 1
+                          ? "font-semibold text-zinc-100 bg-white/[0.02]"
+                          : item.level === 2
+                          ? "pl-4 text-zinc-300"
+                          : "pl-6 text-zinc-400"
+                      } hover:text-white hover:bg-white/[0.06]`}
                     >
-                      <span className="truncate">{item.title}</span>
-                      <span className="text-[10px] font-mono text-zinc-500">P.{item.pageNumber}</span>
+                      <span className="truncate pr-2">{item.title}</span>
+                      <span className="text-[10px] font-mono text-zinc-500 shrink-0">
+                        {item.timestamp ? item.timestamp : `P.${item.pageNumber}`}
+                      </span>
                     </button>
                   ))
                 ) : (
@@ -664,13 +729,17 @@ export const ReaderPage = () => {
           <div className="w-full max-w-3xl space-y-6" style={{ fontSize: `${fontSize}px` }}>
             {mode === "study" ? (
               <StudyReader
-                htmlContent={document.content || ""}
+                htmlContent={document.extractedText || document.content || ""}
                 highlights={highlights}
               />
             ) : (
               <div className="w-full h-full min-h-[700px] rounded-lg overflow-hidden border border-white/[0.08] bg-[#12131a]">
                 <iframe
-                  src={`${SERVER_BASE_URL}/${document.filePath || ""}`}
+                  src={
+                    document.fileUrl?.startsWith("http")
+                      ? document.fileUrl
+                      : `${SERVER_BASE_URL}${document.fileUrl?.startsWith("/") ? "" : "/"}${document.fileUrl || document.filePath || ""}`
+                  }
                   className="w-full h-[85vh] border-none"
                   title="PDF Viewer"
                 />

@@ -33,7 +33,12 @@ const applyHighlightsToHtml = (htmlContent, highlights = []) => {
 
 export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
   if (!htmlContent) {
-    return <p className="text-slate-400 italic">No content available for Study Reflow Mode.</p>;
+    return (
+      <div className="py-16 text-center space-y-2 border border-dashed border-white/[0.08] rounded-xl p-8 bg-[#0c0d14]/40">
+        <p className="text-sm font-medium text-zinc-400">No content available for Study Reflow Mode.</p>
+        <p className="text-xs text-zinc-600 font-mono">Switch to "Original PDF" mode to view the raw document.</p>
+      </div>
+    );
   }
 
   // Sanitize any legacy empty flow diagram boxes or centered arrows and replace with left-aligned down arrow badges
