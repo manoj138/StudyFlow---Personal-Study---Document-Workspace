@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, UserPlus, User, Mail, Lock, AlertCircle, Sparkles, CheckCircle2, GraduationCap, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Lock, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { Input, Button, Badge } from "../components/ui";
 
 export const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -15,7 +16,6 @@ export const RegisterPage = () => {
   const { user, register } = useAuth();
   const navigate = useNavigate();
 
-  // Automatically redirect already logged-in users to Dashboard
   useEffect(() => {
     if (user) {
       navigate("/dashboard", { replace: true });
@@ -46,179 +46,150 @@ export const RegisterPage = () => {
       await register(trimmedName, trimmedEmail, password);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed. Please try again.");
+      setError(
+        err.response?.data?.error || "Registration failed. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 selection:bg-purple-500/30 transition-colors duration-200">
-      
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-600/10 dark:bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
-
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10"
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-3xl rounded-lg border border-zinc-800 bg-[#121215] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2"
       >
         {/* Left Side: Developer Workspace Showcase */}
-        <div className="hidden md:flex flex-col justify-between p-8 text-white relative overflow-hidden bg-gradient-to-br from-[#0c1222] via-[#0E1526] to-[#080C14] border-r border-slate-200 dark:border-white/10">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="StudyFlow Logo" className="w-8 h-8 object-contain drop-shadow-md" />
-            <span className="font-extrabold text-lg tracking-tight text-white">Study<span className="text-purple-400">Flow</span></span>
+        <div className="hidden md:flex flex-col justify-between p-8 bg-[#0c0c0e] border-r border-zinc-800 text-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="StudyFlow Logo"
+              className="w-7 h-7 object-contain"
+            />
+            <span className="font-bold text-base tracking-tight">
+              Study<span className="text-zinc-400">Flow</span>
+            </span>
           </div>
 
           <div className="space-y-4 my-auto">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-purple-300 text-xs font-semibold border border-white/20">
-              <GraduationCap className="w-3.5 h-3.5 text-purple-300" /> Start Free Workspace
-            </span>
-            <h2 className="text-2xl font-extrabold text-white leading-snug">
-              Create Your Personal Study Workspace
+            <Badge variant="accent" size="sm">
+              Free Developer Workspace
+            </Badge>
+
+            <h2 className="text-xl font-bold tracking-tight text-zinc-100 leading-snug">
+              Build your technical interview foundation
             </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Join StudyFlow to organize all your course materials, PDF notes, and revision highlights in one place.
+
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Create your account to organize documentation, study modules, and practice daily interview sprints.
             </p>
 
-            <div className="space-y-2 pt-2 text-xs text-slate-200">
+            <div className="space-y-2 pt-2 text-xs text-zinc-300 font-mono">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Unlimited document uploads</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>Unlimited technical document uploads</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Custom subject module categories</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>Structured subject tracks</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Automated revision hub feed</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>Daily active recall revision queue</span>
               </div>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 font-mono">© 2026 StudyFlow Personal Workspace</p>
+          <p className="text-[11px] text-zinc-500 font-mono">
+            StudyFlow • Production Standard 2026
+          </p>
         </div>
 
         {/* Right Side: Register Form */}
-        <div className="p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          <div className="text-center md:text-left space-y-1">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <img src="/logo.png" alt="StudyFlow Logo" className="w-8 h-8 object-contain md:hidden" />
-              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Create Workspace</h2>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Sign up in seconds to start reading and organizing notes.</p>
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-zinc-100 tracking-tight">
+              Create Account
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Start your personal study and document workspace
+            </p>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-300">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-              <span>{error}</span>
+            <div className="p-3 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono">
+              {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (error) setError("");
-                  }}
-                  placeholder="Manoj Chougule"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                />
-              </div>
-            </div>
+            <Input
+              label="Full Name"
+              type="text"
+              required
+              icon={User}
+              placeholder="Manoj Chougule"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="email"
-                  required
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  inputMode="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (error) setError("");
-                  }}
-                  placeholder="student@example.com"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                />
-              </div>
-            </div>
+            <Input
+              label="Email Address"
+              type="email"
+              required
+              icon={Mail}
+              placeholder="developer@studyflow.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError("");
-                  }}
-                  placeholder="Minimum 6 characters"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                />
+            <Input
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              required
+              icon={Lock}
+              placeholder="Minimum 6 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              suffix={
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
-                  title={showPassword ? "Hide password" : "Show password"}
+                  className="text-zinc-500 hover:text-zinc-300 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-              </div>
-            </div>
+              }
+            />
 
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25 transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+              variant="indigo"
+              size="md"
+              loading={submitting}
+              className="w-full mt-2"
             >
-              {submitting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating Workspace...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" /> Create Free Workspace
-                </>
-              )}
-            </button>
+              Create Workspace Account
+            </Button>
           </form>
 
-          <p className="text-center md:text-left text-xs text-slate-500 dark:text-slate-400 pt-2">
-            Already have an account?{" "}
-            <Link to="/login" className="text-purple-600 dark:text-purple-400 font-bold hover:underline">
-              Sign In Here
+          <div className="pt-4 border-t border-zinc-800 text-center text-xs text-zinc-400">
+            <span>Already have an account? </span>
+            <Link
+              to="/login"
+              className="font-medium text-zinc-200 hover:text-white hover:underline"
+            >
+              Sign In
             </Link>
-          </p>
+          </div>
         </div>
       </motion.div>
     </div>
   );
 };
+
+export default RegisterPage;

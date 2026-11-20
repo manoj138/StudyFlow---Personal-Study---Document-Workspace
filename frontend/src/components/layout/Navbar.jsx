@@ -2,7 +2,20 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { BookOpen, LogOut, User, Sun, Moon, Search, Menu, X, ChevronRight, Mic } from "lucide-react";
+import {
+  LogOut,
+  Sun,
+  Moon,
+  Search,
+  Menu,
+  X,
+  ChevronRight,
+  Mic,
+  BookOpen,
+  LayoutDashboard,
+  RotateCcw
+} from "lucide-react";
+import { Button, Badge, Kbd } from "../ui";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -21,178 +34,164 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-white/90 dark:bg-[#080C14]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-3 sm:px-6 lg:px-8 py-3 flex items-center justify-between transition-colors duration-200">
+    <header className="sticky top-0 z-30 w-full bg-[#121215]/95 backdrop-blur-md border-b border-zinc-800 px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between text-zinc-100 font-sans">
       {/* Brand Logo & Tag */}
       <Link
         to={user ? "/dashboard" : "/"}
         onClick={() => setMobileMenuOpen(false)}
-        className="flex items-center gap-2 group shrink-0"
+        className="flex items-center gap-2.5 group shrink-0"
       >
         <img
           src="/logo.png"
           alt="StudyFlow Logo"
-          className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-200"
+          className="w-7 h-7 object-contain"
         />
         <div className="flex items-center gap-1.5">
-          <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white font-sans">
-            Study<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
+          <span className="font-bold text-sm sm:text-base tracking-tight text-zinc-100">
+            Study<span className="text-zinc-400">Flow</span>
           </span>
-          <span className="hidden sm:inline-block text-[10px] font-bold tracking-wider uppercase text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700/60">
-            Workspace
-          </span>
+          <Badge variant="neutral" size="sm">Workspace</Badge>
         </div>
       </Link>
 
       {/* Desktop Navigation Links */}
       {user && (
-        <nav className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-[#0E1526] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-inner">
+        <nav className="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-md border border-zinc-800 text-xs font-medium">
           <Link
             to="/dashboard"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/dashboard")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
             }`}
           >
-            Dashboard
+            <LayoutDashboard size={13} />
+            <span>Dashboard</span>
           </Link>
+
           <Link
             to="/interview"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/interview") || location.pathname.startsWith("/interview")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
             }`}
           >
-            <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-            <span>MERN Interview</span>
+            <Mic size={13} className="text-indigo-400" />
+            <span>Interview Hub</span>
           </Link>
+
           <Link
             to="/library"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/library") || location.pathname.startsWith("/document")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
             }`}
           >
-            Library
+            <BookOpen size={13} />
+            <span>Library</span>
           </Link>
+
           <Link
             to="/revision"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/revision")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
             }`}
           >
-            Revision
+            <RotateCcw size={13} />
+            <span>Revision</span>
           </Link>
         </nav>
       )}
 
-      {/* Desktop Right Actions */}
-      <div className="hidden md:flex items-center gap-2 sm:gap-3 shrink-0">
+      {/* Desktop Right Controls */}
+      <div className="hidden md:flex items-center gap-2 sm:gap-2.5 shrink-0">
         {user && (
           <button
             onClick={() => navigate("/library")}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+            className="flex items-center gap-2 h-8 px-2.5 rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors cursor-pointer"
             title="Quick Search"
           >
-            <Search className="w-3.5 h-3.5 text-slate-400" />
-            <span>Search notes...</span>
-            <kbd className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-mono">
-              ⌘K
-            </kbd>
+            <Search size={13} />
+            <span className="font-mono text-[11px]">Search...</span>
+            <Kbd>/</Kbd>
           </button>
         )}
 
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={theme === "dark" ? Sun : Moon}
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-transparent hover:bg-slate-200 dark:hover:bg-white/5 border border-slate-200 dark:border-white/5 transition-all flex items-center justify-center"
           title={`Switch to ${theme === "dark" ? "Light Mode" : "Dark Mode"}`}
-        >
-          {theme === "dark" ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-indigo-600" />
-          )}
-        </button>
+        />
 
         {user ? (
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl">
-              <div className="w-5 h-5 rounded-full bg-indigo-600/30 border border-indigo-500/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-md">
+              <div className="w-4 h-4 rounded-full bg-zinc-700 text-zinc-200 flex items-center justify-center text-[10px] font-bold">
                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}
               </div>
-              <span>{user.name}</span>
+              <span className="truncate max-w-[120px]">{user.name}</span>
             </div>
-            <button
+
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={LogOut}
               onClick={handleLogout}
-              className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all"
               title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+              className="text-zinc-400 hover:text-rose-400"
+            />
           </div>
         ) : (
           <div className="flex items-center gap-2 text-xs font-medium">
-            <Link
-              to="/login"
-              className="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-            >
-              Sign In
+            <Link to="/login">
+              <Button variant="ghost" size="sm">Sign In</Button>
             </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition-all"
-            >
-              Get Started
+            <Link to="/register">
+              <Button variant="primary" size="sm">Get Started</Button>
             </Link>
           </div>
         )}
       </div>
 
-      {/* Mobile Controls: Theme & Hamburger Button */}
+      {/* Mobile Controls */}
       <div className="flex md:hidden items-center gap-2">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={theme === "dark" ? Sun : Moon}
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-transparent border border-slate-200 dark:border-white/5"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-indigo-600" />
-          )}
-        </button>
+        />
 
         {user ? (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={mobileMenuOpen ? X : Menu}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white"
-            title="Toggle Menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          />
         ) : (
-          <Link
-            to="/login"
-            className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
-          >
-            Sign In
+          <Link to="/login">
+            <Button variant="primary" size="sm">Sign In</Button>
           </Link>
         )}
       </div>
 
-      {/* Mobile Drawer Menu Overlay */}
+      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && user && (
-        <div className="absolute top-full left-0 right-0 glass-panel border-b border-slate-200 dark:border-white/10 p-4 space-y-4 md:hidden shadow-2xl bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl animate-fade-in z-50">
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+        <div className="absolute top-full left-0 right-0 border-b border-zinc-800 p-4 space-y-3 md:hidden shadow-2xl bg-[#121215] z-50">
+          <div className="flex items-center gap-2.5 p-3 rounded-md bg-zinc-900 border border-zinc-800">
+            <div className="w-8 h-8 rounded-full bg-zinc-700 text-zinc-200 flex items-center justify-center font-bold text-xs">
               {user.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
             <div>
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white">{user.name}</h4>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+              <h4 className="text-xs font-semibold text-zinc-100">{user.name}</h4>
+              <p className="text-[11px] font-mono text-zinc-400 truncate">{user.email}</p>
             </div>
           </div>
 
@@ -200,70 +199,74 @@ export const Navbar = () => {
             <Link
               to="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className={`w-full p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+              className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 isActive("/dashboard")
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+                  ? "bg-zinc-800 text-zinc-100 font-semibold"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <span>Dashboard</span>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </Link>
-
-            <Link
-              to="/library"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`w-full p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
-                isActive("/library") || location.pathname.startsWith("/document")
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
-              }`}
-            >
-              <span>Document Library</span>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </Link>
-
-            <Link
-              to="/revision"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`w-full p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
-                isActive("/revision")
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
-              }`}
-            >
-              <span>Revision Workspace</span>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight size={13} className="text-zinc-500" />
             </Link>
 
             <Link
               to="/interview"
               onClick={() => setMobileMenuOpen(false)}
-              className={`w-full p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
-                isActive("/interview") || location.pathname.startsWith("/interview")
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                isActive("/interview")
+                  ? "bg-zinc-800 text-zinc-100 font-semibold"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <div className="flex items-center gap-2">
-                <Mic className="w-4 h-4 text-indigo-500" />
-                <span>Mock Interview</span>
+                <Mic size={13} className="text-indigo-400" />
+                <span>Interview Hub</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight size={13} className="text-zinc-500" />
+            </Link>
+
+            <Link
+              to="/library"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                isActive("/library")
+                  ? "bg-zinc-800 text-zinc-100 font-semibold"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              }`}
+            >
+              <span>Document Library</span>
+              <ChevronRight size={13} className="text-zinc-500" />
+            </Link>
+
+            <Link
+              to="/revision"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                isActive("/revision")
+                  ? "bg-zinc-800 text-zinc-100 font-semibold"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              }`}
+            >
+              <span>Revision Center</span>
+              <ChevronRight size={13} className="text-zinc-500" />
             </Link>
           </div>
 
-          <div className="pt-2 border-t border-slate-200 dark:border-white/5">
-            <button
+          <div className="pt-2 border-t border-zinc-800">
+            <Button
+              variant="danger"
+              size="sm"
+              icon={LogOut}
+              className="w-full"
               onClick={handleLogout}
-              className="w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Logout Account</span>
-            </button>
+              Logout Account
+            </Button>
           </div>
         </div>
       )}
     </header>
   );
 };
+
+export default Navbar;

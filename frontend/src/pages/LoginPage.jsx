@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, LogIn, Mail, Lock, AlertCircle, Sparkles, CheckCircle2, ShieldCheck, GraduationCap, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { Card, CardContent, Input, Button, Badge } from "../components/ui";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +15,6 @@ export const LoginPage = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  // Automatically redirect already logged-in users to Dashboard
   useEffect(() => {
     if (user) {
       navigate("/dashboard", { replace: true });
@@ -37,158 +37,143 @@ export const LoginPage = () => {
       await login(trimmedEmail, password);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please check your email and password.");
+      setError(
+        err.response?.data?.error ||
+          "Login failed. Please check your email and password."
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 selection:bg-indigo-500/30 transition-colors duration-200">
-      
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-indigo-600/10 dark:bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
-
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10"
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-3xl rounded-lg border border-zinc-800 bg-[#121215] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2"
       >
         {/* Left Side: Developer Workspace Showcase */}
-        <div className="hidden md:flex flex-col justify-between p-8 text-white relative overflow-hidden bg-gradient-to-br from-[#0c1222] via-[#0E1526] to-[#080C14] border-r border-slate-200 dark:border-white/10">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="StudyFlow Logo" className="w-8 h-8 object-contain drop-shadow-md" />
-            <span className="font-extrabold text-lg tracking-tight text-white">Study<span className="text-indigo-400">Flow</span></span>
+        <div className="hidden md:flex flex-col justify-between p-8 bg-[#0c0c0e] border-r border-zinc-800 text-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="StudyFlow Logo"
+              className="w-7 h-7 object-contain"
+            />
+            <span className="font-bold text-base tracking-tight">
+              Study<span className="text-zinc-400">Flow</span>
+            </span>
           </div>
 
           <div className="space-y-4 my-auto">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-amber-300 text-xs font-semibold border border-white/20">
-              <GraduationCap className="w-3.5 h-3.5 text-amber-300" /> Focused Learning
-            </span>
-            <h2 className="text-2xl font-extrabold text-white leading-snug">
-              Welcome Back to Your Workspace
+            <Badge variant="accent" size="sm">
+              MERN Developer Workspace
+            </Badge>
+
+            <h2 className="text-xl font-bold tracking-tight text-zinc-100 leading-snug">
+              Welcome back to your study cockpit
             </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Resume your active reading modules, access saved bookmarks, and continue where you left off.
+
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Resume active recall interview drills, sync reading progress, and track your retention velocity.
             </p>
 
-            <div className="space-y-2 pt-2 text-xs text-slate-200">
+            <div className="space-y-2 pt-2 text-xs text-zinc-300 font-mono">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Auto-saved reading progress sync</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>250 MERN Interview Questions Bank</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Distraction-free Study Reflow Mode</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>Active recall spaced repetition</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Personal notes & revision hub</span>
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                <span>Bilingual Marathi logic explanation notes</span>
               </div>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 font-mono">© 2026 StudyFlow Personal Workspace</p>
+          <p className="text-[11px] text-zinc-500 font-mono">
+            StudyFlow • Production Standard 2026
+          </p>
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          <div className="text-center md:text-left space-y-1">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <img src="/logo.png" alt="StudyFlow Logo" className="w-8 h-8 object-contain md:hidden" />
-              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sign In</h2>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Enter your workspace account credentials to continue.</p>
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-zinc-100 tracking-tight">
+              Sign In
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Enter your credentials to access your personal workspace
+            </p>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-300">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-              <span>{error}</span>
+            <div className="p-3 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono">
+              {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="email"
-                  required
-                  autoFocus
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  inputMode="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (error) setError("");
-                  }}
-                  placeholder="student@example.com"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-              </div>
-            </div>
+            <Input
+              label="Email Address"
+              type="email"
+              required
+              icon={Mail}
+              placeholder="developer@studyflow.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError("");
-                  }}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-sm sm:text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
-                  title={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                required
+                icon={Lock}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                }
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+              variant="indigo"
+              size="md"
+              loading={submitting}
+              className="w-full mt-2"
             >
-              {submitting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4" /> Sign In to Workspace
-                </>
-              )}
-            </button>
+              Sign In to Workspace
+            </Button>
           </form>
 
-          <p className="text-center md:text-left text-xs text-slate-500 dark:text-slate-400 pt-2">
-            Don't have a workspace account?{" "}
-            <Link to="/register" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
-              Create Free Account
+          <div className="pt-4 border-t border-zinc-800 text-center text-xs text-zinc-400">
+            <span>Don't have an account? </span>
+            <Link
+              to="/register"
+              className="font-medium text-zinc-200 hover:text-white hover:underline"
+            >
+              Create one now
             </Link>
-          </p>
+          </div>
         </div>
       </motion.div>
     </div>
   );
 };
+
+export default LoginPage;
