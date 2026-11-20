@@ -55,11 +55,8 @@ export const LoginPage = () => {
         transition={{ duration: 0.4 }}
         className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10"
       >
-        {/* Left Side: Artwork Showcase Banner */}
-        <div 
-          className="hidden md:flex flex-col justify-between p-8 text-white relative overflow-hidden bg-cover bg-center dark-panel"
-          style={{ backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%), url('/hero_banner.jpg')` }}
-        >
+        {/* Left Side: Developer Workspace Showcase */}
+        <div className="hidden md:flex flex-col justify-between p-8 text-white relative overflow-hidden bg-gradient-to-br from-[#0c1222] via-[#0E1526] to-[#080C14] border-r border-slate-200 dark:border-white/10">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="StudyFlow Logo" className="w-8 h-8 object-contain drop-shadow-md" />
             <span className="font-extrabold text-lg tracking-tight text-white">Study<span className="text-indigo-400">Flow</span></span>

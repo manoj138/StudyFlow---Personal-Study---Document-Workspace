@@ -251,8 +251,8 @@ export const InterviewHubPage = () => {
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                 Official Study Track
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                English + मराठी स्पष्टीकरण
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
+                Dual-Language Track (English + Marathi Notes)
               </span>
             </div>
             <h3 className="text-base sm:text-lg font-extrabold text-white">

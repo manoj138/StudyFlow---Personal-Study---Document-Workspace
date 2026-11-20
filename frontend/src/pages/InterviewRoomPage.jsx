@@ -174,9 +174,9 @@ export const InterviewRoomPage = () => {
     return () => clearInterval(timer);
   }, [sessionCompleted]);
 
-  // Question countdown timer
+  // Question countdown timer (pauses while interviewer speaks)
   useEffect(() => {
-    if (!isTimerRunning || mode !== "mock" || sessionCompleted || currentResult) return;
+    if (!isTimerRunning || mode !== "mock" || sessionCompleted || currentResult || isAiSpeaking) return;
 
     const interval = setInterval(() => {
       setTimerSeconds((prev) => {
@@ -190,7 +190,7 @@ export const InterviewRoomPage = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isTimerRunning, mode, sessionCompleted, currentResult]);
+  }, [isTimerRunning, mode, sessionCompleted, currentResult, isAiSpeaking]);
 
   // Speak Current Question
   const speakCurrentQuestion = (text) => {
@@ -650,7 +650,7 @@ export const InterviewRoomPage = () => {
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 border border-amber-500/25 transition-all shadow-sm cursor-pointer"
                   >
                     <Brain className="w-3.5 h-3.5 text-amber-500" />
-                    <span>{showMarathiDrawer ? "लपवा (Hide Marathi)" : "💡 संकल्पना समजून घ्या (मराठीत)"}</span>
+                    <span>{showMarathiDrawer ? "Hide Concept Logic" : "💡 Explain Logic (मराठीत)"}</span>
                   </button>
                 )}
 
@@ -674,7 +674,7 @@ export const InterviewRoomPage = () => {
                   >
                     <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
                       <Brain className="w-4 h-4" />
-                      <span>💡 सोप्या मराठीत स्पष्टीकरण (Concept Logic)</span>
+                      <span>💡 Concept Explanation (मराठी स्पष्टीकरण)</span>
                     </div>
                     <p className="whitespace-pre-wrap font-medium">{currentQuestion.marathiExplanation}</p>
                   </motion.div>
@@ -773,11 +773,17 @@ export const InterviewRoomPage = () => {
               <div className="relative">
                 <textarea
                   rows={4}
-                  placeholder="Your dictated answer will appear here in real-time, or type manually..."
+                  placeholder="Your dictated answer will appear here in real-time, or type manually... (Press Ctrl + Enter to score)"
                   value={userAnswer}
                   onChange={(e) => {
                     setUserAnswer(e.target.value);
                     setTranscript(e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !evaluating && userAnswer.trim()) {
+                      e.preventDefault();
+                      handleEvaluate();
+                    }
                   }}
                   className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all font-mono leading-relaxed"
                 />
@@ -791,7 +797,7 @@ export const InterviewRoomPage = () => {
               {/* Words & Submit Action */}
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono text-slate-400">
-                  {userAnswer ? userAnswer.trim().split(/\s+/).filter(Boolean).length : 0} words
+                  {userAnswer ? userAnswer.trim().split(/\s+/).filter(Boolean).length : 0} words • <span className="text-slate-500">Ctrl+Enter</span>
                 </span>
 
                 <button
@@ -879,7 +885,7 @@ export const InterviewRoomPage = () => {
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
                   <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>पुढील रिव्हिजन कधी हवी? (Anki SRS)</span>
+                  <span>Schedule Next Review (Active Recall SRS)</span>
                 </span>
                 {reviewStatusMsg && (
                   <span className="text-emerald-400 text-[11px] font-bold animate-pulse">
@@ -892,22 +898,22 @@ export const InterviewRoomPage = () => {
                   onClick={() => handleRateQuestion("again")}
                   className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
                 >
-                  <span className="text-xs">🔴 विसरलो</span>
-                  <span className="text-[9px] text-slate-400 font-normal">उद्या</span>
+                  <span className="text-xs">🔴 Again</span>
+                  <span className="text-[9px] text-slate-400 font-normal">Tomorrow</span>
                 </button>
                 <button
                   onClick={() => handleRateQuestion("good")}
                   className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
                 >
-                  <span className="text-xs">🟡 आठवलं</span>
-                  <span className="text-[9px] text-slate-400 font-normal">३ दिवसांनी</span>
+                  <span className="text-xs">🟡 Good</span>
+                  <span className="text-[9px] text-slate-400 font-normal">In 3 Days</span>
                 </button>
                 <button
                   onClick={() => handleRateQuestion("easy")}
                   className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
                 >
-                  <span className="text-xs">🟢 पक्कं</span>
-                  <span className="text-[9px] text-slate-400 font-normal">७ दिवसांनी</span>
+                  <span className="text-xs">🟢 Mastered</span>
+                  <span className="text-[9px] text-slate-400 font-normal">In 7 Days</span>
                 </button>
               </div>
             </div>

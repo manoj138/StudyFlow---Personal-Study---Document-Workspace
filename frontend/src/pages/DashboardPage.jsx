@@ -235,7 +235,7 @@ export const DashboardPage = () => {
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              तुम्ही आधीच ११ महिने काम केलं आहे. रोज फक्त १५ मिनिटे ५ प्रश्न मोठ्याने बोला, कन्सेप्ट्स पक्क्या करा आणि आत्मविश्वासाने नोकरी मिळवा! 🚀
+              Leverage your 11 months of production experience. Daily spoken interview drills lock in technical depth, sharpen response speed, and prepare you for senior interviewers.
             </p>
           </div>
 
@@ -301,14 +301,14 @@ export const DashboardPage = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5" /> आजचा १५-मिनिटांचा सराव (Daily Active Sprint)
+                  <Flame className="w-3.5 h-3.5" /> Daily Active Recall Sprint
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  ५ निवडक प्रश्न
+                  5 High-Yield Questions Due Today
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                कंटाळा नको, हे ५ प्रश्न मोठ्याने बोलून सराव करा आणि आजचे टार्गेट पूर्ण करा.
+                Practice answering aloud with the voice studio to build interview fluency and retention.
               </p>
             </div>
             <button
@@ -333,7 +333,7 @@ export const DashboardPage = () => {
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-bold uppercase tracking-wider text-indigo-400 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
+                    <span className="font-bold uppercase tracking-wider text-indigo-400 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 font-mono">
                       {q.category || "MERN"}
                     </span>
                     <span className="font-mono text-slate-500">Q#{idx + 1}</span>
@@ -342,13 +342,13 @@ export const DashboardPage = () => {
                     {q.question}
                   </h4>
                   {q.marathiExplanation && (
-                    <p className="text-[11px] text-amber-300/80 line-clamp-1 italic">
-                      💡 {q.marathiExplanation}
-                    </p>
+                    <span className="inline-block text-[10px] text-amber-300/80 font-mono">
+                      💡 Concept Note Available
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/80 text-slate-400">
-                  <span>Speak & Drill</span>
+                  <span>Drill Question</span>
                   <ChevronRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -612,35 +612,35 @@ export const DashboardPage = () => {
 
             <div className="grid grid-cols-2 gap-2">
               <button 
-                onClick={() => navigate("/library")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
+                onClick={() => navigate("/interview")}
+                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Notes</span>
+                <Mic className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Interview Hub</span>
+              </button>
+
+              <button 
+                onClick={() => navigate("/library")}
+                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-cyan-500" />
+                <span>Study Library</span>
               </button>
 
               <button 
                 onClick={() => navigate("/revision")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
+                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
                 <GraduationCap className="w-3.5 h-3.5 text-purple-500" />
-                <span>Revisions</span>
+                <span>Revision Deck</span>
               </button>
 
               <button 
-                onClick={() => navigate("/library")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
+                onClick={() => setShowSubjectModal(true)}
+                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Code className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Practice DSA</span>
-              </button>
-
-              <button 
-                onClick={() => navigate("/dashboard")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all"
-              >
-                <Brain className="w-3.5 h-3.5 text-cyan-500" />
-                <span>Progress</span>
+                <Plus className="w-3.5 h-3.5 text-emerald-500" />
+                <span>New Track</span>
               </button>
             </div>
           </div>
