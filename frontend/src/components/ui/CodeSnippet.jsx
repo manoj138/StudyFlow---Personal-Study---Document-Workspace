@@ -24,9 +24,9 @@ export const CodeSnippet = ({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800 bg-[#09090b] overflow-hidden text-xs font-mono shadow-sm ${className}`}
+      className={`rounded-lg border border-white/[0.08] bg-[#08090C] overflow-hidden text-xs font-mono shadow-sm ${className}`}
     >
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-zinc-800 bg-zinc-900/60 text-zinc-400">
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/[0.06] bg-[#0E1015] text-zinc-400">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
           <span className="text-[11px] font-semibold text-zinc-300">

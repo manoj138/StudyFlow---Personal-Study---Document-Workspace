@@ -34,7 +34,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#121215]/95 backdrop-blur-md border-b border-zinc-800 px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between text-zinc-100 font-sans">
+    <header className="sticky top-0 z-30 w-full bg-[#0E1015]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between text-zinc-100 font-sans shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
       {/* Brand Logo & Tag */}
       <Link
         to={user ? "/dashboard" : "/"}
@@ -56,13 +56,13 @@ export const Navbar = () => {
 
       {/* Desktop Navigation Links */}
       {user && (
-        <nav className="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-md border border-zinc-800 text-xs font-medium">
+        <nav className="hidden md:flex items-center gap-1 bg-[#08090C] p-1 rounded-md border border-white/[0.08] text-xs font-medium">
           <Link
             to="/dashboard"
             className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/dashboard")
-                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                ? "bg-[#1C202C] text-zinc-100 shadow-sm border border-white/[0.12] font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
             }`}
           >
             <LayoutDashboard size={13} />
@@ -73,8 +73,8 @@ export const Navbar = () => {
             to="/interview"
             className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/interview") || location.pathname.startsWith("/interview")
-                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                ? "bg-[#1C202C] text-zinc-100 shadow-sm border border-white/[0.12] font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
             }`}
           >
             <Mic size={13} className="text-indigo-400" />
@@ -85,8 +85,8 @@ export const Navbar = () => {
             to="/library"
             className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/library") || location.pathname.startsWith("/document")
-                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                ? "bg-[#1C202C] text-zinc-100 shadow-sm border border-white/[0.12] font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
             }`}
           >
             <BookOpen size={13} />
@@ -97,8 +97,8 @@ export const Navbar = () => {
             to="/revision"
             className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
               isActive("/revision")
-                ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60 font-semibold"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                ? "bg-[#1C202C] text-zinc-100 shadow-sm border border-white/[0.12] font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
             }`}
           >
             <RotateCcw size={13} />
@@ -112,7 +112,7 @@ export const Navbar = () => {
         {user && (
           <button
             onClick={() => navigate("/library")}
-            className="flex items-center gap-2 h-8 px-2.5 rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors cursor-pointer"
+            className="flex items-center gap-2 h-8 px-2.5 rounded-md bg-[#08090C] border border-white/[0.08] text-xs text-zinc-400 hover:text-zinc-200 hover:border-white/[0.14] transition-colors cursor-pointer"
             title="Quick Search"
           >
             <Search size={13} />
@@ -131,7 +131,7 @@ export const Navbar = () => {
 
         {user ? (
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-md">
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-300 bg-[#08090C] border border-white/[0.08] px-2.5 py-1 rounded-md">
               <div className="w-4 h-4 rounded-full bg-zinc-700 text-zinc-200 flex items-center justify-center text-[10px] font-bold">
                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}
               </div>
@@ -184,8 +184,8 @@ export const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && user && (
-        <div className="absolute top-full left-0 right-0 border-b border-zinc-800 p-4 space-y-3 md:hidden shadow-2xl bg-[#121215] z-50">
-          <div className="flex items-center gap-2.5 p-3 rounded-md bg-zinc-900 border border-zinc-800">
+        <div className="absolute top-full left-0 right-0 border-b border-white/[0.08] p-4 space-y-3 md:hidden shadow-2xl bg-[#0E1015] z-50">
+          <div className="flex items-center gap-2.5 p-3 rounded-md bg-[#08090C] border border-white/[0.08]">
             <div className="w-8 h-8 rounded-full bg-zinc-700 text-zinc-200 flex items-center justify-center font-bold text-xs">
               {user.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
@@ -201,8 +201,8 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 isActive("/dashboard")
-                  ? "bg-zinc-800 text-zinc-100 font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-[#1C202C] text-zinc-100 font-semibold border border-white/[0.12]"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
               <span>Dashboard</span>
@@ -214,8 +214,8 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 isActive("/interview")
-                  ? "bg-zinc-800 text-zinc-100 font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-[#1C202C] text-zinc-100 font-semibold border border-white/[0.12]"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -230,8 +230,8 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 isActive("/library")
-                  ? "bg-zinc-800 text-zinc-100 font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-[#1C202C] text-zinc-100 font-semibold border border-white/[0.12]"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
               <span>Document Library</span>
@@ -243,8 +243,8 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 isActive("/revision")
-                  ? "bg-zinc-800 text-zinc-100 font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-[#1C202C] text-zinc-100 font-semibold border border-white/[0.12]"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
               }`}
             >
               <span>Revision Center</span>
@@ -252,7 +252,7 @@ export const Navbar = () => {
             </Link>
           </div>
 
-          <div className="pt-2 border-t border-zinc-800">
+          <div className="pt-2 border-t border-white/[0.08]">
             <Button
               variant="danger"
               size="sm"

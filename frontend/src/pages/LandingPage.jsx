@@ -55,7 +55,7 @@ console.log('5');
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] bg-luxury-mesh text-zinc-100 flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white font-sans antialiased">
+    <div className="min-h-screen bg-[#08090C] bg-luxury-mesh text-zinc-100 flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white font-sans antialiased">
       {/* 1. Hero Section */}
       <section className="relative pt-16 pb-20 lg:pt-24 lg:pb-32 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8">
@@ -127,9 +127,9 @@ console.log('5');
             transition={{ duration: 0.6, delay: 0.3 }}
             className="pt-10 max-w-4xl mx-auto text-left"
           >
-            <div className="rounded-lg border border-white/[0.1] bg-[#0c0d14] shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden">
+            <div className="rounded-lg border border-white/[0.1] bg-[#0E1015] shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.08)] overflow-hidden">
               {/* Window Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-[#11121c] border-b border-white/[0.06]">
+              <div className="flex items-center justify-between px-4 py-3 bg-[#08090C] border-b border-white/[0.06]">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] opacity-80" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] opacity-80" />
@@ -166,7 +166,7 @@ console.log('5');
                   {sampleQuestion.title}
                 </h3>
 
-                <pre className="p-3.5 rounded-md bg-[#070709] border border-white/[0.06] text-xs font-mono text-zinc-300 leading-relaxed overflow-x-auto">
+                <pre className="p-3.5 rounded-md bg-[#08090C] border border-white/[0.06] text-xs font-mono text-zinc-300 leading-relaxed overflow-x-auto">
                   <code>{sampleQuestion.code}</code>
                 </pre>
 

@@ -26,47 +26,47 @@ export const FlashcardItem = ({
           }`}
         >
           {/* FRONT SIDE - Question */}
-          <div className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-b from-[#111827] to-[#0B1120] border border-indigo-500/30 shadow-xl backdrop-blur-md backface-hidden">
+          <div className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 rounded-lg bg-[#0E1015] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_-4px_rgba(0,0,0,0.7)] backface-hidden">
             <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold text-xs">
-                <HelpCircle size={14} />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-400 font-mono text-xs">
+                <HelpCircle size={13} />
                 Question #{index !== undefined ? index + 1 : 1}
               </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1 group-hover:text-indigo-400 transition-colors">
-                <RotateCw size={12} /> Click to flip
+              <span className="text-xs text-zinc-500 flex items-center gap-1 group-hover:text-zinc-300 transition-colors font-mono">
+                <RotateCw size={12} /> Flip
               </span>
             </div>
 
             <div className="my-auto text-center px-4">
-              <p className="text-base sm:text-lg font-bold text-white leading-relaxed">
+              <p className="text-base sm:text-lg font-semibold text-zinc-100 leading-relaxed">
                 {card.question}
               </p>
             </div>
 
-            <div className="text-center text-xs text-slate-500">
-              Tap card to reveal answer
+            <div className="text-center text-xs text-zinc-500 font-mono">
+              Space / Click to reveal
             </div>
           </div>
 
           {/* BACK SIDE - Answer */}
-          <div className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-b from-[#0F172A] to-[#020617] border border-emerald-500/40 shadow-xl backdrop-blur-md rotate-y-180 backface-hidden">
+          <div className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 rounded-lg bg-[#0E1015] border border-emerald-500/30 shadow-[inset_0_1px_0_rgba(16,185,129,0.15),0_8px_24px_-4px_rgba(0,0,0,0.7)] rotate-y-180 backface-hidden">
             <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-xs">
-                <CheckCircle2 size={14} />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-mono text-xs">
+                <CheckCircle2 size={13} />
                 Answer Breakdown
               </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1">
-                <RotateCw size={12} /> Click to flip back
+              <span className="text-xs text-zinc-500 flex items-center gap-1 font-mono">
+                <RotateCw size={12} /> Flip back
               </span>
             </div>
 
             <div className="my-auto text-center px-4">
-              <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
+              <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-sans">
                 {card.answer}
               </p>
             </div>
 
-            <div className="text-center text-xs text-emerald-400 font-medium">
+            <div className="text-center text-xs text-emerald-400 font-mono">
               Recall verified
             </div>
           </div>
@@ -75,24 +75,24 @@ export const FlashcardItem = ({
 
       {/* Optional Rating Action Controls */}
       {showRatings && onRate && (
-        <div className="flex items-center justify-center gap-3 mt-4 w-full max-w-sm">
+        <div className="flex items-center justify-center gap-2 mt-4 w-full max-w-sm font-mono">
           <button
             onClick={() => onRate(card, "hard")}
-            className="flex-1 py-2 px-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 font-bold text-xs hover:bg-rose-900/60 transition-colors"
+            className="flex-1 py-1.5 px-3 rounded-md bg-rose-500/10 border border-rose-500/25 text-rose-400 font-medium text-xs hover:bg-rose-500/20 transition-colors shadow-sm"
           >
-            🔴 Hard
+            1 Hard
           </button>
           <button
             onClick={() => onRate(card, "good")}
-            className="flex-1 py-2 px-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 font-bold text-xs hover:bg-amber-900/60 transition-colors"
+            className="flex-1 py-1.5 px-3 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400 font-medium text-xs hover:bg-amber-500/20 transition-colors shadow-sm"
           >
-            🟡 Good
+            2 Good
           </button>
           <button
             onClick={() => onRate(card, "easy")}
-            className="flex-1 py-2 px-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 font-bold text-xs hover:bg-emerald-900/60 transition-colors"
+            className="flex-1 py-1.5 px-3 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-medium text-xs hover:bg-emerald-500/20 transition-colors shadow-sm"
           >
-            🟢 Easy
+            3 Easy
           </button>
         </div>
       )}

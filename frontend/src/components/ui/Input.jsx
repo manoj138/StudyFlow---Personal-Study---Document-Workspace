@@ -56,14 +56,14 @@ export const Input = ({
       <input
         type={type}
         disabled={disabled}
-        className={`w-full h-9 px-3 text-xs sm:text-sm bg-zinc-950 text-zinc-100 placeholder-zinc-500 rounded-md border transition-colors duration-150 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`w-full h-9 px-3 text-xs sm:text-sm bg-[#08090C] text-zinc-100 placeholder-zinc-500 rounded-md border transition-colors duration-150 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
           Icon ? "pl-9" : ""
         } ${suffix ? "pr-9" : ""} ${
           mono ? "font-mono" : "font-sans"
         } ${
           error
             ? "border-rose-500/80 focus:border-rose-400 focus:ring-1 focus:ring-rose-500/20"
-            : "border-zinc-800 hover:border-zinc-700 focus:border-zinc-400"
+            : "border-white/[0.08] hover:border-white/[0.14] focus:border-white/[0.25]"
         } ${className}`}
         {...props}
       />

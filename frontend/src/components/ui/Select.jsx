@@ -20,10 +20,10 @@ export const Select = ({
     <div className="relative flex items-center w-full">
       <select
         disabled={disabled}
-        className={`w-full h-9 pl-3 pr-8 text-xs sm:text-sm bg-zinc-950 text-zinc-100 rounded-md border appearance-none transition-colors duration-150 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-sans ${
+        className={`w-full h-9 pl-3 pr-8 text-xs sm:text-sm bg-[#08090C] text-zinc-100 rounded-md border appearance-none transition-colors duration-150 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-sans ${
           error
             ? "border-rose-500/80 focus:border-rose-400 focus:ring-1 focus:ring-rose-500/20"
-            : "border-zinc-800 hover:border-zinc-700 focus:border-zinc-400"
+            : "border-white/[0.08] hover:border-white/[0.14] focus:border-white/[0.25]"
         } ${className}`}
         {...props}
       >
@@ -32,7 +32,7 @@ export const Select = ({
               <option
                 key={opt.value ?? opt._id ?? opt.id}
                 value={opt.value ?? opt._id ?? opt.id}
-                className="bg-zinc-950 text-zinc-100"
+                className="bg-[#08090C] text-zinc-100"
               >
                 {opt.label ?? opt.name ?? opt.title}
               </option>

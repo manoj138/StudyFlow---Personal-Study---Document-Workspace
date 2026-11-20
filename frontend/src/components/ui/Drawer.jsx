@@ -48,12 +48,12 @@ export const Drawer = ({
       <div className="absolute inset-0" onClick={onClose} />
 
       <div
-        className={`relative z-10 w-full ${width} h-full bg-[#121215] border-zinc-800 text-zinc-100 shadow-2xl flex flex-col justify-between ${sideStyles} ${className}`}
+        className={`relative z-10 w-full ${width} h-full bg-[#0E1015] border-white/[0.08] text-zinc-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07),0_16px_36px_-8px_rgba(0,0,0,0.85)] flex flex-col justify-between ${sideStyles} ${className}`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/80 bg-zinc-950/40">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-[#08090C]/60">
           <div className="flex items-center gap-2.5">
             {Icon && (
-              <div className="p-1.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700/60">
+              <div className="p-1.5 rounded-md bg-white/[0.05] text-zinc-300 border border-white/[0.08]">
                 <Icon size={15} />
               </div>
             )}
@@ -62,7 +62,7 @@ export const Drawer = ({
 
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-1 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X size={15} />
           </button>

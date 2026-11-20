@@ -35,7 +35,7 @@ export const Dropdown = ({
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className={`absolute z-50 mt-1 min-w-[160px] rounded-md border border-zinc-800 bg-[#121215] p-1 text-zinc-100 shadow-xl animate-in fade-in zoom-in-95 duration-100 ${alignStyles} ${className}`}
+          className={`absolute z-50 mt-1 min-w-[160px] rounded-md border border-white/[0.12] bg-[#141720] p-1 text-zinc-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_12px_28px_-6px_rgba(0,0,0,0.85)] animate-in fade-in zoom-in-95 duration-100 ${alignStyles} ${className}`}
         >
           {children}
         </div>
@@ -58,7 +58,7 @@ export const DropdownItem = ({
       className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] font-medium transition-colors flex items-center gap-2 cursor-pointer select-none text-left ${
         danger
           ? "text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
-          : "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
+          : "text-zinc-300 hover:bg-white/[0.06] hover:text-zinc-100"
       } ${className}`}
     >
       {Icon && <Icon size={13} className="shrink-0" />}
@@ -68,7 +68,7 @@ export const DropdownItem = ({
 };
 
 export const DropdownSeparator = () => (
-  <div className="my-1 border-t border-zinc-800/80" />
+  <div className="my-1 border-t border-white/[0.08]" />
 );
 
 export default Dropdown;

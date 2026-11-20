@@ -163,7 +163,7 @@ export const DashboardPage = () => {
   const dynamicWeekDays = calculateWeeklyActivity();
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1500px] mx-auto font-sans">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1500px] mx-auto font-sans">
       {/* Top Command Bar */}
       <PageHeader
         breadcrumb="STUDYFLOW // DEV COCKPIT // MERN TRACK"
@@ -236,7 +236,7 @@ export const DashboardPage = () => {
 
       {/* DAILY ACTIVE RECALL SPRINT */}
       {sprintData?.sprintQuestions?.length > 0 && (
-        <Card className="border-indigo-500/20 bg-gradient-to-b from-[#121215] to-[#0e0e11]">
+        <Card className="border-indigo-500/20 bg-[#0E1015]">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -273,7 +273,7 @@ export const DashboardPage = () => {
                   key={q.questionId || idx}
                   interactive
                   onClick={() => navigate(`/interview/${q.setId}`)}
-                  className="bg-[#0c0c0e] border-zinc-800/80 p-3.5 space-y-2 flex flex-col justify-between"
+                  className="bg-[#08090C] border-white/[0.08] p-3.5 space-y-2 flex flex-col justify-between"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[10px]">

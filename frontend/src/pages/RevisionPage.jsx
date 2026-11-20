@@ -83,7 +83,7 @@ export const RevisionPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       {/* Header Command Strip */}
       <PageHeader
         breadcrumb="STUDYFLOW // RETENTION ENGINE"

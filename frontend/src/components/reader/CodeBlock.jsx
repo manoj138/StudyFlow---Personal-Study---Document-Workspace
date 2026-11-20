@@ -87,9 +87,9 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
   const lines = code.split("\n");
 
   return (
-    <div className="my-5 rounded-lg border border-white/[0.08] bg-[#0c0d14] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_24px_-4px_rgba(0,0,0,0.7)] overflow-hidden font-mono text-xs">
+    <div className="my-5 rounded-lg border border-white/[0.08] bg-[#0E1015] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_8px_24px_-4px_rgba(0,0,0,0.7)] overflow-hidden font-mono text-xs">
       {/* MacOS Terminal Window Bar */}
-      <div className="flex flex-wrap items-center justify-between px-3.5 py-2.5 bg-[#11121c] border-b border-white/[0.06] gap-2">
+      <div className="flex flex-wrap items-center justify-between px-3.5 py-2.5 bg-[#08090C] border-b border-white/[0.06] gap-2">
         {/* Left: Window Controls + Language Selector */}
         <div className="flex items-center gap-2.5">
           <div className="flex items-center gap-1.5">
@@ -104,14 +104,14 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
               onChange={(e) => setActiveLang(e.target.value)}
               className="bg-transparent text-[11px] font-mono text-zinc-300 focus:outline-none cursor-pointer uppercase tracking-wider"
             >
-              <option value="javascript" className="bg-[#121215] text-white">JavaScript</option>
-              <option value="jsx" className="bg-[#121215] text-white">JSX / React</option>
-              <option value="html" className="bg-[#121215] text-white">HTML</option>
-              <option value="css" className="bg-[#121215] text-white">CSS</option>
-              <option value="json" className="bg-[#121215] text-white">JSON</option>
-              <option value="python" className="bg-[#121215] text-white">Python</option>
-              <option value="sql" className="bg-[#121215] text-white">SQL</option>
-              <option value="bash" className="bg-[#121215] text-white">Bash</option>
+              <option value="javascript" className="bg-[#0E1015] text-white">JavaScript</option>
+              <option value="jsx" className="bg-[#0E1015] text-white">JSX / React</option>
+              <option value="html" className="bg-[#0E1015] text-white">HTML</option>
+              <option value="css" className="bg-[#0E1015] text-white">CSS</option>
+              <option value="json" className="bg-[#0E1015] text-white">JSON</option>
+              <option value="python" className="bg-[#0E1015] text-white">Python</option>
+              <option value="sql" className="bg-[#0E1015] text-white">SQL</option>
+              <option value="bash" className="bg-[#0E1015] text-white">Bash</option>
             </select>
           </div>
           {title && <span className="text-zinc-500 truncate max-w-xs text-[11px] font-sans">{title}</span>}
@@ -234,7 +234,7 @@ export const CodeBlock = ({ initialCode = "", language = "javascript", title = "
 
       {/* Execution Output Console */}
       {output && (
-        <div className="border-t border-white/[0.06] bg-[#07080d] p-3 text-xs font-mono space-y-2">
+        <div className="border-t border-white/[0.06] bg-[#08090C] p-3 text-xs font-mono space-y-2">
           <div className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] pb-1.5 mb-1.5">
             <span className="font-bold flex items-center gap-1.5 text-indigo-400 uppercase tracking-wider text-[10px]">
               <Terminal size={12} /> Execution Output

@@ -212,7 +212,7 @@ export const InterviewHubPage = () => {
   const bestOverallScore = sets.length > 0 ? Math.max(...sets.map((s) => s.bestScore || 0)) : 0;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       {/* Header Command Strip */}
       <PageHeader
         breadcrumb="STUDYFLOW // INTERVIEW HUB"
@@ -234,7 +234,7 @@ export const InterviewHubPage = () => {
       />
 
       {/* MERN Complete Curriculum Callout */}
-      <Card className="border-indigo-500/25 bg-gradient-to-r from-[#121215] to-[#101018]">
+      <Card className="border-indigo-500/25 bg-[#0E1015]">
         <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5">
             <div className="w-10 h-10 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shrink-0">
@@ -443,7 +443,7 @@ export const InterviewHubPage = () => {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="bg-[#121215] border border-zinc-800 rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl p-5 space-y-5"
+              className="bg-[#141720] border border-white/[0.12] rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl p-5 space-y-5"
             >
               {/* Modal Header */}
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">

@@ -48,7 +48,7 @@ export const DemoButton = ({ label = "Click Me" }) => {
             </div>
             <button
               onClick={() => setShowToast(false)}
-              className="text-slate-400 hover:text-white text-xs px-1"
+              className="text-zinc-400 hover:text-white text-xs px-1"
             >
               ✕
             </button>

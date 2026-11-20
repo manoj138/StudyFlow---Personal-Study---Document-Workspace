@@ -22,7 +22,7 @@ export const VoiceWaveVisualizer = ({
     <div className="flex flex-col items-center justify-center gap-3 py-2">
       {/* Visualizer Container */}
       <div
-        className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-900 border border-slate-700/60 shadow-lg transition-all duration-300"
+        className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#141720] border border-white/[0.12] shadow-lg transition-all duration-300"
         style={{
           boxShadow: isActive ? `0 0 28px ${glowColor}` : "none"
         }}
@@ -69,7 +69,7 @@ export const VoiceWaveVisualizer = ({
               ? isInterviewer
                 ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30"
                 : "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30"
-              : "bg-slate-800 text-slate-400 border border-slate-700"
+              : "bg-[#0E1015] text-zinc-400 border border-white/[0.08]"
           }`}
         >
           {isInterviewer ? (
@@ -108,7 +108,7 @@ export const VoiceWaveVisualizer = ({
               ? isInterviewer
                 ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30 animate-pulse"
                 : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 animate-pulse"
-              : "bg-slate-800 text-slate-400 border-slate-700"
+              : "bg-[#0E1015] text-zinc-400 border border-white/[0.08]"
           }`}
         >
           {label}

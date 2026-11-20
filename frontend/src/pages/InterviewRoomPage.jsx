@@ -371,7 +371,7 @@ export const InterviewRoomPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-[#08090C] flex items-center justify-center p-6 text-center">
         <div className="space-y-3">
           <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-mono text-zinc-400">Loading interview room...</p>
@@ -382,7 +382,7 @@ export const InterviewRoomPage = () => {
 
   if (!interviewSet || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-[#08090C] flex items-center justify-center p-6 text-center">
         <Card className="max-w-md w-full p-6 space-y-4">
           <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
           <h2 className="text-base font-semibold text-zinc-100">No questions found in this set</h2>
@@ -409,7 +409,7 @@ export const InterviewRoomPage = () => {
     const seconds = sessionDuration % 60;
 
     return (
-      <div className="min-h-screen bg-[#09090b] p-4 sm:p-6 lg:p-10 max-w-4xl mx-auto flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-[#08090C] p-4 sm:p-6 lg:p-10 max-w-4xl mx-auto flex items-center justify-center font-sans">
         <Card className="w-full space-y-6 p-6 sm:p-8">
           <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
             <div className="space-y-1">
@@ -512,9 +512,9 @@ export const InterviewRoomPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans flex flex-col justify-between">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 font-sans flex flex-col justify-between">
       {/* Top Header Command Bar */}
-      <header className="bg-[#121215] border-b border-zinc-800 px-4 sm:px-8 py-2.5 sticky top-0 z-20 flex items-center justify-between gap-4">
+      <header className="bg-[#0E1015] border-b border-white/[0.08] px-4 sm:px-8 py-2.5 sticky top-0 z-20 flex items-center justify-between gap-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         {/* Left: Back & Breadcrumb */}
         <div className="flex items-center gap-3">
           <Button
@@ -841,7 +841,7 @@ export const InterviewRoomPage = () => {
       </main>
 
       {/* Bottom Fixed Action Bar */}
-      <footer className="bg-[#121215] border-t border-zinc-800 px-4 sm:px-8 py-3 sticky bottom-0 z-20 flex items-center justify-between gap-3">
+      <footer className="bg-[#0E1015] border-t border-white/[0.08] px-4 sm:px-8 py-3 sticky bottom-0 z-20 flex items-center justify-between gap-3 shadow-[0_-1px_0_rgba(255,255,255,0.06)]">
         <Button
           variant="outline"
           size="sm"

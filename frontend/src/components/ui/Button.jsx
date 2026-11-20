@@ -28,7 +28,7 @@ export const Button = ({
     indigo:
       "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_1px_3px_rgba(0,0,0,0.5)] border border-indigo-400/40 hover:shadow-[0_0_16px_rgba(99,102,241,0.3)]",
     secondary:
-      "bg-[#151620] hover:bg-[#1a1c29] text-zinc-200 border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.4)]",
+      "bg-[#141720] hover:bg-[#1C202C] text-zinc-200 border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.4)]",
     outline:
       "bg-transparent hover:bg-white/[0.04] text-zinc-300 border border-white/[0.1] hover:border-white/[0.18]",
     ghost:
@@ -40,7 +40,7 @@ export const Button = ({
     success:
       "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[inset_0_1px_0_rgba(16,185,129,0.15)]",
     subtle:
-      "bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 border border-white/[0.06]"
+      "bg-[#0E1015] hover:bg-[#141720] text-zinc-200 border border-white/[0.06]"
   };
 
   const sizes = {

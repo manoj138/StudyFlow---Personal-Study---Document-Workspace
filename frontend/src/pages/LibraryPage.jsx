@@ -278,7 +278,7 @@ export const LibraryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1500px] mx-auto font-sans">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1500px] mx-auto font-sans">
       {/* Page Command Strip */}
       <PageHeader
         breadcrumb="STUDYFLOW // DOCUMENT WORKSPACE"
@@ -307,7 +307,7 @@ export const LibraryPage = () => {
       />
 
       {/* Unified Search & Filter Command Strip */}
-      <div className="bg-[#121215] p-2.5 rounded-lg border border-zinc-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      <div className="bg-[#0E1015] p-2.5 rounded-lg border border-white/[0.08] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <SegmentedTabs
           tabs={categoryTabs}
           activeTab={libraryCategory}

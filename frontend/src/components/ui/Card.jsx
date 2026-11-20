@@ -70,7 +70,7 @@ export const CardContent = ({ children, className = "", ...props }) => {
 export const CardFooter = ({ children, className = "", ...props }) => {
   return (
     <div
-      className={`p-3 sm:p-4 border-t border-white/[0.06] bg-[#090a0f]/50 rounded-b-lg flex items-center justify-between gap-3 ${className}`}
+      className={`p-3 sm:p-4 border-t border-white/[0.06] bg-[#08090C]/50 rounded-b-lg flex items-center justify-between gap-3 ${className}`}
       {...props}
     >
       {children}

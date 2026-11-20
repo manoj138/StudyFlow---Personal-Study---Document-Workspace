@@ -29,7 +29,7 @@ export const SearchInput = ({
         onChange={onChange}
         disabled={disabled}
         placeholder={placeholder}
-        className="w-full h-9 pl-9 pr-14 text-xs sm:text-sm bg-zinc-950 text-zinc-100 placeholder-zinc-500 rounded-md border border-zinc-800 hover:border-zinc-700 focus:border-zinc-400 focus:outline-none transition-colors duration-150 font-mono disabled:opacity-50"
+        className="w-full h-9 pl-9 pr-14 text-xs sm:text-sm bg-[#08090C] text-zinc-100 placeholder-zinc-500 rounded-md border border-white/[0.08] hover:border-white/[0.14] focus:border-white/[0.25] focus:outline-none transition-colors duration-150 font-mono disabled:opacity-50"
         {...props}
       />
 

@@ -8,15 +8,25 @@ export default {
   theme: {
     extend: {
       colors: {
+        surface: {
+          canvas: "#08090C",
+          card: "#0E1015",
+          elevated: "#141720",
+          active: "#1C202C",
+          hover: "rgba(255, 255, 255, 0.04)"
+        },
         dark: {
-          canvas: "#070709",
-          surface: "#0c0d13",
-          elevated: "#12131a",
+          canvas: "#08090C",
+          surface: "#0E1015",
+          elevated: "#141720",
+          active: "#1C202C",
           border: "rgba(255, 255, 255, 0.08)",
           specular: "rgba(255, 255, 255, 0.12)"
         },
         brand: {
           indigo: "#6366F1",
+          violet: "#8B5CF6",
+          emerald: "#10B981",
           teal: "#10B981",
           cyan: "#06B6D4",
           amber: "#F59E0B",

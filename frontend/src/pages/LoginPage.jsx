@@ -47,15 +47,15 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="min-h-screen bg-[#08090C] text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-3xl rounded-lg border border-zinc-800 bg-[#121215] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2"
+        className="w-full max-w-3xl rounded-lg border border-white/[0.08] bg-[#0E1015] shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_16px_36px_-8px_rgba(0,0,0,0.85)] overflow-hidden grid grid-cols-1 md:grid-cols-2"
       >
         {/* Left Side: Developer Workspace Showcase */}
-        <div className="hidden md:flex flex-col justify-between p-8 bg-[#0c0c0e] border-r border-zinc-800 text-zinc-100">
+        <div className="hidden md:flex flex-col justify-between p-8 bg-[#08090C] border-r border-white/[0.08] text-zinc-100">
           <div className="flex items-center gap-2.5">
             <img
               src="/logo.png"

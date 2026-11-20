@@ -34,7 +34,7 @@ const applyHighlightsToHtml = (htmlContent, highlights = []) => {
 export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
   if (!htmlContent) {
     return (
-      <div className="py-16 text-center space-y-2 border border-dashed border-white/[0.08] rounded-xl p-8 bg-[#0c0d14]/40">
+      <div className="py-16 text-center space-y-2 border border-dashed border-white/[0.08] rounded-xl p-8 bg-[#0E1015]/60">
         <p className="text-sm font-medium text-zinc-400">No content available for Study Reflow Mode.</p>
         <p className="text-xs text-zinc-600 font-mono">Switch to "Original PDF" mode to view the raw document.</p>
       </div>
@@ -74,7 +74,7 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
       if (containsDevanagari || isOrphanKeyword || isProseLine) {
         parts.push({
           type: "html",
-          content: `<p class="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300 my-3 font-sans">${rawCode}</p>`
+          content: `<p class="text-sm sm:text-base leading-relaxed text-zinc-300 my-3 font-sans">${rawCode}</p>`
         });
       } else {
         const isJsLang = ["javascript", "js", "jsx"].includes(lang.toLowerCase());
@@ -95,7 +95,7 @@ export const StudyReader = ({ htmlContent = "", highlights = [] }) => {
   }
 
   return (
-    <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 font-sans space-y-4">
+    <div className="prose dark:prose-invert max-w-none text-zinc-200 font-sans space-y-4">
       {parts.map((part, index) => {
         if (part.type === "code") {
           return (

@@ -420,7 +420,7 @@ export const ReaderPage = () => {
 
   if (!document) {
     return (
-      <div className="min-h-screen bg-[#070709] text-zinc-400 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#08090C] text-zinc-400 flex flex-col items-center justify-center p-4">
         <p>Document not found.</p>
         <Button variant="outline" size="sm" onClick={() => navigate("/library")} className="mt-4">
           ← Back to Library
@@ -437,9 +437,9 @@ export const ReaderPage = () => {
   ];
 
   return (
-    <div className="h-[calc(100vh-53px)] bg-[#070709] bg-luxury-mesh text-zinc-100 flex flex-col overflow-hidden font-sans antialiased">
+    <div className="h-[calc(100vh-53px)] bg-[#08090C] bg-luxury-mesh text-zinc-100 flex flex-col overflow-hidden font-sans antialiased">
       {/* Precision Floating Reader Header */}
-      <header className="bg-[#12131a] border-b border-white/[0.08] px-4 py-2 flex items-center justify-between z-20 shrink-0 gap-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <header className="bg-[#0E1015] border-b border-white/[0.08] px-4 py-2 flex items-center justify-between z-20 shrink-0 gap-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         {/* Left: Back & Document Metadata */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <Button
@@ -473,13 +473,13 @@ export const ReaderPage = () => {
         </div>
 
         {/* Center: Mode Switcher */}
-        <div className="hidden sm:flex items-center bg-[#090a0f] border border-white/[0.08] rounded-md p-0.5 gap-1 shrink-0">
+        <div className="hidden sm:flex items-center bg-[#08090C] border border-white/[0.08] rounded-md p-0.5 gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setMode("study")}
             className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
               mode === "study"
-                ? "bg-zinc-800 text-white shadow-sm"
+                ? "bg-[#1C202C] text-white shadow-sm border border-white/[0.12]"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
@@ -490,7 +490,7 @@ export const ReaderPage = () => {
             onClick={() => setMode("original")}
             className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
               mode === "original"
-                ? "bg-zinc-800 text-white shadow-sm"
+                ? "bg-[#1C202C] text-white shadow-sm border border-white/[0.12]"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
@@ -501,7 +501,7 @@ export const ReaderPage = () => {
         {/* Right Controls */}
         <div className="flex items-center gap-2 shrink-0">
           {mode === "study" && (
-            <div className="hidden sm:flex items-center gap-1 bg-[#090a0f] border border-white/[0.08] rounded-md px-2 py-0.5 text-xs font-mono">
+            <div className="hidden sm:flex items-center gap-1 bg-[#08090C] border border-white/[0.08] rounded-md px-2 py-0.5 text-xs font-mono">
               <button
                 type="button"
                 onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -542,7 +542,7 @@ export const ReaderPage = () => {
           </Button>
 
           {/* Page Jump */}
-          <form onSubmit={handlePageInputSubmit} className="hidden sm:flex items-center gap-0.5 bg-[#090a0f] border border-white/[0.08] rounded-md p-0.5 font-mono text-xs">
+          <form onSubmit={handlePageInputSubmit} className="hidden sm:flex items-center gap-0.5 bg-[#08090C] border border-white/[0.08] rounded-md p-0.5 font-mono text-xs">
             <button
               type="button"
               disabled={currentPage <= 1}
@@ -577,11 +577,11 @@ export const ReaderPage = () => {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar Drawer */}
         <div
-          className={`absolute md:relative inset-y-0 left-0 w-[85vw] max-w-[320px] md:w-80 bg-[#0c0d14] border-r border-white/[0.08] flex flex-col z-30 transition-all duration-300 ${
+          className={`absolute md:relative inset-y-0 left-0 w-[85vw] max-w-[320px] md:w-80 bg-[#0E1015] border-r border-white/[0.08] flex flex-col z-30 transition-all duration-300 ${
             sidebarOpen ? "ml-0 shadow-2xl" : "-ml-[85vw] md:-ml-80"
           }`}
         >
-          <div className="p-2 border-b border-white/[0.06] bg-[#090a0f]">
+          <div className="p-2 border-b border-white/[0.06] bg-[#08090C]">
             <SegmentedTabs
               tabs={sidebarTabs}
               activeTab={activeTab}
@@ -629,7 +629,7 @@ export const ReaderPage = () => {
                       jumpToHighlight(h._id);
                       setEditingHighlight(h);
                     }}
-                    className="p-3 rounded-md bg-[#12131a] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer space-y-1.5 transition-colors"
+                    className="p-3 rounded-md bg-[#0E1015] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer space-y-1.5 transition-colors"
                   >
                     <div className="flex items-center justify-between text-[10px] font-mono">
                       <span className="text-indigo-400 font-semibold">Page {h.pageNumber}</span>
@@ -659,7 +659,7 @@ export const ReaderPage = () => {
                   <div
                     key={b._id}
                     onClick={() => handlePageOrScrollChange(b.pageNumber)}
-                    className="p-2.5 rounded-md bg-[#12131a] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer flex items-center justify-between text-xs"
+                    className="p-2.5 rounded-md bg-[#0E1015] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer flex items-center justify-between text-xs"
                   >
                     <span className="text-zinc-200 font-medium">{b.title || `Page ${b.pageNumber}`}</span>
                     <button
@@ -686,7 +686,7 @@ export const ReaderPage = () => {
                     placeholder="Write a personal study note..."
                     value={newNoteContent}
                     onChange={(e) => setNewNoteContent(e.target.value)}
-                    className="w-full p-2.5 rounded-md bg-zinc-950 border border-white/[0.08] text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400 font-mono"
+                    className="w-full p-2.5 rounded-md bg-[#08090C] border border-white/[0.08] text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/[0.2] font-mono"
                   />
                   <Button type="submit" variant="primary" size="sm" className="w-full">
                     Save Note
@@ -695,7 +695,7 @@ export const ReaderPage = () => {
 
                 <div className="space-y-2">
                   {notes.map((n) => (
-                    <div key={n._id} className="p-3 rounded-md bg-[#12131a] border border-white/[0.06] space-y-1">
+                    <div key={n._id} className="p-3 rounded-md bg-[#0E1015] border border-white/[0.06] space-y-1">
                       <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
                         <span>Page {n.pageNumber}</span>
                         <button
@@ -733,7 +733,7 @@ export const ReaderPage = () => {
                 highlights={highlights}
               />
             ) : (
-              <div className="w-full h-full min-h-[700px] rounded-lg overflow-hidden border border-white/[0.08] bg-[#12131a]">
+              <div className="w-full h-full min-h-[700px] rounded-lg overflow-hidden border border-white/[0.08] bg-[#0E1015]">
                 <iframe
                   src={
                     document.fileUrl?.startsWith("http")
@@ -751,7 +751,7 @@ export const ReaderPage = () => {
           {popoverPos && selectedText && (
             <div
               style={{ top: `${popoverPos.top}px`, left: `${popoverPos.left}px` }}
-              className="absolute z-50 -translate-x-1/2 p-1.5 rounded-lg bg-[#12131a] border border-white/[0.12] shadow-2xl flex items-center gap-1.5 animate-in fade-in zoom-in-95"
+              className="absolute z-50 -translate-x-1/2 p-1.5 rounded-lg bg-[#141720] border border-white/[0.12] shadow-2xl flex items-center gap-1.5 animate-in fade-in zoom-in-95"
             >
               <div className="flex items-center gap-1 px-1">
                 {["yellow", "green", "blue", "pink"].map((color) => (

@@ -32,7 +32,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-[#070709] bg-luxury-mesh text-zinc-100 flex flex-col font-sans antialiased selection:bg-indigo-500/25 selection:text-white">
+          <div className="min-h-screen bg-[#08090C] bg-luxury-mesh text-zinc-100 flex flex-col font-sans antialiased selection:bg-indigo-500/25 selection:text-white">
             <Navbar />
             <main className="flex-1">
               <Routes>
