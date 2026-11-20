@@ -1,35 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import API from "../services/api";
 import {
-  BookOpen, Clock, Bookmark, FileText, ArrowRight, Plus, FolderPlus,
-  Sparkles, Activity, Upload, Flame, Target, TrendingUp, ChevronRight, BarChart2, CheckCircle2,
-  Code, Brain, Microscope, Calculator, Check, Search, Bell, MoreVertical, Layers, Zap, Sun, Moon, Youtube, GraduationCap, Mic, RotateCcw
+  BookOpen,
+  FileText,
+  Plus,
+  FolderPlus,
+  CheckCircle2,
+  Code,
+  Brain,
+  Microscope,
+  Calculator,
+  RotateCcw,
+  BarChart2,
+  ChevronRight,
+  Upload,
+  Mic,
+  Briefcase,
+  Terminal,
+  Layers,
+  ArrowRight
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { StatCard } from "../components/ui/StatCard";
-import { SubjectBadge } from "../components/ui/SubjectBadge";
-import { Button } from "../components/ui/Button";
 import { Modal } from "../components/common/Modal";
-import { EmptyState } from "../components/common/EmptyState";
-import { DocumentCard } from "../components/common/DocumentCard";
-import { VideoCard } from "../components/common/VideoCard";
-import { getDailySprint, seedMernCurriculum } from "../services/interviewService";
+import { getDailySprint } from "../services/interviewService";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Badge,
+  MetricCard,
+  PageHeader
+} from "../components/ui";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const [subjects, setSubjects] = useState([]);
   const [documents, setDocuments] = useState([]);
-  const [bookmarksCount, setBookmarksCount] = useState(0);
-  const [highlightsCount, setHighlightsCount] = useState(0);
-  const [continueDoc, setContinueDoc] = useState(null);
-  const [totalReadingSeconds, setTotalReadingSeconds] = useState(0);
+  const [, setBookmarksCount] = useState(0);
+  const [, setHighlightsCount] = useState(0);
+  const [, setContinueDoc] = useState(null);
+  const [, setTotalReadingSeconds] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sprintData, setSprintData] = useState(null);
 
@@ -120,58 +136,7 @@ export const DashboardPage = () => {
     { name: "Cyan", hex: "#06B6D4" }
   ];
 
-  const iconOptions = [
-    { id: "BookOpen", label: "General", Icon: BookOpen },
-    { id: "Code", label: "Coding", Icon: Code },
-    { id: "Brain", label: "Theory", Icon: Brain },
-    { id: "Microscope", label: "Science", Icon: Microscope },
-    { id: "Calculator", label: "Math", Icon: Calculator }
-  ];
-
-  // Dynamic Reading Time Formatter
-  const formatReadingTime = (totalSecs) => {
-    if (!totalSecs || totalSecs === 0) return "0m";
-    const hours = Math.floor(totalSecs / 3600);
-    const mins = Math.floor((totalSecs % 3600) / 60);
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins}m`;
-  };
-
-  // Time of day greeting
-  const getTimeGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
-  };
-
-  // Format date like "Tue, 21 Sep 2026"
-  const formattedToday = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-
-  // Calculate 7-day Upload Trend
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const newDocsThisWeek = documents.filter((d) => new Date(d.createdAt) >= sevenDaysAgo).length;
-
-  // Calculate Dynamic Average Completion & Focus Level
-  const avgCompletion = documents.length > 0
-    ? Math.round(documents.reduce((acc, curr) => acc + (curr.progress?.completionPercentage || 0), 0) / documents.length)
-    : 0;
-
-  const getFocusTier = (pct) => {
-    if (pct >= 75) return { label: "Peak Focus", note: "You're on fire! 🔥", stroke: "92, 100" };
-    if (pct >= 40) return { label: "Steady Progress", note: "Great momentum! ⚡", stroke: "60, 100" };
-    if (pct > 0) return { label: "Getting Started", note: "Keep going! 🚀", stroke: "30, 100" };
-    return { label: "Ready to Learn", note: "Upload first doc! 📖", stroke: "0, 100" };
-  };
-
-  const focusTier = getFocusTier(avgCompletion);
-
-  // Dynamic Weekly Activity Breakdown (Grouped by Day of Week)
+  // Dynamic Weekly Activity Breakdown
   const calculateWeeklyActivity = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const daySecs = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
@@ -198,498 +163,380 @@ export const DashboardPage = () => {
   const dynamicWeekDays = calculateWeeklyActivity();
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-7 max-w-[1500px] mx-auto font-sans transition-colors duration-200">
-      
-      {/* Top Banner & Header CTA Bar */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
-        
-        {/* Main Developer Command Center Hero Banner */}
-        <div 
-          className="flex-1 rounded-3xl overflow-hidden border border-slate-700/60 dark:border-indigo-500/20 shadow-2xl relative min-h-[220px] p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-br from-[#0c1222] via-[#0f172a] to-[#090d16] text-white"
-        >
-          {/* Top Badges Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 relative z-10">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-                <Code className="w-3.5 h-3.5 text-indigo-400" /> MERN Stack Engineer
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-                ⚡ 11M Experience
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
-                🎯 Target: Q4 2026
-              </span>
-            </div>
-            <div className="text-xs font-mono font-bold text-slate-300 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60 flex items-center gap-1.5">
-              <span>📅</span> {formattedToday}
-            </div>
-          </div>
-
-          {/* Hero Main Content */}
-          <div className="space-y-2 mt-4 relative z-10 max-w-2xl">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-              <span>{getTimeGreeting()},</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-teal-300 to-emerald-400">
-                {user?.name || "Manoj"}
-              </span>
-            </h1>
-
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Leverage your 11 months of production experience. Daily spoken interview drills lock in technical depth, sharpen response speed, and prepare you for senior interviewers.
-            </p>
-          </div>
-
-          {/* Bottom Live Streak & Active Recall Counter */}
-          <div className="pt-4 mt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 relative z-10 text-xs">
-            <div className="flex items-center gap-4 text-slate-300">
-              <span className="flex items-center gap-1.5">
-                <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
-                <strong className="text-white font-mono">{sprintData?.stats?.masteredCount || 0}</strong> Mastered
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <RotateCcw className="w-4 h-4 text-indigo-400" />
-                <strong className="text-white font-mono">{sprintData?.stats?.dueCount || 0}</strong> Due for Review
-              </span>
-            </div>
-            <button
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1500px] mx-auto font-sans">
+      {/* Top Command Bar */}
+      <PageHeader
+        breadcrumb="STUDYFLOW // DEV COCKPIT // MERN TRACK"
+        title={`Welcome back, ${user?.name || "Manoj"}`}
+        description="MERN Stack Engineer • 11 Months Production Experience • Placement Target: December 2026"
+        actions={
+          <>
+            <Button
+              variant="indigo"
+              size="sm"
+              icon={Mic}
               onClick={() => navigate("/interview")}
-              className="text-xs font-bold text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1"
             >
-              <span>MERN Interview Studio</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              Interview Studio
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={Upload}
+              onClick={() => navigate("/library")}
+            >
+              Upload Notes
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={Plus}
+              onClick={() => setShowSubjectModal(true)}
+            >
+              Add Track
+            </Button>
+          </>
+        }
+      />
 
-          {/* Subtle ambient tech glow background */}
-          <div className="absolute -right-16 -top-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute right-32 -bottom-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        </div>
+      {/* 4 Quantitative Developer Readiness Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <MetricCard
+          label="MERN Question Bank"
+          value={sprintData?.stats?.totalQuestions || 250}
+          subtext="Comprehensive Curriculum"
+          icon={Brain}
+          onClick={() => navigate("/interview")}
+        />
 
-        {/* Primary Header CTA Buttons Stack */}
-        <div className="flex flex-row sm:flex-col items-center justify-center gap-2.5 shrink-0 lg:w-52 w-full sm:w-auto">
-          <button
-            onClick={() => navigate("/interview")}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <Mic className="w-4 h-4 text-emerald-100 animate-pulse" />
-            <span>Daily Voice Drill</span>
-          </button>
+        <MetricCard
+          label="Conceptually Mastered"
+          value={sprintData?.stats?.masteredCount || 0}
+          subtext="Retained Long-Term"
+          icon={CheckCircle2}
+          onClick={() => navigate("/revision")}
+        />
 
-          <button
-            onClick={() => navigate("/library")}
-            className="w-full py-2.5 px-4 rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-white/15 flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <Upload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Upload Notes</span>
-          </button>
+        <MetricCard
+          label="Due for Review"
+          value={sprintData?.stats?.dueCount || 0}
+          subtext="Active Recall Queue"
+          icon={RotateCcw}
+          onClick={() => navigate("/revision")}
+        />
 
-          <button
-            onClick={() => setShowSubjectModal(true)}
-            className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <GraduationCap className="w-4 h-4 text-amber-500" />
-            <span>Add Track</span>
-          </button>
-        </div>
+        <MetricCard
+          label="Job Readiness"
+          value={`${sprintData?.stats?.readinessScore || 0}%`}
+          subtext="Target: December 2026"
+          icon={Briefcase}
+          onClick={() => navigate("/interview")}
+        />
       </div>
 
-      {/* DAILY 15-MINUTE SPRINT SECTION */}
+      {/* DAILY ACTIVE RECALL SPRINT */}
       {sprintData?.sprintQuestions?.length > 0 && (
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
-            <div>
+        <Card className="border-indigo-500/20 bg-gradient-to-b from-[#121215] to-[#0e0e11]">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5" /> Daily Active Recall Sprint
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  5 High-Yield Questions Due Today
+                <Badge variant="warning" size="sm">
+                  Daily Active Recall Sprint
+                </Badge>
+                <span className="text-xs text-zinc-400 font-mono">
+                  {sprintData.sprintQuestions.length} Questions Scheduled Today
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Practice answering aloud with the voice studio to build interview fluency and retention.
-              </p>
+              <CardDescription>
+                Reinforce technical answers and deepen conceptual recall.
+              </CardDescription>
             </div>
-            <button
+
+            <Button
+              variant="indigo"
+              size="sm"
+              icon={ArrowRight}
               onClick={() => {
                 const first = sprintData.sprintQuestions[0];
                 if (first?.setId) navigate(`/interview/${first.setId}`);
                 else navigate("/interview");
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 shrink-0"
             >
-              <Mic className="w-3.5 h-3.5" />
-              <span>Start Today's Sprint</span>
-            </button>
-          </div>
+              Start Sprint
+            </Button>
+          </CardHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {sprintData.sprintQuestions.slice(0, 3).map((q, idx) => (
-              <div
-                key={q.questionId || idx}
-                onClick={() => navigate(`/interview/${q.setId}`)}
-                className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 hover:border-indigo-500/40 transition-all cursor-pointer group space-y-2 flex flex-col justify-between"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-bold uppercase tracking-wider text-indigo-400 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 font-mono">
-                      {q.category || "MERN"}
-                    </span>
-                    <span className="font-mono text-slate-500">Q#{idx + 1}</span>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {sprintData.sprintQuestions.slice(0, 3).map((q, idx) => (
+                <Card
+                  key={q.questionId || idx}
+                  interactive
+                  onClick={() => navigate(`/interview/${q.setId}`)}
+                  className="bg-[#0c0c0e] border-zinc-800/80 p-3.5 space-y-2 flex flex-col justify-between"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <Badge variant="accent" size="sm">
+                        {q.category || "MERN"}
+                      </Badge>
+                      <span className="font-mono text-zinc-500">Q#{idx + 1}</span>
+                    </div>
+                    <h4 className="text-xs font-medium text-zinc-200 line-clamp-2 leading-snug">
+                      {q.question}
+                    </h4>
+                    {q.marathiExplanation && (
+                      <span className="text-[10px] text-amber-400/80 font-mono block">
+                        Concept Note Available
+                      </span>
+                    )}
                   </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-200 group-hover:text-white line-clamp-2">
-                    {q.question}
-                  </h4>
-                  {q.marathiExplanation && (
-                    <span className="inline-block text-[10px] text-amber-300/80 font-mono">
-                      💡 Concept Note Available
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/80 text-slate-400">
-                  <span>Drill Question</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
+                  <div className="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-800/80 text-zinc-400">
+                    <span className="font-mono text-[10px] text-zinc-500">Review Item</span>
+                    <ChevronRight size={13} className="text-zinc-400" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* 4 Quantitative Developer Readiness Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Metric 1: Total MERN Questions in Bank */}
-        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
-              <Brain className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-              MERN Bank
-            </span>
-          </div>
-          <div className="mt-3">
-            <span className="text-xs text-slate-400 font-medium">Questions in Bank</span>
-            <h3 className="text-2xl font-black text-white font-mono mt-0.5">
-              {sprintData?.stats?.totalQuestions || 250}
-            </h3>
-          </div>
-        </div>
-
-        {/* Metric 2: Mastered Questions */}
-        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              🟢 Mastered
-            </span>
-          </div>
-          <div className="mt-3">
-            <span className="text-xs text-slate-400 font-medium">Conceptually Mastered</span>
-            <h3 className="text-2xl font-black text-emerald-400 font-mono mt-0.5">
-              {sprintData?.stats?.masteredCount || 0}
-            </h3>
-          </div>
-        </div>
-
-        {/* Metric 3: Due for Review Today */}
-        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-amber-500/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
-              <RotateCcw className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              ⚡ Due Today
-            </span>
-          </div>
-          <div className="mt-3">
-            <span className="text-xs text-slate-400 font-medium">Due for Review</span>
-            <h3 className="text-2xl font-black text-amber-400 font-mono mt-0.5">
-              {sprintData?.stats?.dueCount || 0}
-            </h3>
-          </div>
-        </div>
-
-        {/* Metric 4: Interview Readiness Rate */}
-        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm flex items-center justify-between hover:border-cyan-500/40 transition-colors">
-          <div>
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center mb-2">
-              <Target className="w-4 h-4" />
-            </div>
-            <span className="text-xs text-slate-400 font-medium">Job Readiness</span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <h3 className="text-base font-bold text-white font-mono">
-                {sprintData?.stats?.readinessScore || 0}% Ready
-              </h3>
-            </div>
-          </div>
-
-          <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                className="text-slate-800"
-                strokeWidth="3.5"
-              />
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#06B6D4"
-                strokeWidth="3.5"
-                strokeDasharray={`${Math.max(5, sprintData?.stats?.readinessScore || 0)}, 100`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <span className="absolute text-[11px] font-extrabold text-white font-mono">
-              {sprintData?.stats?.readinessScore || 0}%
-            </span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 3-Column Lower Section: Weekly Activity | Recent Documents | Goals & Quick Links */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        {/* Col 1: Dynamic Weekly Activity Bar Chart (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#111827] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-6">
-          <div className="flex items-center justify-between">
+      {/* 3-Column Lower Section: Weekly Activity | Recent Documents | Track Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Col 1: Weekly Activity Chart (5 cols) */}
+        <Card className="lg:col-span-5 flex flex-col justify-between">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Weekly Activity
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Live reading time per day</p>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <BarChart2 size={15} className="text-zinc-400" />
+                <span>Weekly Activity</span>
+              </CardTitle>
+              <CardDescription>Reading and study hours per day</CardDescription>
             </div>
-            <span className="text-[11px] font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
-              This Week
-            </span>
-          </div>
+            <Badge variant="outline" size="sm">This Week</Badge>
+          </CardHeader>
 
-          {/* Bar Columns Container */}
-          <div className="flex items-end justify-between gap-3 pt-6 h-48">
-            {dynamicWeekDays.map((w, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {w.hours}
-                </span>
-                <div className="w-full bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden h-36 flex flex-col justify-end p-1 border border-slate-200 dark:border-white/5">
-                  <div
-                    className="w-full bg-gradient-to-t from-indigo-600 to-cyan-400 rounded-lg transition-all duration-300 group-hover:brightness-125"
-                    style={{ height: `${w.height}%` }}
-                  />
+          <CardContent>
+            <div className="flex items-end justify-between gap-2 pt-4 h-44">
+              {dynamicWeekDays.map((w, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                  <span className="text-[10px] font-mono text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {w.hours}
+                  </span>
+                  <div className="w-full bg-zinc-900 rounded-sm overflow-hidden h-32 flex flex-col justify-end p-0.5 border border-zinc-800">
+                    <div
+                      className="w-full bg-zinc-300 rounded-[2px] transition-all duration-300 group-hover:bg-white"
+                      style={{ height: `${w.height}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-400">{w.day}</span>
                 </div>
-                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">{w.day}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Col 2: Recent Documents List (4 cols) */}
-        <div className="lg:col-span-4 bg-white dark:bg-[#111827] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Recent Documents
-            </h3>
-            <Link to="/library" className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1">
-              <span>View All ({documents.length})</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+        <Card className="lg:col-span-4 flex flex-col justify-between">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <FileText size={15} className="text-zinc-400" />
+                <span>Recent Documents</span>
+              </CardTitle>
+              <CardDescription>Library study materials</CardDescription>
+            </div>
+            <Link to="/library" className="text-xs text-zinc-400 hover:text-zinc-200 font-mono">
+              View All ({documents.length})
             </Link>
-          </div>
+          </CardHeader>
 
-          <div className="space-y-3">
+          <CardContent className="space-y-2">
             {documents.length === 0 ? (
-              <div className="p-6 text-center rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-200 dark:border-white/10 space-y-2">
-                <p className="text-xs text-slate-500 dark:text-slate-400">No documents uploaded yet.</p>
-                <button
+              <div className="p-6 text-center rounded-md bg-zinc-900/40 border border-dashed border-zinc-800 space-y-2">
+                <p className="text-xs text-zinc-400">No documents uploaded yet.</p>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => navigate("/library")}
-                  className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm cursor-pointer"
                 >
                   Upload First Document
-                </button>
+                </Button>
               </div>
             ) : (
               documents.slice(0, 4).map((doc) => (
                 <div
                   key={doc._id}
                   onClick={() => navigate(`/document/${doc._id}`)}
-                  className="p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                  className="p-2.5 rounded-md border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-800/60 hover:border-zinc-700 transition-colors cursor-pointer flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div 
-                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm"
-                      style={{ backgroundColor: doc.subjectId?.color || "#6366F1" }}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-300 bg-zinc-800 border border-zinc-700/60 shrink-0"
                     >
-                      {doc.fileType === "youtube" ? <Youtube size={18} /> : <FileText size={18} />}
+                      <FileText size={14} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <h4 className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                         {doc.title}
                       </h4>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
-                          {doc.subjectId?.name || "General"}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          • {doc.progress?.completionPercentage || 0}% read
-                        </span>
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-mono mt-0.5">
+                        <span>{doc.subjectId?.name || "General"}</span>
+                        <span>•</span>
+                        <span>{doc.progress?.completionPercentage || 0}% read</span>
                       </div>
                     </div>
                   </div>
 
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight size={13} className="text-zinc-500 group-hover:text-zinc-300 transition-colors shrink-0" />
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Col 3: Focus on Your Goals Card + Quick Links (3 cols) */}
-        <div className="lg:col-span-3 space-y-5 flex flex-col justify-between">
-          
-          {/* MERN Placement Roadmap Progress Matrix */}
-          <div className="rounded-2xl border border-indigo-500/20 dark:border-white/10 p-5 shadow-sm bg-gradient-to-br from-[#0E1526] to-[#151E34] text-white flex flex-col justify-between min-h-[220px]">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                    <Target className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-white tracking-wide block">MERN Job Target</span>
-                    <span className="text-[10px] text-emerald-400 font-mono font-medium">Dec 2026 Placement</span>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
-                  250 Qs Bank
-                </span>
+        {/* Col 3: MERN Track Breakdown + Quick Navigation (3 cols) */}
+        <div className="lg:col-span-3 space-y-4 flex flex-col justify-between">
+          <Card>
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Terminal size={15} className="text-zinc-400" />
+                  <span>Curriculum Plan</span>
+                </CardTitle>
+                <CardDescription>250 High-Yield Questions</CardDescription>
+              </div>
+              <Badge variant="accent" size="sm">Q4 2026</Badge>
+            </CardHeader>
+
+            <CardContent className="space-y-2 text-xs">
+              <div className="flex items-center justify-between text-zinc-300 py-1 border-b border-zinc-800/60">
+                <span className="font-mono text-[11px]">JavaScript & Async</span>
+                <span className="font-mono text-zinc-400">60 Qs</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300 py-1 border-b border-zinc-800/60">
+                <span className="font-mono text-[11px]">React & Hooks</span>
+                <span className="font-mono text-zinc-400">55 Qs</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300 py-1 border-b border-zinc-800/60">
+                <span className="font-mono text-[11px]">Node.js & Express</span>
+                <span className="font-mono text-zinc-400">50 Qs</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300 py-1 border-b border-zinc-800/60">
+                <span className="font-mono text-[11px]">MongoDB Aggregation</span>
+                <span className="font-mono text-zinc-400">45 Qs</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300 py-1">
+                <span className="font-mono text-[11px]">Production & Internship</span>
+                <span className="font-mono text-zinc-400">40 Qs</span>
               </div>
 
-              <div className="space-y-1.5 my-3 text-[11px]">
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">⚡ JavaScript & Async</span>
-                  <span className="font-mono text-indigo-400 font-semibold">60 Qs</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">⚛️ React & Hooks</span>
-                  <span className="font-mono text-cyan-400 font-semibold">55 Qs</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">🟢 Node.js & Express</span>
-                  <span className="font-mono text-emerald-400 font-semibold">50 Qs</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">🍃 MongoDB Aggregation</span>
-                  <span className="font-mono text-green-400 font-semibold">45 Qs</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="flex items-center gap-1.5">💼 11-Mo Internship Qs</span>
-                  <span className="font-mono text-amber-400 font-semibold">40 Qs</span>
-                </div>
+              <div className="pt-2">
+                <Button
+                  variant="indigo"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate("/interview")}
+                >
+                  Launch Interview Hub
+                </Button>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <button
-              onClick={() => navigate("/interview")}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer active:scale-98"
-            >
-              <Mic className="w-3.5 h-3.5" />
-              <span>Launch Voice Mock Studio</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Quick Links Card */}
-          <div className="bg-white dark:bg-[#111827] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-500" /> Quick Links
-            </h4>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button 
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs uppercase font-mono tracking-wider text-zinc-400">
+                Quick Navigation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Mic}
                 onClick={() => navigate("/interview")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Mic className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Interview Hub</span>
-              </button>
-
-              <button 
+                Interviews
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={BookOpen}
                 onClick={() => navigate("/library")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <BookOpen className="w-3.5 h-3.5 text-cyan-500" />
-                <span>Study Library</span>
-              </button>
-
-              <button 
+                Library
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={RotateCcw}
                 onClick={() => navigate("/revision")}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <GraduationCap className="w-3.5 h-3.5 text-purple-500" />
-                <span>Revision Deck</span>
-              </button>
-
-              <button 
+                Revision
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Plus}
                 onClick={() => setShowSubjectModal(true)}
-                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:border-indigo-500 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-emerald-500" />
-                <span>New Track</span>
-              </button>
-            </div>
-          </div>
-
+                New Track
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-
       </div>
 
       {/* Add Subject Modal */}
       <Modal
         isOpen={showSubjectModal}
         onClose={() => setShowSubjectModal(false)}
-        title="Add New Subject"
+        title="Create Study Track"
         icon={FolderPlus}
       >
         <form onSubmit={handleCreateSubject} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1">Subject Name</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1.5">
+              Track Name
+            </label>
             <input
               type="text"
               required
               placeholder="e.g. System Design, Computer Networks"
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
-              className="w-full bg-[#0F172A] border border-dark-border/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3.5 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1">Description (Optional)</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1.5">
+              Description (Optional)
+            </label>
             <input
               type="text"
-              placeholder="e.g. Advanced distributed systems architecture"
+              placeholder="e.g. Core architectural patterns and scalable services"
               value={newSubjectDesc}
               onChange={(e) => setNewSubjectDesc(e.target.value)}
-              className="w-full bg-[#0F172A] border border-dark-border/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3.5 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-2">Color Theme</label>
-            <div className="flex items-center gap-3">
+            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-2">
+              Color Accent
+            </label>
+            <div className="flex items-center gap-2">
               {colorPresets.map((c) => (
                 <button
                   type="button"
                   key={c.hex}
                   onClick={() => setNewSubjectColor(c.hex)}
-                  className={`w-7 h-7 rounded-full transition-transform ${
-                    newSubjectColor === c.hex ? "scale-125 ring-2 ring-white" : "hover:scale-110"
+                  className={`w-6 h-6 rounded-full transition-all ${
+                    newSubjectColor === c.hex ? "scale-110 ring-2 ring-zinc-300" : "opacity-80 hover:opacity-100"
                   }`}
                   style={{ backgroundColor: c.hex }}
                 />
@@ -697,17 +544,16 @@ export const DashboardPage = () => {
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setShowSubjectModal(false)}>
+          <div className="pt-2 flex justify-end gap-2 border-t border-zinc-800">
+            <Button variant="outline" size="sm" onClick={() => setShowSubjectModal(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="gradient">
-              Save Subject
+            <Button type="submit" variant="primary" size="sm">
+              Save Track
             </Button>
           </div>
         </form>
       </Modal>
-
     </div>
   );
 };

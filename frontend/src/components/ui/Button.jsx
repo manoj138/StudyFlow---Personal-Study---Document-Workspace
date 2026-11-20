@@ -1,8 +1,10 @@
-import React from "react";
+  import React from "react";
 import { Loader2 } from "lucide-react";
+import { Kbd } from "./Kbd";
 
 /**
- * Button - Standardized UI button component supporting variants, loading state, and icons
+ * Button - Precision Interactive Control
+ * Sharp 6px radius, Linear/Vercel standard, native Kbd shortcut integration.
  */
 export const Button = ({
   children,
@@ -11,26 +13,40 @@ export const Button = ({
   loading = false,
   disabled = false,
   icon: Icon,
+  shortcut,
   className = "",
   onClick,
   type = "button",
   ...props
 }) => {
-  const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40 active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100";
+  const baseStyles =
+    "inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none";
 
   const variants = {
-    primary: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 border border-indigo-400/30",
-    gradient: "bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white shadow-lg shadow-indigo-500/20 border border-indigo-300/30",
-    secondary: "bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 hover:border-slate-600",
-    outline: "bg-transparent hover:bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 hover:border-indigo-500/60",
-    glass: "bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-md",
-    danger: "bg-rose-600/80 hover:bg-rose-500 text-white border border-rose-500/40 shadow-lg shadow-rose-600/20"
+    primary:
+      "bg-zinc-100 hover:bg-white text-zinc-950 font-semibold shadow-sm border border-zinc-200",
+    indigo:
+      "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm border border-indigo-500",
+    secondary:
+      "bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 shadow-sm",
+    outline:
+      "bg-transparent hover:bg-zinc-850 text-zinc-300 border border-zinc-800 hover:border-zinc-700",
+    ghost:
+      "bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-100",
+    danger:
+      "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30",
+    warning:
+      "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30",
+    success:
+      "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+    subtle:
+      "bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/50"
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-xs gap-1.5",
-    md: "px-4 py-2.5 text-sm gap-2",
-    lg: "px-6 py-3.5 text-base gap-2.5 font-bold"
+    sm: "h-8 px-2.5 text-xs gap-1.5",
+    md: "h-9 px-3.5 text-xs gap-2",
+    lg: "h-10 px-4 text-sm gap-2"
   };
 
   return (
@@ -42,11 +58,12 @@ export const Button = ({
       {...props}
     >
       {loading ? (
-        <Loader2 className="animate-spin text-current shrink-0" size={size === "sm" ? 14 : size === "lg" ? 20 : 16} />
+        <Loader2 className="animate-spin text-current shrink-0" size={size === "sm" ? 12 : 14} />
       ) : Icon ? (
-        <Icon className="shrink-0" size={size === "sm" ? 14 : size === "lg" ? 20 : 16} />
+        <Icon className="shrink-0" size={size === "sm" ? 13 : 15} />
       ) : null}
       <span>{children}</span>
+      {shortcut && <Kbd className="ml-1.5">{shortcut}</Kbd>}
     </button>
   );
 };

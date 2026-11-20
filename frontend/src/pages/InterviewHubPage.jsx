@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Mic,
   Plus,
@@ -11,15 +11,11 @@ import {
   Trash2,
   Sparkles,
   Trophy,
-  CheckCircle2,
-  Clock,
   Layers,
   Search,
   X,
-  FileUp,
   Brain,
-  HelpCircle,
-  AlertCircle
+  HelpCircle
 } from "lucide-react";
 import API from "../services/api";
 import {
@@ -30,6 +26,18 @@ import {
   deleteInterviewSet,
   seedMernCurriculum
 } from "../services/interviewService";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Badge,
+  MetricCard,
+  PageHeader
+} from "../components/ui";
 
 export const InterviewHubPage = () => {
   const navigate = useNavigate();
@@ -54,9 +62,6 @@ export const InterviewHubPage = () => {
 
   // Library Documents for Tab 3
   const [libraryDocs, setLibraryDocs] = useState([]);
-
-  // Preview Questions Modal
-  const [previewSet, setPreviewSet] = useState(null);
 
   useEffect(() => {
     loadInterviewSets();
@@ -159,7 +164,6 @@ export const InterviewHubPage = () => {
         setIsCreateOpen(false);
         resetCreateForm();
         loadInterviewSets();
-        // Immediately navigate into the new session
         if (res.interviewSet?._id) {
           navigate(`/interview/${res.interviewSet._id}`);
         }
@@ -204,151 +208,120 @@ export const InterviewHubPage = () => {
     return matchesSearch && matchesTopic;
   });
 
-  // Calculate aggregates
   const totalQuestions = sets.reduce((acc, s) => acc + (s.questionCount || 0), 0);
   const bestOverallScore = sets.length > 0 ? Math.max(...sets.map((s) => s.bestScore || 0)) : 0;
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-8 font-sans transition-colors duration-200">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-br from-indigo-950/80 via-slate-900 to-slate-950 p-6 sm:p-8 rounded-3xl border border-indigo-500/20 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-white">
-        <div className="space-y-3 relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30">
-            <Mic className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-            AI Mock Interview Studio
-          </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            Interview Practice <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-300">Room</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Upload interview PDFs, Word docs, or notes. StudyFlow asks questions using voice just like a real interviewer — speak into the mic and get instant AI scoring & keyword feedback.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
+      {/* Header Command Strip */}
+      <PageHeader
+        breadcrumb="STUDYFLOW // INTERVIEW HUB"
+        title="Technical Interview Hub"
+        description="Self-study technical interview sets with keyboard-first active recall, standard benchmark answers, and optional voice scoring."
+        actions={
+          <Button
+            variant="indigo"
+            size="sm"
+            icon={Plus}
+            onClick={() => {
+              resetCreateForm();
+              setIsCreateOpen(true);
+            }}
+          >
+            New Interview Set
+          </Button>
+        }
+      />
 
-        <button
-          onClick={() => {
-            resetCreateForm();
-            setIsCreateOpen(true);
-          }}
-          className="relative z-10 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Interview Set</span>
-        </button>
-
-        {/* Ambient background decoration */}
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      </div>
-
-      {/* 1-Click MERN Mastery Curriculum Banner */}
-      <div className="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/80 border border-emerald-500/30 rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <Brain className="w-6 h-6 animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                Official Study Track
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
-                Dual-Language Track (English + Marathi Notes)
-              </span>
+      {/* MERN Complete Curriculum Callout */}
+      <Card className="border-indigo-500/25 bg-gradient-to-r from-[#121215] to-[#101018]">
+        <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shrink-0">
+              <Brain size={20} />
             </div>
-            <h3 className="text-base sm:text-lg font-extrabold text-white">
-              MERN Stack Complete Interview Guide (250 Qs)
-            </h3>
-            <p className="text-xs text-slate-300 max-w-xl">
-              Covers React Hooks, Event Loop, Express APIs, MongoDB Aggregation, JWT Security & Junior Developer Mock.
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="accent" size="sm">
+                  Official Study Track
+                </Badge>
+                <Badge variant="neutral" size="sm">
+                  Dual-Language (English + Marathi Notes)
+                </Badge>
+              </div>
+              <h3 className="text-sm sm:text-base font-semibold text-zinc-100">
+                MERN Stack Complete Interview Guide (250 Questions)
+              </h3>
+              <p className="text-xs text-zinc-400 max-w-xl">
+                Covers React Hooks, Event Loop, Express APIs, MongoDB Aggregation, JWT Security & 11-Month Internship Questions.
+              </p>
+            </div>
           </div>
+
+          <Button
+            variant="indigo"
+            size="sm"
+            icon={Sparkles}
+            loading={loadingMernSeed}
+            onClick={handleSeedMern}
+            className="shrink-0"
+          >
+            Load 250 Questions
+          </Button>
         </div>
-        <button
-          onClick={handleSeedMern}
-          disabled={loadingMernSeed}
-          className="shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-        >
-          {loadingMernSeed ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Loading 250 Questions...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              <span>Load MERN Guide & Practice Now</span>
-            </>
-          )}
-        </button>
-      </div>
+      </Card>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-            Question Sets
-          </span>
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-500" />
-            <span className="text-2xl font-black font-mono">{sets.length}</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-            Total Questions
-          </span>
-          <div className="flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-purple-500" />
-            <span className="text-2xl font-black font-mono">{totalQuestions}</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-            Best Score
-          </span>
-          <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-500" />
-            <span className="text-2xl font-black font-mono">{bestOverallScore}%</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-            AI Engine
-          </span>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Gemini + Voice</span>
-          </div>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <MetricCard
+          label="Question Sets"
+          value={sets.length}
+          subtext="Available Decks"
+          icon={Layers}
+        />
+        <MetricCard
+          label="Total Questions"
+          value={totalQuestions}
+          subtext="Interview Bank"
+          icon={HelpCircle}
+        />
+        <MetricCard
+          label="Best Readiness"
+          value={`${bestOverallScore}%`}
+          subtext="Peak Score"
+          icon={Trophy}
+        />
+        <MetricCard
+          label="Evaluation Mode"
+          value="Self-Study"
+          subtext="+ Optional Mic Drill"
+          icon={Mic}
+        />
       </div>
 
       {/* Search & Topic Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search interview sets by title or topic..."
+            placeholder="Search interview sets by title or track..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3.5 py-1.5 rounded-md bg-zinc-900 border border-zinc-800 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400 font-mono"
           />
         </div>
 
-        {/* Topic Pills */}
         {topics.length > 1 && (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             {topics.map((t) => (
               <button
                 key={t}
                 onClick={() => setSelectedTopic(t)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all ${
+                className={`px-2.5 py-1 rounded-md text-xs font-mono capitalize whitespace-nowrap transition-colors cursor-pointer ${
                   selectedTopic === t
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    ? "bg-zinc-100 text-zinc-950 font-semibold"
+                    : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
                 }`}
               >
                 {t}
@@ -360,107 +333,104 @@ export const InterviewHubPage = () => {
 
       {/* Sets Grid */}
       {loading ? (
-        <div className="py-20 text-center space-y-3">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-slate-400">Loading your interview sets...</p>
+        <div className="py-20 text-center space-y-2">
+          <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-mono text-zinc-500">Loading interview sets...</p>
         </div>
       ) : filteredSets.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-white/10 rounded-3xl p-10 sm:p-16 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto">
-            <Brain className="w-8 h-8" />
+        <Card className="p-10 text-center border-dashed border-zinc-800 max-w-md mx-auto my-8 space-y-3">
+          <div className="w-10 h-10 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700/60 flex items-center justify-center mx-auto">
+            <Brain size={20} />
           </div>
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              {searchQuery ? "No matching interview sets found" : "No interview sets created yet"}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Upload your interview PDF, paste notes, or generate from your existing study documents to start practicing.
-            </p>
-          </div>
-          <button
+          <CardTitle className="text-sm font-semibold">
+            {searchQuery ? "No matching interview sets" : "No interview sets created yet"}
+          </CardTitle>
+          <CardDescription>
+            Upload your technical PDF, paste notes, or load the official MERN guide to start practicing.
+          </CardDescription>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Plus}
             onClick={() => {
               resetCreateForm();
               setIsCreateOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-indigo-600/20"
           >
-            <Plus className="w-4 h-4" /> Create First Interview Set
-          </button>
-        </div>
+            Create Interview Set
+          </Button>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredSets.map((s) => (
-            <motion.div
+            <Card
               key={s._id}
-              whileHover={{ y: -3 }}
-              className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-white/10 p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 transition-all flex flex-col justify-between group"
+              interactive
+              onClick={() => navigate(`/interview/${s._id}`)}
+              className="space-y-3 flex flex-col justify-between"
             >
-              <div className="space-y-3">
-                {/* Header Pills */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                    {s.topic || "General"}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span className="font-semibold">{s.questionCount} Qs</span>
-                  </div>
-                </div>
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <Badge variant="neutral" size="sm">
+                  {s.topic || "General"}
+                </Badge>
+                <span className="text-[11px] font-mono text-zinc-500">
+                  {s.questionCount} Questions
+                </span>
+              </CardHeader>
 
-                {/* Title */}
-                <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-indigo-500 transition-colors">
+              <CardContent className="space-y-3 py-0">
+                <h3 className="text-sm font-semibold text-zinc-100 line-clamp-2 leading-snug">
                   {s.title}
                 </h3>
 
-                {/* Score Progress / Past Attempt */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-white/5">
+                <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500 dark:text-slate-400">Best Readiness Score:</span>
-                    <span
-                      className={`font-bold font-mono ${
-                        s.bestScore >= 80
-                          ? "text-emerald-500"
+                    <span className="text-[11px] font-mono text-zinc-500">Readiness Score:</span>
+                    <Badge
+                      variant={
+                        s.bestScore >= 75
+                          ? "success"
                           : s.bestScore >= 50
-                          ? "text-amber-500"
-                          : "text-slate-400"
-                      }`}
+                          ? "warning"
+                          : "neutral"
+                      }
+                      size="sm"
                     >
-                      {s.bestScore ? `${s.bestScore}%` : "Not attempted"}
-                    </span>
+                      {s.bestScore ? `${s.bestScore}%` : "Unscored"}
+                    </Badge>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        s.bestScore >= 80
-                          ? "bg-emerald-500"
-                          : s.bestScore >= 50
-                          ? "bg-amber-500"
-                          : "bg-indigo-500"
-                      }`}
+                      className="h-full bg-zinc-300 transition-all duration-300"
                       style={{ width: `${s.bestScore || 0}%` }}
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 pt-5 mt-3 border-t border-slate-100 dark:border-white/5">
-                <button
-                  onClick={() => navigate(`/interview/${s._id}`)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all"
+              <CardFooter className="pt-2 flex items-center justify-between gap-2">
+                <Button
+                  variant="indigo"
+                  size="sm"
+                  icon={Play}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/interview/${s._id}`);
+                  }}
+                  className="flex-1"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Start Interview</span>
-                </button>
-                <button
+                  Start Practice
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={Trash2}
                   onClick={(e) => handleDelete(s._id, e)}
                   title="Delete Set"
-                  className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </motion.div>
+                  className="hover:text-rose-400"
+                />
+              </CardFooter>
+            </Card>
           ))}
         </div>
       )}
@@ -468,229 +438,173 @@ export const InterviewHubPage = () => {
       {/* Modal: Create New Interview */}
       <AnimatePresence>
         {isCreateOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-6"
+              exit={{ scale: 0.96, opacity: 0 }}
+              className="bg-[#121215] border border-zinc-800 rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl p-5 space-y-5"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Create Interview Set
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Auto-extract questions with AI or import your notes
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <div className="space-y-0.5">
+                  <h2 className="text-base font-semibold text-zinc-100">
+                    Create Technical Interview Set
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Generate structured questions and model answers automatically
+                  </p>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={X}
                   onClick={() => setIsCreateOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                />
               </div>
 
-              {/* Source Tabs */}
-              <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
+              {/* Source Mode Tabs */}
+              <div className="grid grid-cols-3 gap-1 bg-zinc-900 p-1 rounded-md border border-zinc-800 text-xs">
                 <button
                   type="button"
                   onClick={() => setCreateTab("upload")}
-                  className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-1.5 rounded-[4px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                     createTab === "upload"
-                      ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60"
+                      : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
-                  <FileUp className="w-3.5 h-3.5" /> Upload File
+                  <Upload size={13} />
+                  <span>File Upload</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setCreateTab("text")}
-                  className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-1.5 rounded-[4px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                     createTab === "text"
-                      ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60"
+                      : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
-                  <FileText className="w-3.5 h-3.5" /> Paste Notes
+                  <FileText size={13} />
+                  <span>Paste Text</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setCreateTab("library")}
-                  className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-1.5 rounded-[4px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                     createTab === "library"
-                      ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60"
+                      : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5" /> From Library
+                  <BookOpen size={13} />
+                  <span>From Library</span>
                 </button>
               </div>
 
-              {/* Form Body */}
+              {/* Create Form */}
               <form onSubmit={handleCreateSubmit} className="space-y-4">
                 {createError && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{createError}</span>
+                  <div className="p-3 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono">
+                    {createError}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Set Title {createTab !== "upload" && "*"}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. React Frontend Deep Dive"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Topic / Category
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. React, Node.js, HR"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                    Set Title
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. React 19 Server Actions & Hooks"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+                  />
                 </div>
 
-                {/* Tab 1: Upload File */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                    Topic / Domain
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. React, Node.js, System Design"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+
+                {/* Tab 1: File Upload */}
                 {createTab === "upload" && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Upload Document (PDF, Word, Markdown, Text)
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                      Upload Document (PDF, DOCX, TXT)
                     </label>
-                    <div className="border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-6 text-center hover:border-indigo-500/50 transition-colors">
-                      <input
-                        type="file"
-                        id="interview-file"
-                        accept=".pdf,.docx,.txt,.md"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setSelectedFile(file);
-                            if (!title) {
-                              setTitle(file.name.replace(/\.[^/.]+$/, ""));
-                            }
-                          }
-                        }}
-                        className="hidden"
-                      />
-                      <label htmlFor="interview-file" className="cursor-pointer space-y-2 block">
-                        <Upload className="w-8 h-8 text-indigo-500 mx-auto" />
-                        <div className="text-xs text-slate-600 dark:text-slate-400">
-                          {selectedFile ? (
-                            <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                              Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)
-                            </span>
-                          ) : (
-                            <span>
-                              Click to choose a file or drag & drop <br />
-                              <span className="text-[10px] text-slate-400">PDF, DOCX, MD, TXT up to 25MB</span>
-                            </span>
-                          )}
-                        </div>
-                      </label>
-                    </div>
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.doc,.txt,.md"
+                      onChange={(e) => setSelectedFile(e.target.files[0] || null)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-md p-2 text-xs text-zinc-300 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700"
+                    />
                   </div>
                 )}
 
-                {/* Tab 2: Paste Raw Text */}
+                {/* Tab 2: Raw Text */}
                 {createTab === "text" && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Paste Interview Questions & Answers or Notes
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                      Paste Notes or Interview Q&A Text
                     </label>
                     <textarea
-                      rows={7}
-                      placeholder="Paste questions here, for example:&#10;Q1: What is the Virtual DOM in React?&#10;Ans: The Virtual DOM is an in-memory representation of real DOM elements...&#10;&#10;Q2: What is the difference between let and const?&#10;Ans: let allows reassignment while const creates immutable bindings."
+                      rows={5}
+                      placeholder="Paste interview questions, study notes, or transcript..."
                       value={rawText}
                       onChange={(e) => setRawText(e.target.value)}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-md p-3 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400 font-mono leading-relaxed"
                     />
-                    <p className="text-[11px] text-slate-400">
-                      Tip: You can paste messy notes or full interview cheat sheets. AI will automatically structure questions, model answers, and expected keywords.
-                    </p>
                   </div>
                 )}
 
-                {/* Tab 3: Select from Library */}
+                {/* Tab 3: Existing Library Document */}
                 {createTab === "library" && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Select Document from Library
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                      Choose from Library
                     </label>
-                    {libraryDocs.length === 0 ? (
-                      <p className="text-xs text-slate-400 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-center">
-                        No documents found in your library yet. Upload a file above or in the Library tab first.
-                      </p>
-                    ) : (
-                      <select
-                        value={selectedDocId}
-                        onChange={(e) => {
-                          setSelectedDocId(e.target.value);
-                          const doc = libraryDocs.find((d) => d._id === e.target.value);
-                          if (doc && !title) {
-                            setTitle(`Interview: ${doc.title}`);
-                            setTopic(doc.subjectTitle || "General");
-                          }
-                        }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      >
-                        <option value="">-- Choose a document --</option>
-                        {libraryDocs.map((doc) => (
-                          <option key={doc._id} value={doc._id}>
-                            {doc.title} ({doc.fileType?.toUpperCase() || "DOC"})
-                          </option>
-                        ))}
-                      </select>
-                    )}
+                    <select
+                      value={selectedDocId}
+                      onChange={(e) => setSelectedDocId(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-xs sm:text-sm text-zinc-100 focus:outline-none focus:border-zinc-400"
+                    >
+                      <option value="">Select a document...</option>
+                      {libraryDocs.map((doc) => (
+                        <option key={doc._id} value={doc._id}>
+                          {doc.title} ({doc.fileName || "File"})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/10">
-                  <button
-                    type="button"
+                <div className="pt-3 flex items-center justify-end gap-2 border-t border-zinc-800">
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setIsCreateOpen(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-all"
+                    variant="indigo"
+                    size="sm"
+                    loading={submitting}
                   >
-                    {submitting ? (
-                      <>
-                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>AI Parsing Q&A...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <span>Generate Interview</span>
-                      </>
-                    )}
-                  </button>
+                    Generate Interview Set
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -701,3 +615,4 @@ export const InterviewHubPage = () => {
   );
 };
 
+export default InterviewHubPage;
