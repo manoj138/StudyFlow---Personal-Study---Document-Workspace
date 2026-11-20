@@ -49,15 +49,16 @@ export const InterviewRoomPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Mode: "mock" (Pressure/Real with timer & hidden answers) or "practice" (Learning/Read along)
-  const [mode, setMode] = useState("mock");
+  // Mode: "study" (Default - calm reading & recall) or "mock" (voice recording drill)
+  const [mode, setMode] = useState("study");
   const [showIdealAnswer, setShowIdealAnswer] = useState(false);
+  const [enableVoiceMode, setEnableVoiceMode] = useState(false);
 
   // Audio & Speech States
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
-  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(true);
+  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(false);
 
-  // Timer State (per question)
+  // Timer State (only active when voice drill mode is ON)
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
@@ -75,13 +76,20 @@ export const InterviewRoomPage = () => {
   const [showMarathiDrawer, setShowMarathiDrawer] = useState(false);
   const [reviewStatusMsg, setReviewStatusMsg] = useState("");
 
-  const handleRateQuestion = async (rating) => {
+  const handleRateQuestion = async (rating, autoAdvance = true) => {
     if (!currentQuestion?._id || !interviewSet?._id) return;
     try {
       const res = await reviewQuestion(interviewSet._id, currentQuestion._id, rating);
       if (res.success) {
         setReviewStatusMsg(`✓ ${res.message}`);
         setTimeout(() => setReviewStatusMsg(""), 3000);
+        if (autoAdvance) {
+          setTimeout(() => {
+            if (currentIndex < questions.length - 1) {
+              setCurrentIndex((prev) => prev + 1);
+            }
+          }, 350);
+        }
       }
     } catch (err) {
       console.error("Failed to rate question:", err);
@@ -142,11 +150,11 @@ export const InterviewRoomPage = () => {
     speechEngine.stop();
     stopListening();
     resetTranscript();
-    setShowIdealAnswer(mode === "practice");
+    setShowIdealAnswer(false);
     setShowMarathiDrawer(false);
     setReviewStatusMsg("");
     setTimerSeconds(60);
-    setIsTimerRunning(true);
+    setIsTimerRunning(enableVoiceMode);
 
     // If previously answered in this session, restore result
     if (sessionResults[currentQuestion._id]) {
@@ -158,11 +166,42 @@ export const InterviewRoomPage = () => {
       setCurrentResult(null);
     }
 
-    // Auto speak question if enabled
+    // Auto speak question only if enabled
     if (autoSpeakEnabled) {
       speakCurrentQuestion(currentQuestion.question);
     }
-  }, [currentIndex, currentQuestion?._id, mode]);
+  }, [currentIndex, currentQuestion?._id]);
+
+  // Keyboard-first fast study shortcuts (Space, 1, 2, 3, ArrowRight, ArrowLeft)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger shortcuts if user is typing in textarea or input
+      if (["TEXTAREA", "INPUT"].includes(e.target?.tagName)) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        setShowIdealAnswer((prev) => !prev);
+      } else if (e.key === "1") {
+        e.preventDefault();
+        handleRateQuestion("again");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        handleRateQuestion("good");
+      } else if (e.key === "3") {
+        e.preventDefault();
+        handleRateQuestion("easy");
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrev();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, currentQuestion?._id, questions.length, showIdealAnswer]);
 
   // Overall session timer
   useEffect(() => {
@@ -530,50 +569,54 @@ export const InterviewRoomPage = () => {
           </div>
         </div>
 
-        {/* Center: Mode Switcher */}
-        <div className="hidden sm:flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/5 text-xs font-semibold">
-          <button
-            onClick={() => setMode("mock")}
-            className={`px-3 py-1 rounded-lg transition-all ${
-              mode === "mock"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-            }`}
-          >
-            Real Mock Mode
-          </button>
-          <button
-            onClick={() => setMode("practice")}
-            className={`px-3 py-1 rounded-lg transition-all ${
-              mode === "practice"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-            }`}
-          >
-            Practice / Learn Mode
-          </button>
+        {/* Center: Keyboard Shortcuts Pill */}
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-[#0E1526] rounded-xl border border-slate-200 dark:border-white/5 text-[11px] text-slate-400 font-mono">
+          <span className="text-slate-500">Shortcuts:</span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-indigo-400 font-bold">Space</kbd> Answer
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-rose-400 font-bold">1</kbd> Again
+          </span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-amber-400 font-bold">2</kbd> Good
+          </span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-emerald-400 font-bold">3</kbd> Mastered
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-300 font-bold">→</kbd> Next
+          </span>
         </div>
 
-        {/* Right: Timer & Finish */}
-        <div className="flex items-center gap-3">
-          {mode === "mock" && !currentResult && (
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-bold border ${
-                timerSeconds <= 15
-                  ? "bg-rose-500/10 text-rose-500 border-rose-500/30 animate-pulse"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>00:{timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}</span>
-            </div>
-          )}
+        {/* Right: Voice Drill Toggle & Finish */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => {
+              if (enableVoiceMode) {
+                stopListening();
+                speechEngine.stop();
+              }
+              setEnableVoiceMode((prev) => !prev);
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+              enableVoiceMode
+                ? "bg-emerald-600 border-emerald-500 text-white shadow-sm"
+                : "bg-slate-100 dark:bg-[#0E1526] border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+            }`}
+            title="Turn on microphone to practice dictating spoken answers"
+          >
+            <Mic className={`w-3.5 h-3.5 ${enableVoiceMode ? "animate-pulse text-white" : "text-slate-400"}`} />
+            <span>{enableVoiceMode ? "Voice Mic: ON" : "Voice Mic: OFF"}</span>
+          </button>
 
           <button
             onClick={handleFinishSession}
-            className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all"
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
           >
-            Finish Interview
+            Finish Review
           </button>
         </div>
       </header>
@@ -581,345 +624,293 @@ export const InterviewRoomPage = () => {
       {/* Progress Line */}
       <div className="w-full h-1 bg-slate-100 dark:bg-slate-800">
         <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-teal-400 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300"
           style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
         />
       </div>
 
-      {/* Main Studio Split-Screen Arena */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* LEFT COLUMN: INTERVIEWER & QUESTION STAGE (7 cols) */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* Question Card */}
-            <div className="bg-white dark:bg-[#0E1526] rounded-2xl border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-sm space-y-4">
-              {/* Question Meta Row */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-white/5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono">
-                    Question #{currentIndex + 1} of {questions.length}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-white/5">
-                    {currentQuestion.category || currentQuestion.track || interviewSet.topic}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${
-                      currentQuestion.difficulty === "hard"
-                        ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                        : currentQuestion.difficulty === "easy"
-                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                        : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                    }`}
-                  >
-                    {currentQuestion.difficulty}
-                  </span>
-                </div>
-
-                {/* TTS Audio Controls */}
-                <button
-                  onClick={handleToggleSpeak}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
-                >
-                  {isAiSpeaking ? (
-                    <>
-                      <VolumeX className="w-3.5 h-3.5 text-rose-500" />
-                      <span>Stop Voice</span>
-                    </>
-                  ) : (
-                    <>
-                      <Volume2 className="w-3.5 h-3.5 text-indigo-500" />
-                      <span>Re-read Question</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Question Text */}
-              <div className="space-y-2">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-relaxed tracking-tight">
-                  {currentQuestion.question}
-                </h2>
-              </div>
-
-              {/* Action Buttons Row: Marathi Drawer & Ideal Answer Toggle */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                {currentQuestion.marathiExplanation && (
-                  <button
-                    onClick={() => setShowMarathiDrawer((prev) => !prev)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 border border-amber-500/25 transition-all shadow-sm cursor-pointer"
-                  >
-                    <Brain className="w-3.5 h-3.5 text-amber-500" />
-                    <span>{showMarathiDrawer ? "Hide Concept Logic" : "💡 Explain Logic (मराठीत)"}</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setShowIdealAnswer((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
-                >
-                  {showIdealAnswer ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-indigo-400" />}
-                  <span>{showIdealAnswer ? "Hide Ideal Answer" : "Peek Ideal Answer"}</span>
-                </button>
-              </div>
-
-              {/* Marathi Concept Drawer */}
-              <AnimatePresence>
-                {showMarathiDrawer && currentQuestion.marathiExplanation && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-slate-800 dark:text-amber-100 text-xs sm:text-sm leading-relaxed space-y-2 overflow-hidden text-left"
-                  >
-                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
-                      <Brain className="w-4 h-4" />
-                      <span>💡 Concept Explanation (मराठी स्पष्टीकरण)</span>
-                    </div>
-                    <p className="whitespace-pre-wrap font-medium">{currentQuestion.marathiExplanation}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+      {/* Main Studio Arena */}
+      <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* QUESTION CARD */}
+        <div className="bg-white dark:bg-[#0E1526] rounded-3xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 shadow-sm space-y-5">
+          {/* Question Meta Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono">
+                Question #{currentIndex + 1} of {questions.length}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-white/5 font-mono">
+                {currentQuestion.category || currentQuestion.track || interviewSet.topic}
+              </span>
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border font-mono ${
+                  currentQuestion.difficulty === "hard"
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                    : currentQuestion.difficulty === "easy"
+                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                    : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                }`}
+              >
+                {currentQuestion.difficulty}
+              </span>
             </div>
 
-            {/* Model / Ideal Answer Reveal Card */}
-            <AnimatePresence>
-              {(showIdealAnswer || currentResult) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  className="bg-white dark:bg-[#0E1526] rounded-2xl border border-indigo-500/20 p-5 sm:p-6 shadow-sm space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-500 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" /> Standard Model Answer (Interview Benchmark)
-                    </span>
-                    <button
-                      onClick={() => setShowIdealAnswer((prev) => !prev)}
-                      className="text-[11px] text-slate-400 hover:text-slate-200 cursor-pointer"
-                    >
-                      {showIdealAnswer ? "Collapse" : "Expand"}
-                    </button>
-                  </div>
-                  {showIdealAnswer && (
-                    <div className="pt-2 border-t border-slate-100 dark:border-white/5">
-                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-mono font-normal">
-                        {currentQuestion.answer}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleSpeak}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+                title="Listen to question pronunciation"
+              >
+                {isAiSpeaking ? (
+                  <>
+                    <VolumeX className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Stop</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Listen</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* RIGHT COLUMN: CANDIDATE VOICE STUDIO & SCORING (5 cols) */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Voice & Transcript Studio Card */}
-            <div className="bg-white dark:bg-[#0E1526] rounded-2xl border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${isListening ? "bg-emerald-500 animate-ping" : "bg-slate-400"}`} />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-                    Candidate Audio Cockpit
-                  </span>
-                </div>
-                {userAnswer && (
-                  <button
-                    onClick={() => {
-                      resetTranscript();
-                      setUserAnswer("");
-                      setCurrentResult(null);
-                    }}
-                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Clear Answer"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+          {/* Question Text */}
+          <div className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-relaxed tracking-tight">
+              {currentQuestion.question}
+            </h2>
+          </div>
 
-              {/* Mic & Wave Visualizer Hub */}
-              <div className="flex flex-col items-center justify-center gap-3 py-4 bg-slate-50 dark:bg-[#080C14] rounded-xl border border-slate-200/80 dark:border-white/5">
-                <VoiceWaveVisualizer
-                  isActive={isListening || isAiSpeaking}
-                  role={isListening ? "candidate" : "interviewer"}
-                  label={isListening ? "Listening to your voice..." : "Microphone Ready"}
-                />
+          {/* Reveal Model Answer Button */}
+          <div className="pt-2">
+            <button
+              onClick={() => setShowIdealAnswer((prev) => !prev)}
+              className={`w-full py-4 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-98 ${
+                showIdealAnswer
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-indigo-600/25"
+              }`}
+            >
+              {showIdealAnswer ? (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  <span>Hide Model Answer (Press Space)</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4 text-indigo-200" />
+                  <span>Reveal Model Answer & Concept (Press Space)</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
 
-                <button
-                  onClick={handleToggleMic}
-                  className={`p-4 rounded-full transition-all duration-300 transform active:scale-95 shadow-lg cursor-pointer ${
-                    isListening
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 scale-105 animate-pulse"
-                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 hover:scale-105"
-                  }`}
-                >
-                  {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-                </button>
-
-                <div className="text-center">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                    {isListening ? "Tap to Stop Recording" : "Tap Mic to Dictate Spoken Answer"}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {isListening ? "Speak clearly in English" : "Or type directly in the box below"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Answer Text Area */}
-              <div className="relative">
-                <textarea
-                  rows={4}
-                  placeholder="Your dictated answer will appear here in real-time, or type manually... (Press Ctrl + Enter to score)"
-                  value={userAnswer}
-                  onChange={(e) => {
-                    setUserAnswer(e.target.value);
-                    setTranscript(e.target.value);
-                  }}
-                  onKeyDown={(e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !evaluating && userAnswer.trim()) {
-                      e.preventDefault();
-                      handleEvaluate();
-                    }
-                  }}
-                  className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all font-mono leading-relaxed"
-                />
-                {interimTranscript && (
-                  <p className="absolute bottom-2.5 left-3.5 right-3.5 text-xs text-indigo-400 italic pointer-events-none line-clamp-1">
-                    ... {interimTranscript}
-                  </p>
-                )}
-              </div>
-
-              {/* Words & Submit Action */}
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono text-slate-400">
-                  {userAnswer ? userAnswer.trim().split(/\s+/).filter(Boolean).length : 0} words • <span className="text-slate-500">Ctrl+Enter</span>
-                </span>
-
-                <button
-                  onClick={handleEvaluate}
-                  disabled={evaluating || !userAnswer.trim()}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-98"
-                >
-                  {evaluating ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Scoring Answer...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Submit & Score</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* AI Scorecard & Feedback Card */}
-            <AnimatePresence>
-              {currentResult && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="bg-white dark:bg-[#0E1526] rounded-2xl border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-sm space-y-4"
-                >
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
-                    <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-indigo-400" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                        AI Scorecard
-                      </h3>
+        {/* MODEL ANSWER & CONCEPT BREAKDOWN (REVEALED STATE) */}
+        <AnimatePresence>
+          {showIdealAnswer && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="space-y-5"
+            >
+              {/* Standard Technical English Answer */}
+              <div className="bg-white dark:bg-[#0E1526] rounded-3xl border border-indigo-500/20 p-6 sm:p-8 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                      <Sparkles className="w-4 h-4" />
                     </div>
-                    <span
-                      className={`text-lg font-black font-mono px-3 py-0.5 rounded-lg border ${
-                        currentResult.score >= 75
-                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                          : currentResult.score >= 50
-                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                          : "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                      }`}
-                    >
-                      {currentResult.score}%
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                      Standard Technical Answer (Interview Benchmark)
                     </span>
                   </div>
+                </div>
 
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-[#080C14] p-3 rounded-xl border border-slate-200 dark:border-white/5">
-                    💡 <span className="font-semibold">Feedback:</span> {currentResult.feedback}
-                  </p>
+                <div className="text-sm sm:text-base text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-sans font-normal">
+                  {currentQuestion.answer}
+                </div>
 
-                  <div className="space-y-1.5">
+                {/* Expected Interview Keywords */}
+                {currentQuestion.keywords?.length > 0 && (
+                  <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-1.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block font-mono">
-                      Technical Concept Keywords
+                      Expected Interview Keywords
                     </span>
                     <div className="flex flex-wrap gap-1.5">
-                      {currentResult.matchedKeywords?.map((kw, i) => (
+                      {currentQuestion.keywords.map((kw, i) => (
                         <span
-                          key={`m-${i}`}
-                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          key={i}
+                          className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold"
                         >
-                          <CheckCircle2 className="w-3 h-3" /> {kw}
-                        </span>
-                      ))}
-                      {currentResult.missedKeywords?.map((kw, i) => (
-                        <span
-                          key={`x-${i}`}
-                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                        >
-                          <XCircle className="w-3 h-3" /> Missed: {kw}
+                          {kw}
                         </span>
                       ))}
                     </div>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Spaced Repetition Anki Rating Bar */}
-            <div className="bg-white dark:bg-[#0E1526] rounded-2xl border border-slate-200 dark:border-white/10 p-5 shadow-sm space-y-3">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
-                  <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Schedule Next Review (Active Recall SRS)</span>
-                </span>
-                {reviewStatusMsg && (
-                  <span className="text-emerald-400 text-[11px] font-bold animate-pulse">
-                    {reviewStatusMsg}
-                  </span>
                 )}
               </div>
-              <div className="grid grid-cols-3 gap-2">
+
+              {/* 💡 Marathi Concept Breakdown */}
+              {currentQuestion.marathiExplanation && (
+                <div className="bg-amber-500/10 border border-amber-500/25 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3 text-slate-800 dark:text-amber-100">
+                  <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
+                    <Brain className="w-4 h-4" />
+                    <span>💡 संकल्पना सोप्या भाषेत (Core Concept Logic)</span>
+                  </div>
+                  <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap font-medium">
+                    {currentQuestion.marathiExplanation}
+                  </p>
+                </div>
+              )}
+
+              {/* Spaced Repetition Active Recall Rating Row */}
+              <div className="bg-white dark:bg-[#0E1526] rounded-3xl border border-slate-200 dark:border-white/10 p-6 shadow-sm space-y-3">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                    <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Rate your understanding to schedule next review:</span>
+                  </span>
+                  {reviewStatusMsg && (
+                    <span className="text-emerald-400 font-bold animate-pulse font-mono">
+                      {reviewStatusMsg}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    onClick={() => handleRateQuestion("again")}
+                    className="p-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-1 active:scale-95 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">🔴 Again</span>
+                      <kbd className="text-[10px] bg-rose-500/20 px-1.5 py-0.2 rounded border border-rose-500/30 font-mono">1</kbd>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-normal">Review Tomorrow (Reset)</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleRateQuestion("good")}
+                    className="p-3.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-1 active:scale-95 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">🟡 Good</span>
+                      <kbd className="text-[10px] bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-500/30 font-mono">2</kbd>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-normal">Understood Core Idea (3 Days)</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleRateQuestion("easy")}
+                    className="p-3.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-1 active:scale-95 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">🟢 Mastered</span>
+                      <kbd className="text-[10px] bg-emerald-500/20 px-1.5 py-0.2 rounded border border-emerald-500/30 font-mono">3</kbd>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-normal">Completely Clear (7 Days)</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* OPTIONAL CANDIDATE VOICE STUDIO (ONLY WHEN TOGGLED ON) */}
+        {enableVoiceMode && (
+          <div className="bg-white dark:bg-[#0E1526] rounded-3xl border border-emerald-500/30 p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${isListening ? "bg-emerald-500 animate-ping" : "bg-slate-400"}`} />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                  Optional Candidate Voice Practice
+                </span>
+              </div>
+              {userAnswer && (
                 <button
-                  onClick={() => handleRateQuestion("again")}
-                  className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
+                  onClick={() => {
+                    resetTranscript();
+                    setUserAnswer("");
+                    setCurrentResult(null);
+                  }}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                  title="Clear Answer"
                 >
-                  <span className="text-xs">🔴 Again</span>
-                  <span className="text-[9px] text-slate-400 font-normal">Tomorrow</span>
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  onClick={() => handleRateQuestion("good")}
-                  className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-500 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
-                >
-                  <span className="text-xs">🟡 Good</span>
-                  <span className="text-[9px] text-slate-400 font-normal">In 3 Days</span>
-                </button>
-                <button
-                  onClick={() => handleRateQuestion("easy")}
-                  className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-400 text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 active:scale-95 cursor-pointer"
-                >
-                  <span className="text-xs">🟢 Mastered</span>
-                  <span className="text-[9px] text-slate-400 font-normal">In 7 Days</span>
-                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-3 py-4 bg-slate-50 dark:bg-[#080C14] rounded-2xl border border-slate-200/80 dark:border-white/5">
+              <VoiceWaveVisualizer
+                isActive={isListening || isAiSpeaking}
+                role={isListening ? "candidate" : "interviewer"}
+                label={isListening ? "Listening to your voice..." : "Microphone Ready"}
+              />
+
+              <button
+                onClick={handleToggleMic}
+                className={`p-4 rounded-full transition-all duration-300 transform active:scale-95 shadow-lg cursor-pointer ${
+                  isListening
+                    ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 scale-105 animate-pulse"
+                    : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 hover:scale-105"
+                }`}
+              >
+                {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              </button>
+
+              <div className="text-center">
+                <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                  {isListening ? "Tap to Stop Recording" : "Tap Mic to Dictate Spoken Answer"}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {isListening ? "Speak clearly in English" : "Or type directly in the box below"}
+                </span>
               </div>
             </div>
-          </div>
 
-        </div>
+            <div className="relative">
+              <textarea
+                rows={3}
+                placeholder="Your dictated answer will appear here in real-time, or type manually... (Press Ctrl + Enter to score)"
+                value={userAnswer}
+                onChange={(e) => {
+                  setUserAnswer(e.target.value);
+                  setTranscript(e.target.value);
+                }}
+                className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all font-mono leading-relaxed"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-slate-400">
+                {userAnswer ? userAnswer.trim().split(/\s+/).filter(Boolean).length : 0} words
+              </span>
+
+              <button
+                onClick={handleEvaluate}
+                disabled={evaluating || !userAnswer.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-98"
+              >
+                {evaluating ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Scoring Answer...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Submit & Score</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Bottom Sticky Action Bar */}
@@ -932,10 +923,18 @@ export const InterviewRoomPage = () => {
           <ChevronLeft className="w-4 h-4" /> Previous
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setShowIdealAnswer((prev) => !prev)}
+            className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-400 transition-colors items-center gap-1.5 cursor-pointer"
+          >
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-900 text-[10px] font-bold">Space</kbd>
+            <span>{showIdealAnswer ? "Hide Answer" : "Reveal Answer"}</span>
+          </button>
+
           <button
             onClick={handleShuffle}
-            className="p-2 rounded-xl text-slate-500 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="p-2 rounded-xl text-slate-500 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
             title="Randomize / Shuffle Questions"
           >
             <Shuffle className="w-4 h-4" />
