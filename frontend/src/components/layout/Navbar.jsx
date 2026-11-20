@@ -45,47 +45,47 @@ export const Navbar = () => {
 
       {/* Desktop Navigation Links */}
       {user && (
-        <nav className="hidden md:flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200 dark:border-white/5">
+        <nav className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-[#0E1526] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-inner">
           <Link
             to="/dashboard"
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               isActive("/dashboard")
                 ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
             }`}
           >
             Dashboard
           </Link>
           <Link
+            to="/interview"
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              isActive("/interview") || location.pathname.startsWith("/interview")
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
+            }`}
+          >
+            <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span>MERN Interview</span>
+          </Link>
+          <Link
             to="/library"
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               isActive("/library") || location.pathname.startsWith("/document")
                 ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
             }`}
           >
             Library
           </Link>
           <Link
             to="/revision"
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               isActive("/revision")
                 ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/5"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/5"
             }`}
           >
             Revision
-          </Link>
-          <Link
-            to="/interview"
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-              isActive("/interview") || location.pathname.startsWith("/interview")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/5"
-            }`}
-          >
-            <Mic className="w-3.5 h-3.5" />
-            <span>Interview</span>
           </Link>
         </nav>
       )}

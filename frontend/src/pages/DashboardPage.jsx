@@ -357,121 +357,97 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* 4 Dynamic Quantitative Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 4 Quantitative Developer Readiness Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Metric 1: Total Documents */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center">
-              <BookOpen className="w-5 h-5" />
+        {/* Metric 1: Total MERN Questions in Bank */}
+        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+              <Brain className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-semibold font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-              +{newDocsThisWeek} this week
+            <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+              MERN Bank
             </span>
           </div>
-          <div className="mt-4 relative z-10">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Documents</span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {documents.length}
+          <div className="mt-3">
+            <span className="text-xs text-slate-400 font-medium">Questions in Bank</span>
+            <h3 className="text-2xl font-black text-white font-mono mt-0.5">
+              {sprintData?.stats?.totalQuestions || 250}
             </h3>
           </div>
-          {/* Mini Sparkline Background Graph */}
-          <svg className="absolute bottom-0 right-0 w-32 h-16 opacity-30 text-purple-500 pointer-events-none" viewBox="0 0 100 40">
-            <path d="M0,35 Q25,10 50,25 T100,5 L100,40 L0,40 Z" fill="currentColor" opacity="0.2" />
-            <path d="M0,35 Q25,10 50,25 T100,5" fill="none" stroke="currentColor" strokeWidth="3" />
-          </svg>
         </div>
 
-        {/* Metric 2: Study Time */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-              <Clock className="w-5 h-5" />
+        {/* Metric 2: Mastered Questions */}
+        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-semibold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              ⚡ Active Time
+            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              🟢 Mastered
             </span>
           </div>
-          <div className="mt-4 relative z-10">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Study Time</span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {formatReadingTime(totalReadingSeconds)}
+          <div className="mt-3">
+            <span className="text-xs text-slate-400 font-medium">Conceptually Mastered</span>
+            <h3 className="text-2xl font-black text-emerald-400 font-mono mt-0.5">
+              {sprintData?.stats?.masteredCount || 0}
             </h3>
           </div>
-          {/* Mini Sparkline Background Graph */}
-          <svg className="absolute bottom-0 right-0 w-32 h-16 opacity-30 text-emerald-500 pointer-events-none" viewBox="0 0 100 40">
-            <path d="M0,30 Q30,35 60,15 T100,8 L100,40 L0,40 Z" fill="currentColor" opacity="0.2" />
-            <path d="M0,30 Q30,35 60,15 T100,8" fill="none" stroke="currentColor" strokeWidth="3" />
-          </svg>
         </div>
 
-        {/* Metric 3: Saved Annotations */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
-              <Bookmark className="w-5 h-5" />
+        {/* Metric 3: Due for Review Today */}
+        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-amber-500/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+              <RotateCcw className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-semibold font-mono text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              📌 {bookmarksCount} Bookmarks
+            <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              ⚡ Due Today
             </span>
           </div>
-          <div className="mt-4 relative z-10">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Saved Annotations</span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {bookmarksCount + highlightsCount}
+          <div className="mt-3">
+            <span className="text-xs text-slate-400 font-medium">Due for Review</span>
+            <h3 className="text-2xl font-black text-amber-400 font-mono mt-0.5">
+              {sprintData?.stats?.dueCount || 0}
             </h3>
           </div>
-          {/* Mini Sparkline Background Graph */}
-          <svg className="absolute bottom-0 right-0 w-32 h-16 opacity-30 text-amber-500 pointer-events-none" viewBox="0 0 100 40">
-            <path d="M0,25 Q20,35 50,15 T100,10 L100,40 L0,40 Z" fill="currentColor" opacity="0.2" />
-            <path d="M0,25 Q20,35 50,15 T100,10" fill="none" stroke="currentColor" strokeWidth="3" />
-          </svg>
         </div>
 
-        {/* Metric 4: Focus Level with Dynamic Gauge */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex items-center justify-between">
+        {/* Metric 4: Interview Readiness Rate */}
+        <div className="bg-[#0E1526] border border-slate-700/60 dark:border-white/10 rounded-2xl p-4 shadow-sm flex items-center justify-between hover:border-cyan-500/40 transition-colors">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 flex items-center justify-center mb-3">
-              <Target className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center mb-2">
+              <Target className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Completion Rate</span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">{focusTier.label}</h3>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-slate-400 font-medium">Job Readiness</span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <h3 className="text-base font-bold text-white font-mono">
+                {sprintData?.stats?.readinessScore || 0}% Ready
+              </h3>
             </div>
-            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">
-              {focusTier.note}
-            </span>
           </div>
 
-          {/* Radial Circular Progress Gauge */}
-          <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+          <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="currentColor"
-                className="text-slate-200 dark:text-slate-800"
+                className="text-slate-800"
                 strokeWidth="3.5"
               />
               <path
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="url(#cyan-gradient)"
+                stroke="#06B6D4"
                 strokeWidth="3.5"
-                strokeDasharray={`${avgCompletion}, 100`}
+                strokeDasharray={`${Math.max(5, sprintData?.stats?.readinessScore || 0)}, 100`}
                 strokeLinecap="round"
               />
-              <defs>
-                <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#06B6D4" />
-                  <stop offset="100%" stopColor="#3B82F6" />
-                </linearGradient>
-              </defs>
             </svg>
-            <span className="absolute text-xs font-extrabold text-slate-900 dark:text-white font-mono">
-              {avgCompletion}%
+            <span className="absolute text-[11px] font-extrabold text-white font-mono">
+              {sprintData?.stats?.readinessScore || 0}%
             </span>
           </div>
         </div>
@@ -576,27 +552,54 @@ export const DashboardPage = () => {
         {/* Col 3: Focus on Your Goals Card + Quick Links (3 cols) */}
         <div className="lg:col-span-3 space-y-5 flex flex-col justify-between">
           
-          {/* Goal Mountain Banner Card */}
-          <div 
-            className="rounded-2xl border border-slate-200 dark:border-white/10 p-5 shadow-sm text-white flex flex-col justify-between relative overflow-hidden bg-cover bg-center min-h-[160px] dark-panel"
-            style={{ backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%), url('/hero_banner.jpg')` }}
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-amber-300 flex items-center justify-center border border-amber-300/30">
-                <GraduationCap className="w-4 h-4" />
+          {/* MERN Placement Roadmap Progress Matrix */}
+          <div className="rounded-2xl border border-indigo-500/20 dark:border-white/10 p-5 shadow-sm bg-gradient-to-br from-[#0E1526] to-[#151E34] text-white flex flex-col justify-between min-h-[220px]">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white tracking-wide block">MERN Job Target</span>
+                    <span className="text-[10px] text-emerald-400 font-mono font-medium">Dec 2026 Placement</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                  250 Qs Bank
+                </span>
               </div>
-              <span className="text-xs font-bold text-white tracking-wide">Focus on Your Goals</span>
+
+              <div className="space-y-1.5 my-3 text-[11px]">
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">⚡ JavaScript & Async</span>
+                  <span className="font-mono text-indigo-400 font-semibold">60 Qs</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">⚛️ React & Hooks</span>
+                  <span className="font-mono text-cyan-400 font-semibold">55 Qs</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">🟢 Node.js & Express</span>
+                  <span className="font-mono text-emerald-400 font-semibold">50 Qs</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">🍃 MongoDB Aggregation</span>
+                  <span className="font-mono text-green-400 font-semibold">45 Qs</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">💼 11-Mo Internship Qs</span>
+                  <span className="font-mono text-amber-400 font-semibold">40 Qs</span>
+                </div>
+              </div>
             </div>
 
-            <p className="text-xs text-slate-200 leading-relaxed my-2">
-              Consistent effort today builds your success tomorrow.
-            </p>
-
             <button
-              onClick={() => navigate("/library")}
-              className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+              onClick={() => navigate("/interview")}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer active:scale-98"
             >
-              <span>Keep Going</span>
+              <Mic className="w-3.5 h-3.5" />
+              <span>Launch Voice Mock Studio</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

@@ -9,20 +9,23 @@ export default {
     extend: {
       colors: {
         dark: {
-          bg: "#0B0F17",
-          card: "#131926",
-          hover: "#1C2536",
+          canvas: "#080C14",
+          surface: "#0E1526",
+          elevated: "#151E34",
+          hover: "#1C2744",
           border: "rgba(255, 255, 255, 0.08)"
         },
         brand: {
-          primary: "#6366F1", // Indigo
-          accent: "#8B5CF6",  // Violet
-          teal: "#10B981"
+          indigo: "#6366F1",
+          teal: "#10B981",
+          cyan: "#06B6D4",
+          amber: "#F59E0B",
+          rose: "#F43F5E"
         }
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        serif: ["Lora", "serif"]
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "Fira Code", "monospace"]
       }
     },
   },
