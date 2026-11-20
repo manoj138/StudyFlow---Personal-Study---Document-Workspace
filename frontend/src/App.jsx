@@ -12,7 +12,6 @@ import { ReaderPage } from "./pages/ReaderPage";
 import { RevisionPage } from "./pages/RevisionPage";
 import { InterviewHubPage } from "./pages/InterviewHubPage";
 import { InterviewRoomPage } from "./pages/InterviewRoomPage";
-
 import { DocumentScannerLoader } from "./components/common/DocumentScannerLoader";
 
 // Protected Route Guard
@@ -33,71 +32,71 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-        <div className="min-h-screen bg-slate-50 dark:bg-[#080C14] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              
-              {/* Authenticated Workspace Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/library"
-                element={
-                  <ProtectedRoute>
-                    <LibraryPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/document/:id"
-                element={
-                  <ProtectedRoute>
-                    <ReaderPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/revision"
-                element={
-                  <ProtectedRoute>
-                    <RevisionPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/interview"
-                element={
-                  <ProtectedRoute>
-                    <InterviewHubPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/interview/:id"
-                element={
-                  <ProtectedRoute>
-                    <InterviewRoomPage />
-                  </ProtectedRoute>
-                }
-              />
+          <div className="min-h-screen bg-[#070709] bg-luxury-mesh text-zinc-100 flex flex-col font-sans antialiased selection:bg-indigo-500/25 selection:text-white">
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                
+                {/* Authenticated Workspace Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/library"
+                  element={
+                    <ProtectedRoute>
+                      <LibraryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/document/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ReaderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/revision"
+                  element={
+                    <ProtectedRoute>
+                      <RevisionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/interview"
+                  element={
+                    <ProtectedRoute>
+                      <InterviewHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/interview/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InterviewRoomPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
-  </ThemeProvider>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

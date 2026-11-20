@@ -1,8 +1,8 @@
 import React from "react";
 
 /**
- * Card Suite - Enterprise Geometric Surface System
- * Standard 1px border, 8px radius, flat zinc dark background.
+ * Card Suite - Enterprise Geometric Surface with Specular Lighting
+ * Linear/Raycast standard: Dual-tone bevel, physical top highlight, ambient shadow.
  */
 export const Card = ({
   children,
@@ -14,11 +14,11 @@ export const Card = ({
   return (
     <div
       onClick={onClick}
-      className={`rounded-lg border border-zinc-800 bg-[#121215] text-zinc-100 shadow-sm ${
+      className={`rounded-lg ${
         interactive
-          ? "cursor-pointer hover:border-zinc-700 transition-colors"
-          : ""
-      } ${className}`}
+          ? "specular-card-interactive cursor-pointer"
+          : "specular-card"
+      } text-zinc-100 ${className}`}
       {...props}
     >
       {children}
@@ -29,7 +29,7 @@ export const Card = ({
 export const CardHeader = ({ children, className = "", ...props }) => {
   return (
     <div
-      className={`p-4 sm:p-5 border-b border-zinc-800/80 flex flex-col gap-1 ${className}`}
+      className={`p-4 sm:p-5 border-b border-white/[0.06] flex flex-col gap-1 ${className}`}
       {...props}
     >
       {children}
@@ -51,7 +51,7 @@ export const CardTitle = ({ children, className = "", ...props }) => {
 export const CardDescription = ({ children, className = "", ...props }) => {
   return (
     <p
-      className={`text-xs text-zinc-400 leading-relaxed ${className}`}
+      className={`text-xs text-zinc-400 leading-relaxed font-sans ${className}`}
       {...props}
     >
       {children}
@@ -70,7 +70,7 @@ export const CardContent = ({ children, className = "", ...props }) => {
 export const CardFooter = ({ children, className = "", ...props }) => {
   return (
     <div
-      className={`p-3 sm:p-4 border-t border-zinc-800/80 bg-zinc-950/40 rounded-b-lg flex items-center justify-between gap-3 ${className}`}
+      className={`p-3 sm:p-4 border-t border-white/[0.06] bg-[#090a0f]/50 rounded-b-lg flex items-center justify-between gap-3 ${className}`}
       {...props}
     >
       {children}

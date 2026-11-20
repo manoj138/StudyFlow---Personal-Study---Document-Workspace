@@ -2,33 +2,52 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getDocumentById, updateReadingProgress } from "../services/documentService";
 import { SERVER_BASE_URL } from "../services/api";
-import { useTheme } from "../context/ThemeContext";
 import {
-  getBookmarks, createBookmark, deleteBookmark,
-  getHighlights, createHighlight, updateHighlight, deleteHighlight,
-  getNotes, createNote, deleteNote
+  getBookmarks,
+  createBookmark,
+  deleteBookmark,
+  getHighlights,
+  createHighlight,
+  updateHighlight,
+  deleteHighlight,
+  getNotes,
+  createNote,
+  deleteNote
 } from "../services/annotationService";
 import { createInterviewFromDocument } from "../services/interviewService";
 import { StudyReader } from "../components/reader/StudyReader";
 import {
-  BookOpen, Layers, Bookmark, Highlighter, MessageSquare, ChevronLeft, ChevronRight,
-  ArrowLeft, Plus, Trash2, CheckCircle, Sparkles, Sun, Moon, Edit3, X, Youtube, Play, Video,
-  GraduationCap, Brain, Mic
+  BookOpen,
+  Layers,
+  Bookmark,
+  Highlighter,
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Sparkles,
+  Edit3,
+  X,
+  Mic,
+  FileText
 } from "lucide-react";
-
+import {
+  Button,
+  Badge,
+  Card,
+  Kbd,
+  SegmentedTabs,
+  Modal,
+  Drawer,
+  ProgressBar
+} from "../components/ui";
 import { DocumentScannerLoader } from "../components/common/DocumentScannerLoader";
-
-const extractYouTubeVideoId = (url) => {
-  if (!url) return "";
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : "";
-};
 
 export const ReaderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
 
   const [document, setDocument] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,31 +74,11 @@ export const ReaderPage = () => {
   const [selectedText, setSelectedText] = useState("");
   const [highlightNoteText, setHighlightNoteText] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [popoverPos, setPopoverPos] = useState(null); // Dynamic floating popover coordinates
+  const [popoverPos, setPopoverPos] = useState(null);
 
   // Edit Existing Highlight Modal State
   const [editingHighlight, setEditingHighlight] = useState(null);
   const [startingInterview, setStartingInterview] = useState(false);
-
-  const handleStartDocInterview = async () => {
-    if (!document) return;
-    try {
-      setStartingInterview(true);
-      const res = await createInterviewFromDocument({
-        documentId: id,
-        title: `Interview: ${document.title}`,
-        topic: document.subjectTitle || "General"
-      });
-      if (res?.success && res.interviewSet?._id) {
-        navigate(`/interview/${res.interviewSet._id}`);
-      }
-    } catch (err) {
-      console.error("Failed to start mock interview from document:", err);
-      alert("Could not extract interview questions from this document. Try copying text and creating a set in the Interview Hub.");
-    } finally {
-      setStartingInterview(false);
-    }
-  };
 
   const mainCanvasRef = useRef(null);
   const saveTimeoutRef = useRef(null);
@@ -94,6 +93,7 @@ export const ReaderPage = () => {
 
   const loadDocumentDetails = async () => {
     try {
+      setLoading(true);
       const res = await getDocumentById(id);
       if (res.success) {
         setDocument(res.data);
@@ -104,7 +104,6 @@ export const ReaderPage = () => {
         }
       }
 
-      // Load Annotations
       const [bRes, hRes, nRes] = await Promise.all([
         getBookmarks(id),
         getHighlights(id),
@@ -121,7 +120,26 @@ export const ReaderPage = () => {
     }
   };
 
-  // 2-Way Page Navigation and Smooth Scroll
+  const handleStartDocInterview = async () => {
+    if (!document) return;
+    try {
+      setStartingInterview(true);
+      const res = await createInterviewFromDocument({
+        documentId: id,
+        title: `Interview: ${document.title}`,
+        topic: document.subjectTitle || "General"
+      });
+      if (res?.success && res.interviewSet?._id) {
+        navigate(`/interview/${res.interviewSet._id}`);
+      }
+    } catch (err) {
+      console.error("Failed to start mock interview from document:", err);
+      alert("Could not extract interview questions from this document. Try creating a set in the Interview Hub.");
+    } finally {
+      setStartingInterview(false);
+    }
+  };
+
   const handlePageOrScrollChange = (newPage) => {
     if (!document) return;
     const totalPages = Math.max(1, document.totalPages || 1);
@@ -130,7 +148,6 @@ export const ReaderPage = () => {
     setCurrentPage(targetPage);
     setInputPageVal(targetPage);
 
-    // Smooth Scroll Canvas in Study Reflow Mode
     if (mainCanvasRef.current && mode === "study") {
       const scrollParent = mainCanvasRef.current;
       const scrollableHeight = scrollParent.scrollHeight - scrollParent.clientHeight;
@@ -169,7 +186,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Real-time Page Number detection on manual scroll
   const handleCanvasScroll = (e) => {
     if (!document || !document.totalPages || document.totalPages <= 1) return;
     const target = e.currentTarget;
@@ -188,7 +204,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Handle Bookmark Creation
   const handleAddBookmark = async () => {
     try {
       const res = await createBookmark({
@@ -204,7 +219,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Handle Note Creation
   const handleAddNote = async (e) => {
     e.preventDefault();
     if (!newNoteContent.trim()) return;
@@ -226,7 +240,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Dynamic Floating Popover position text selection handler
   const handleTextSelection = () => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
@@ -243,7 +256,7 @@ export const ReaderPage = () => {
         if (canvas && rect.width > 0 && rect.height > 0) {
           const canvasRect = canvas.getBoundingClientRect();
 
-          let popTop = rect.top - canvasRect.top + canvas.scrollTop - 95;
+          let popTop = rect.top - canvasRect.top + canvas.scrollTop - 90;
           if (popTop < canvas.scrollTop + 10) {
             popTop = rect.bottom - canvasRect.top + canvas.scrollTop + 10;
           }
@@ -264,7 +277,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Click handler on canvas to detect clicks on existing <mark> highlights
   const handleCanvasClick = (e) => {
     const markTag = e.target.closest("mark[data-highlight-id]");
     if (markTag) {
@@ -276,7 +288,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Create new highlight
   const handleAddHighlight = async () => {
     if (!selectedText) return;
     try {
@@ -312,7 +323,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Update existing highlight color
   const handleUpdateHighlightColor = async (newColor) => {
     if (!editingHighlight) return;
     try {
@@ -331,7 +341,6 @@ export const ReaderPage = () => {
     }
   };
 
-  // Scroll directly to highlighted text element in document canvas
   const jumpToHighlight = (highlightId) => {
     if (!mainCanvasRef.current) return;
     const markEl = mainCanvasRef.current.querySelector(`[data-highlight-id="${highlightId}"]`);
@@ -350,756 +359,137 @@ export const ReaderPage = () => {
 
   if (!document) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#080C14] text-slate-600 dark:text-slate-400 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#070709] text-zinc-400 flex flex-col items-center justify-center p-4">
         <p>Document not found.</p>
-        <button
-          onClick={() => navigate("/library")}
-          className="mt-4 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:underline"
-        >
+        <Button variant="outline" size="sm" onClick={() => navigate("/library")} className="mt-4">
           ← Back to Library
-        </button>
+        </Button>
       </div>
     );
   }
 
+  const sidebarTabs = [
+    { id: "toc", label: "TOC", icon: Layers },
+    { id: "highlights", label: `Marks (${highlights.length})`, icon: Highlighter },
+    { id: "bookmarks", label: `Pins (${bookmarks.length})`, icon: Bookmark },
+    { id: "notes", label: `Notes (${notes.length})`, icon: MessageSquare }
+  ];
+
   return (
-    <div className="h-[calc(100vh-57px)] bg-slate-100 dark:bg-[#080C14] text-slate-900 dark:text-slate-100 flex flex-col overflow-hidden font-sans transition-colors duration-200">
-      {/* Reader Header Toolbar */}
-      <div className="glass-panel border-b border-slate-200 dark:border-white/5 px-3 sm:px-6 py-2.5 flex items-center justify-between z-20 shrink-0 gap-2">
-        {/* Left: Back, Sidebar Toggle & Title */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button
+    <div className="h-[calc(100vh-53px)] bg-[#070709] bg-luxury-mesh text-zinc-100 flex flex-col overflow-hidden font-sans antialiased">
+      {/* Precision Floating Reader Header */}
+      <header className="bg-[#12131a] border-b border-white/[0.08] px-4 py-2 flex items-center justify-between z-20 shrink-0 gap-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        {/* Left: Back & Document Metadata */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={ArrowLeft}
             onClick={() => navigate("/library")}
-            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0"
             title="Back to Library"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <button
+            className="h-8 w-8 p-0"
+          />
+
+          <Button
+            variant={sidebarOpen ? "secondary" : "ghost"}
+            size="sm"
+            icon={Layers}
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0"
             title="Toggle Sidebar"
-          >
-            <Layers className="w-4 h-4" />
-          </button>
+            className="h-8 w-8 p-0"
+          />
+
           <div className="flex flex-col min-w-0 flex-1">
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-full sm:max-w-xs">{document.title}</h2>
-            <p className="hidden sm:block text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              Page {currentPage} of {document.totalPages}
-            </p>
+            <h2 className="text-xs sm:text-sm font-semibold text-zinc-100 truncate max-w-full sm:max-w-md">
+              {document.title}
+            </h2>
+            <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
+              <span>{document.subjectTitle || "General"}</span>
+              <span>•</span>
+              <span>Page {currentPage} of {document.totalPages || 1}</span>
+            </div>
           </div>
         </div>
 
-        {/* Center: Mode Switcher (Desktop / Tablet) */}
-        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/5 rounded-xl p-1 gap-1 shrink-0">
+        {/* Center: Mode Switcher */}
+        <div className="hidden sm:flex items-center bg-[#090a0f] border border-white/[0.08] rounded-md p-0.5 gap-1 shrink-0">
           <button
+            type="button"
             onClick={() => setMode("study")}
-            className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
               mode === "study"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                ? "bg-zinc-800 text-white shadow-sm"
+                : "text-zinc-400 hover:text-white"
             }`}
-            title="Study Reflow Mode"
           >
-            <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
-            <span>Study Mode</span>
+            Study Reflow
           </button>
           <button
+            type="button"
             onClick={() => setMode("original")}
-            className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
               mode === "original"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                ? "bg-zinc-800 text-white shadow-sm"
+                : "text-zinc-400 hover:text-white"
             }`}
-            title="Original PDF Mode"
           >
-            <Layers className="w-3.5 h-3.5 shrink-0" />
-            <span>PDF Mode</span>
+            Original PDF
           </button>
         </div>
 
         {/* Right Controls */}
         <div className="flex items-center gap-2 shrink-0">
           {mode === "study" && (
-            <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-xl px-2 py-1">
+            <div className="hidden sm:flex items-center gap-1 bg-[#090a0f] border border-white/[0.08] rounded-md px-2 py-0.5 text-xs font-mono">
               <button
+                type="button"
                 onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs px-1 font-bold"
-                title="Decrease Font Size"
+                className="text-zinc-400 hover:text-white px-1 font-bold"
               >
                 A-
               </button>
-              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono px-1">{fontSize}px</span>
+              <span className="text-[11px] text-zinc-500 px-1">{fontSize}px</span>
               <button
+                type="button"
                 onClick={() => setFontSize(Math.min(28, fontSize + 2))}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs px-1 font-bold"
-                title="Increase Font Size"
+                className="text-zinc-400 hover:text-white px-1 font-bold"
               >
                 A+
               </button>
             </div>
           )}
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Bookmark}
             onClick={handleAddBookmark}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all text-xs font-medium flex items-center gap-1"
             title="Bookmark Current Page"
           >
-            <Bookmark className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden lg:inline">Bookmark</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="indigo"
+            size="sm"
+            icon={Mic}
+            loading={startingInterview}
             onClick={handleStartDocInterview}
-            disabled={startingInterview}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white disabled:opacity-40 transition-all text-xs font-semibold flex items-center gap-1.5"
-            title="Generate Voice Mock Interview from this document"
+            title="Generate Interview Drill"
           >
-            {startingInterview ? (
-              <>
-                <div className="w-3.5 h-3.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <span className="hidden sm:inline">Generating...</span>
-              </>
-            ) : (
-              <>
-                <Mic className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden sm:inline">Mock Interview</span>
-              </>
-            )}
-          </button>
+            <span className="hidden sm:inline">Mock Drill</span>
+          </Button>
 
-          {/* Desktop Direct Page Jump Control (< 4/52 >) */}
-          <form onSubmit={handlePageInputSubmit} className="hidden sm:flex items-center gap-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
+          {/* Page Jump */}
+          <form onSubmit={handlePageInputSubmit} className="hidden sm:flex items-center gap-0.5 bg-[#090a0f] border border-white/[0.08] rounded-md p-0.5 font-mono text-xs">
             <button
               type="button"
               disabled={currentPage <= 1}
               onClick={() => handlePageOrScrollChange(currentPage - 1)}
-              className="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-colors"
-              title="Previous Page"
+              className="p-1 rounded text-zinc-400 hover:text-white disabled:opacity-30"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft size={13} />
             </button>
-            <div className="flex items-center text-xs font-mono px-1">
-              <input
-                type="number"
-                min={1}
-                max={document.totalPages || 1}
-                value={inputPageVal}
-                onChange={(e) => setInputPageVal(e.target.value)}
-                onBlur={handlePageInputSubmit}
-                className="w-8 sm:w-10 bg-transparent text-center font-bold text-indigo-600 dark:text-indigo-400 focus:outline-none focus:bg-slate-200 dark:focus:bg-slate-900 rounded py-0.5"
-                title="Type page number and press Enter"
-              />
-              <span className="text-slate-500 dark:text-slate-400">/{document.totalPages || 1}</span>
-            </div>
-            <button
-              type="button"
-              disabled={currentPage >= (document.totalPages || 1)}
-              onClick={() => handlePageOrScrollChange(currentPage + 1)}
-              className="p-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-colors"
-              title="Next Page"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Main Workspace Area */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <div
-            onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-20 md:hidden"
-          />
-        )}
-
-        {/* Sidebar Drawer */}
-        <div className={`absolute md:relative inset-y-0 left-0 w-[85vw] max-w-[320px] md:w-80 glass-panel border-r border-slate-200 dark:border-white/10 flex flex-col z-30 transition-all duration-300 ${sidebarOpen ? "ml-0 shadow-2xl" : "-ml-[85vw] md:-ml-80"}`}>
-          {/* Segmented Tab Switcher Header */}
-          <div className="p-2 border-b border-slate-200 dark:border-white/10 bg-slate-100/90 dark:bg-slate-950/80">
-            <div className="flex items-center bg-slate-200/70 dark:bg-slate-900/90 p-1 rounded-xl gap-1">
-              <button
-                onClick={() => setActiveTab("toc")}
-                className={`flex-1 py-1.5 px-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeTab === "toc"
-                    ? "bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-                title="Table of Contents"
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Contents</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("highlights")}
-                className={`flex-1 py-1.5 px-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeTab === "highlights"
-                    ? "bg-white dark:bg-amber-600 text-amber-600 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-                title="Saved Highlights"
-              >
-                <Highlighter className="w-3.5 h-3.5" />
-                <span>({highlights.length})</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("bookmarks")}
-                className={`flex-1 py-1.5 px-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeTab === "bookmarks"
-                    ? "bg-white dark:bg-emerald-600 text-emerald-600 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-                title="Bookmarks"
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                <span>({bookmarks.length})</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("notes")}
-                className={`flex-1 py-1.5 px-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeTab === "notes"
-                    ? "bg-white dark:bg-purple-600 text-purple-600 dark:text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-                title="Personal Notes"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>({notes.length})</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Sidebar Tab Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {activeTab === "toc" && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between pb-1">
-                  <h4 className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-indigo-500" /> Table of Contents
-                  </h4>
-                </div>
-                {document.toc && document.toc.length > 0 ? (
-                  document.toc.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handlePageOrScrollChange(item.pageNumber)}
-                      className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between transition-all ${
-                        currentPage === item.pageNumber
-                          ? "bg-indigo-600 text-white font-bold shadow-sm"
-                          : "bg-slate-100/60 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/5 hover:border-indigo-400"
-                      }`}
-                    >
-                      <span className="truncate">{item.title}</span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${currentPage === item.pageNumber ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>P.{item.pageNumber}</span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
-                    <Layers className="w-8 h-8 text-slate-400 mx-auto" />
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No Chapters Detected</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Use direct page navigation to jump across pages.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "highlights" && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-white/5">
-                  <h4 className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Highlighter className="w-3.5 h-3.5" /> Saved Highlights ({highlights.length})
-                  </h4>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Click to jump</span>
-                </div>
-                {highlights.length > 0 ? (
-                  highlights.map((h) => (
-                    <div
-                      key={h._id}
-                      onClick={() => {
-                        jumpToHighlight(h._id);
-                        setEditingHighlight(h);
-                      }}
-                      className="glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-white/5 cursor-pointer space-y-2 hover:border-amber-500/50 hover:shadow-md transition-all group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`w-2.5 h-2.5 rounded-full ${
-                              h.color === "yellow" ? "bg-amber-400 shadow-sm shadow-amber-400/50" : h.color === "green" ? "bg-emerald-400 shadow-sm shadow-emerald-400/50" : h.color === "blue" ? "bg-sky-400 shadow-sm shadow-sky-400/50" : "bg-pink-400 shadow-sm shadow-pink-400/50"
-                            }`}
-                          />
-                          <span className="text-[10px] font-extrabold font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
-                            Page {h.pageNumber}
-                          </span>
-                        </div>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await deleteHighlight(h._id);
-                            setHighlights(highlights.filter((item) => item._id !== h._id));
-                            if (editingHighlight && editingHighlight._id === h._id) setEditingHighlight(null);
-                          }}
-                          className="text-slate-400 hover:text-rose-500 p-1 transition-colors"
-                          title="Delete Highlight"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      <p className="text-xs text-slate-800 dark:text-slate-200 font-serif italic line-clamp-3 border-l-2 border-amber-500 pl-2.5 py-0.5">
-                        "{h.selectedText}"
-                      </p>
-
-                      {h.noteText && (
-                        <div className="text-[11px] text-purple-700 dark:text-purple-300 bg-purple-500/10 border border-purple-500/20 p-2 rounded-xl flex items-center gap-1.5">
-                          <MessageSquare className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                          <span className="truncate font-medium">{h.noteText}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 space-y-2.5 bg-slate-50/50 dark:bg-slate-900/30">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/20">
-                      <Highlighter className="w-5 h-5" />
-                    </div>
-                    <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">No Highlights Yet</h5>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                      Select any text inside the document to highlight in yellow, green, blue or pink with inline comments.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "bookmarks" && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-white/5">
-                  <h4 className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Bookmark className="w-3.5 h-3.5" /> Bookmarks ({bookmarks.length})
-                  </h4>
-                  <button
-                    onClick={handleAddBookmark}
-                    className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" /> Page {currentPage}
-                  </button>
-                </div>
-
-                {bookmarks.length > 0 ? (
-                  bookmarks.map((b) => (
-                    <div
-                      key={b._id}
-                      onClick={() => handlePageOrScrollChange(b.pageNumber)}
-                      className="glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-white/5 cursor-pointer flex items-center justify-between hover:border-emerald-500/50 hover:shadow-md transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                          <Bookmark className="w-4 h-4 fill-current" />
-                        </div>
-                        <div>
-                          <h5 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{b.title}</h5>
-                          <span className="text-[10px] font-extrabold font-mono text-slate-500 dark:text-slate-400">Page {b.pageNumber}</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          await deleteBookmark(b._id);
-                          setBookmarks(bookmarks.filter((item) => item._id !== b._id));
-                        }}
-                        className="text-slate-400 hover:text-rose-500 p-1 transition-colors"
-                        title="Delete Bookmark"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-slate-900/30">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/20">
-                      <Bookmark className="w-5 h-5 fill-current" />
-                    </div>
-                    <div>
-                      <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">No Bookmarks Saved</h5>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
-                        Save key pages so you can jump back to your important study sections instantly.
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleAddBookmark}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Bookmark Page {currentPage}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "notes" && (
-              <div className="space-y-4">
-                <form onSubmit={handleAddNote} className="space-y-2.5 glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-2">
-                    <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider flex items-center gap-1">
-                      <MessageSquare className="w-3.5 h-3.5" /> Add Note
-                    </span>
-                    <span className="text-[10px] font-mono font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">Page {currentPage}</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Note title..."
-                    value={newNoteTitle}
-                    onChange={(e) => setNewNoteTitle(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="Write personal note for current page..."
-                    value={newNoteContent}
-                    onChange={(e) => setNewNoteContent(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                  <button
-                    type="submit"
-                    className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors shadow-sm cursor-pointer"
-                  >
-                    Save Note for Page {currentPage}
-                  </button>
-                </form>
-
-                <div className="space-y-2.5">
-                  {notes.length > 0 ? (
-                    notes.map((n) => (
-                      <div key={n._id} className="glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-white/5 space-y-1.5 shadow-sm hover:border-purple-500/40 transition-all">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-purple-600 dark:text-purple-300">{n.title}</span>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">P.{n.pageNumber}</span>
-                            <button
-                              onClick={async () => {
-                                await deleteNote(n._id);
-                                setNotes(notes.filter((item) => item._id !== n._id));
-                              }}
-                              className="text-slate-400 hover:text-rose-500 p-1 transition-colors"
-                              title="Delete Note"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{n.content}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-6 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/30">
-                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No Personal Notes Yet</p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Use the form above to record key concepts for revision.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Primary Reading Canvas Container */}
-        <div
-          ref={mainCanvasRef}
-          onScroll={handleCanvasScroll}
-          onMouseUp={handleTextSelection}
-          onClick={handleCanvasClick}
-          className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-200/40 dark:bg-[#080C14] flex justify-center relative transition-colors duration-200"
-        >
-          <div className="w-full max-w-4xl space-y-6">
-            {/* Dynamic Floating Selection Popover Toolbar */}
-            {selectedText && (
-              <div
-                style={
-                  popoverPos
-                    ? {
-                        position: "absolute",
-                        top: `${popoverPos.top}px`,
-                        left: `${popoverPos.left}px`,
-                        transform: "translateX(-50%)",
-                        width: "90%",
-                        maxWidth: "500px"
-                      }
-                    : {}
-                }
-                className={`${
-                  popoverPos ? "z-50 border-indigo-500/50" : "sticky top-4 z-40 max-w-xl mx-auto border-indigo-500/40"
-                } glass-panel p-3.5 rounded-2xl border shadow-xl space-y-3 bg-slate-900/95 backdrop-blur-md relative`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Highlighter className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="text-xs font-mono text-slate-300 truncate max-w-xs sm:max-w-md italic">
-                      "{selectedText}"
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => { setSelectedText(""); setShowNoteInput(false); setHighlightNoteText(""); setPopoverPos(null); }}
-                    className="text-slate-500 hover:text-slate-300 text-xs font-bold px-1.5 py-0.5 rounded hover:bg-slate-800"
-                    title="Cancel Selection"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/5">
-                  {/* Color Selectors */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-slate-400 font-medium mr-1">Color:</span>
-                    {[
-                      { id: "yellow", name: "Yellow", bg: "bg-amber-400", ring: "ring-amber-400" },
-                      { id: "green", name: "Green", bg: "bg-emerald-400", ring: "ring-emerald-400" },
-                      { id: "blue", name: "Blue", bg: "bg-sky-400", ring: "ring-sky-400" },
-                      { id: "pink", name: "Pink", bg: "bg-pink-400", ring: "ring-pink-400" }
-                    ].map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setSelectedHighlightColor(c.id)}
-                        className={`w-6 h-6 rounded-full border border-white/20 transition-all flex items-center justify-center ${c.bg} ${
-                          selectedHighlightColor === c.id ? `ring-2 ring-offset-2 ring-offset-slate-900 ${c.ring} scale-110 shadow-sm` : "opacity-70 hover:opacity-100"
-                        }`}
-                        title={`Highlight in ${c.name}`}
-                      >
-                        {selectedHighlightColor === c.id && <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowNoteInput(!showNoteInput)}
-                      className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1 ${
-                        showNoteInput || highlightNoteText
-                          ? "bg-purple-600/30 border-purple-500 text-purple-300"
-                          : "bg-slate-900 border-white/10 text-slate-300 hover:text-white"
-                      }`}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>{showNoteInput ? "Close Note" : "+ Add Comment"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleAddHighlight}
-                      className="px-3.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Highlight & Save</span>
-                    </button>
-                  </div>
-                </div>
-
-                {showNoteInput && (
-                  <div className="pt-2 animate-fade-in">
-                    <input
-                      type="text"
-                      placeholder="Add a comment or personal note to this highlight..."
-                      value={highlightNoteText}
-                      onChange={(e) => setHighlightNoteText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleAddHighlight();
-                      }}
-                      className="w-full bg-slate-950 border border-purple-500/40 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                      autoFocus
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Modal to Edit Existing Highlight */}
-            {editingHighlight && (
-              <div className="sticky top-4 z-40 glass-panel p-4 rounded-2xl border border-amber-500/50 shadow-xl space-y-3 max-w-xl mx-auto bg-slate-900/95 backdrop-blur-md">
-                <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Edit3 className="w-4 h-4 text-amber-400" />
-                    <h4 className="text-xs font-bold text-white">Edit Highlight Color</h4>
-                  </div>
-                  <button
-                    onClick={() => setEditingHighlight(null)}
-                    className="p-1 text-slate-400 hover:text-white rounded"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <p className="text-xs text-slate-300 italic font-serif border-l-2 border-amber-400/60 pl-2">
-                  "{editingHighlight.selectedText}"
-                </p>
-
-                <div className="flex items-center justify-between gap-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-slate-400 font-medium">Change Color:</span>
-                    {[
-                      { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-400" },
-                      { id: "green", bg: "bg-emerald-400", ring: "ring-emerald-400" },
-                      { id: "blue", bg: "bg-sky-400", ring: "ring-sky-400" },
-                      { id: "pink", bg: "bg-pink-400", ring: "ring-pink-400" }
-                    ].map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => handleUpdateHighlightColor(c.id)}
-                        className={`w-6 h-6 rounded-full border border-white/20 transition-all flex items-center justify-center ${c.bg} ${
-                          editingHighlight.color === c.id ? `ring-2 ring-offset-2 ring-offset-slate-900 ${c.ring} scale-110` : "opacity-60 hover:opacity-100"
-                        }`}
-                        title={`Change to ${c.id}`}
-                      >
-                        {editingHighlight.color === c.id && <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={async () => {
-                      await deleteHighlight(editingHighlight._id);
-                      setHighlights(highlights.filter((h) => h._id !== editingHighlight._id));
-                      setEditingHighlight(null);
-                    }}
-                    className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Reading View Modes */}
-            {mode === "study" ? (
-              /* Study Mode Reflow View */
-              <div
-                className="bg-white dark:bg-[#111827] p-6 sm:p-12 rounded-3xl border border-slate-200 dark:border-white/10 shadow-lg leading-relaxed text-slate-900 dark:text-slate-100 selection:bg-indigo-500/30 font-sans transition-colors"
-                style={{ fontSize: `${fontSize}px` }}
-              >
-                <div className="border-b border-slate-200 dark:border-white/10 pb-4 mb-6">
-                  <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest font-mono">
-                    {document.fileType === "youtube" ? "🎬 YouTube AI Study Workspace" : `Study Reflow Mode • Page ${currentPage} of ${document.totalPages}`}
-                  </span>
-                  <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{document.title}</h1>
-                </div>
-
-                {/* Interactive YouTube Video Player Embed */}
-                {document.fileType === "youtube" && (
-                  <div className="bg-slate-950 p-3 sm:p-4 rounded-3xl border border-red-500/30 shadow-2xl mb-8 overflow-hidden">
-                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-                      <span className="text-xs font-bold text-red-400 flex items-center gap-2">
-                        <Youtube className="w-4 h-4 text-red-500" /> Interactive YouTube Study Player
-                      </span>
-                      {document.youtubeUrl && (
-                        <a
-                          href={document.youtubeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-mono transition-colors"
-                        >
-                          <span>Watch on YouTube</span> ↗
-                        </a>
-                      )}
-                    </div>
-                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-inner bg-black">
-                      <iframe
-                        src={`https://www.youtube-nocookie.com/embed/${document.youtubeVideoId || extractYouTubeVideoId(document.youtubeUrl)}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&rel=0`}
-                        title={document.title}
-                        className="w-full h-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <StudyReader htmlContent={document.extractedText} highlights={highlights} />
-              </div>
-            ) : (
-              /* Original PDF Mode View */
-              <div className="bg-white dark:bg-[#111827] p-4 rounded-3xl border border-slate-200 dark:border-white/10 shadow-lg min-h-[75vh] flex flex-col">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-white/10 text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    📄 Original File View ({document.fileType ? document.fileType.toUpperCase() : "DOC"}) • Page {currentPage}
-                  </span>
-                  {document.fileUrl && (
-                    <a
-                      href={`${SERVER_BASE_URL}${document.fileUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600 hover:text-white rounded-xl transition-all font-semibold flex items-center gap-1 border border-indigo-500/30"
-                    >
-                      <span>Open Original File</span> ↗
-                    </a>
-                  )}
-                </div>
-
-                {document.fileType === "pdf" ? (
-                  <iframe
-                    key={`pdf-${currentPage}`}
-                    src={`${SERVER_BASE_URL}${document.fileUrl}#page=${currentPage}`}
-                    className="w-full flex-1 min-h-[600px] rounded-2xl border-none bg-slate-900"
-                    title={document.title}
-                  />
-                ) : (
-                  <div className="flex-1 p-4 bg-slate-900/60 rounded-2xl border border-slate-800 overflow-y-auto">
-                    <StudyReader htmlContent={document.extractedText} highlights={highlights} />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Mobile Reader Toolbar (Kindle & Notion Style Bottom Control Strip) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 sm:hidden flex items-center gap-2 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md border border-slate-700/80 dark:border-white/15 px-3 py-1.5 rounded-full shadow-2xl">
-        {/* Mode Switcher */}
-        <div className="flex items-center bg-white/10 rounded-full p-0.5">
-          <button
-            onClick={() => setMode("study")}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all ${
-              mode === "study" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-300"
-            }`}
-          >
-            <GraduationCap className="w-3 h-3 text-amber-300" />
-            <span>Study</span>
-          </button>
-          <button
-            onClick={() => setMode("original")}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all ${
-              mode === "original" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-300"
-            }`}
-          >
-            <Layers className="w-3 h-3" />
-            <span>PDF</span>
-          </button>
-        </div>
-
-        <div className="w-px h-4 bg-white/20" />
-
-        {/* Mobile Page Controls */}
-        <form onSubmit={handlePageInputSubmit} className="flex items-center gap-1">
-          <button
-            type="button"
-            disabled={currentPage <= 1}
-            onClick={() => handlePageOrScrollChange(currentPage - 1)}
-            className="p-1 rounded-full text-slate-300 hover:text-white disabled:opacity-30"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <div className="flex items-center text-xs font-mono">
             <input
               type="number"
               min={1}
@@ -1107,21 +497,214 @@ export const ReaderPage = () => {
               value={inputPageVal}
               onChange={(e) => setInputPageVal(e.target.value)}
               onBlur={handlePageInputSubmit}
-              className="w-7 bg-transparent text-center font-bold text-indigo-400 focus:outline-none"
+              className="w-8 bg-transparent text-center font-bold text-zinc-200 focus:outline-none"
             />
-            <span className="text-slate-400">/{document.totalPages || 1}</span>
-          </div>
-          <button
-            type="button"
-            disabled={currentPage >= (document.totalPages || 1)}
-            onClick={() => handlePageOrScrollChange(currentPage + 1)}
-            className="p-1 rounded-full text-slate-300 hover:text-white disabled:opacity-30"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
+            <span className="text-zinc-500 pr-1">/{document.totalPages || 1}</span>
+            <button
+              type="button"
+              disabled={currentPage >= (document.totalPages || 1)}
+              onClick={() => handlePageOrScrollChange(currentPage + 1)}
+              className="p-1 rounded text-zinc-400 hover:text-white disabled:opacity-30"
+            >
+              <ChevronRight size={13} />
+            </button>
+          </form>
+        </div>
+      </header>
 
+      {/* Main Workspace Area */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar Drawer */}
+        <div
+          className={`absolute md:relative inset-y-0 left-0 w-[85vw] max-w-[320px] md:w-80 bg-[#0c0d14] border-r border-white/[0.08] flex flex-col z-30 transition-all duration-300 ${
+            sidebarOpen ? "ml-0 shadow-2xl" : "-ml-[85vw] md:-ml-80"
+          }`}
+        >
+          <div className="p-2 border-b border-white/[0.06] bg-[#090a0f]">
+            <SegmentedTabs
+              tabs={sidebarTabs}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+            {activeTab === "toc" && (
+              <div className="space-y-1.5">
+                {document.toc && document.toc.length > 0 ? (
+                  document.toc.map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handlePageOrScrollChange(item.pageNumber)}
+                      className={`w-full text-left px-3 py-2 rounded-md text-xs flex items-center justify-between transition-colors ${
+                        currentPage === item.pageNumber
+                          ? "bg-zinc-800 text-white font-semibold border border-white/[0.1]"
+                          : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      <span className="truncate">{item.title}</span>
+                      <span className="text-[10px] font-mono text-zinc-500">P.{item.pageNumber}</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-xs text-zinc-500">
+                    No Table of Contents detected. Use page jump above.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "highlights" && (
+              <div className="space-y-2">
+                {highlights.map((h) => (
+                  <div
+                    key={h._id}
+                    onClick={() => {
+                      jumpToHighlight(h._id);
+                      setEditingHighlight(h);
+                    }}
+                    className="p-3 rounded-md bg-[#12131a] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer space-y-1.5 transition-colors"
+                  >
+                    <div className="flex items-center justify-between text-[10px] font-mono">
+                      <span className="text-indigo-400 font-semibold">Page {h.pageNumber}</span>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await deleteHighlight(h._id);
+                          setHighlights(highlights.filter((item) => item._id !== h._id));
+                        }}
+                        className="text-zinc-500 hover:text-rose-400"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-zinc-200 line-clamp-2 italic">
+                      "{h.selectedText}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === "bookmarks" && (
+              <div className="space-y-2">
+                {bookmarks.map((b) => (
+                  <div
+                    key={b._id}
+                    onClick={() => handlePageOrScrollChange(b.pageNumber)}
+                    className="p-2.5 rounded-md bg-[#12131a] border border-white/[0.06] hover:border-white/[0.14] cursor-pointer flex items-center justify-between text-xs"
+                  >
+                    <span className="text-zinc-200 font-medium">{b.title || `Page ${b.pageNumber}`}</span>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await deleteBookmark(b._id);
+                        setBookmarks(bookmarks.filter((item) => item._id !== b._id));
+                      }}
+                      className="text-zinc-500 hover:text-rose-400"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === "notes" && (
+              <div className="space-y-3">
+                <form onSubmit={handleAddNote} className="space-y-2 pb-3 border-b border-white/[0.06]">
+                  <textarea
+                    rows={2}
+                    placeholder="Write a personal study note..."
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    className="w-full p-2.5 rounded-md bg-zinc-950 border border-white/[0.08] text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400 font-mono"
+                  />
+                  <Button type="submit" variant="primary" size="sm" className="w-full">
+                    Save Note
+                  </Button>
+                </form>
+
+                <div className="space-y-2">
+                  {notes.map((n) => (
+                    <div key={n._id} className="p-3 rounded-md bg-[#12131a] border border-white/[0.06] space-y-1">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                        <span>Page {n.pageNumber}</span>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await deleteNote(n._id);
+                            setNotes(notes.filter((item) => item._id !== n._id));
+                          }}
+                          className="hover:text-rose-400"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                      <p className="text-xs text-zinc-200 leading-relaxed font-sans">{n.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Reading Canvas */}
+        <div
+          ref={mainCanvasRef}
+          onScroll={handleCanvasScroll}
+          onMouseUp={handleTextSelection}
+          onClick={handleCanvasClick}
+          className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 relative flex justify-center"
+        >
+          <div className="w-full max-w-3xl space-y-6" style={{ fontSize: `${fontSize}px` }}>
+            {mode === "study" ? (
+              <StudyReader
+                htmlContent={document.content || ""}
+                highlights={highlights}
+              />
+            ) : (
+              <div className="w-full h-full min-h-[700px] rounded-lg overflow-hidden border border-white/[0.08] bg-[#12131a]">
+                <iframe
+                  src={`${SERVER_BASE_URL}/${document.filePath || ""}`}
+                  className="w-full h-[85vh] border-none"
+                  title="PDF Viewer"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Floating Selection Popover */}
+          {popoverPos && selectedText && (
+            <div
+              style={{ top: `${popoverPos.top}px`, left: `${popoverPos.left}px` }}
+              className="absolute z-50 -translate-x-1/2 p-1.5 rounded-lg bg-[#12131a] border border-white/[0.12] shadow-2xl flex items-center gap-1.5 animate-in fade-in zoom-in-95"
+            >
+              <div className="flex items-center gap-1 px-1">
+                {["yellow", "green", "blue", "pink"].map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => {
+                      setSelectedHighlightColor(color);
+                      handleAddHighlight();
+                    }}
+                    className={`w-5 h-5 rounded-full transition-transform hover:scale-125 ${
+                      color === "yellow" ? "bg-amber-400" : color === "green" ? "bg-emerald-400" : color === "blue" ? "bg-sky-400" : "bg-pink-400"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
+
+export default ReaderPage;

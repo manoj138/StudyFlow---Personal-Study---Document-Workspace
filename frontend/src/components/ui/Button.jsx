@@ -1,10 +1,10 @@
-  import React from "react";
+import React from "react";
 import { Loader2 } from "lucide-react";
 import { Kbd } from "./Kbd";
 
 /**
- * Button - Precision Interactive Control
- * Sharp 6px radius, Linear/Vercel standard, native Kbd shortcut integration.
+ * Button - Precision Interactive Control with Specular Bevels
+ * Linear/Vercel standard: Dual-tone bevel, physical top highlight, native Kbd shortcut.
  */
 export const Button = ({
   children,
@@ -20,27 +20,27 @@ export const Button = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none";
+    "inline-flex items-center justify-center font-medium transition-all duration-150 rounded-md focus:outline-none focus:ring-1 focus:ring-white/20 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none tracking-tight";
 
   const variants = {
     primary:
-      "bg-zinc-100 hover:bg-white text-zinc-950 font-semibold shadow-sm border border-zinc-200",
+      "bg-white hover:bg-zinc-100 text-zinc-950 font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_1px_3px_rgba(0,0,0,0.6)] border border-white/30",
     indigo:
-      "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm border border-indigo-500",
+      "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_1px_3px_rgba(0,0,0,0.5)] border border-indigo-400/40 hover:shadow-[0_0_16px_rgba(99,102,241,0.3)]",
     secondary:
-      "bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 shadow-sm",
+      "bg-[#151620] hover:bg-[#1a1c29] text-zinc-200 border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.4)]",
     outline:
-      "bg-transparent hover:bg-zinc-850 text-zinc-300 border border-zinc-800 hover:border-zinc-700",
+      "bg-transparent hover:bg-white/[0.04] text-zinc-300 border border-white/[0.1] hover:border-white/[0.18]",
     ghost:
-      "bg-transparent hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-100",
+      "bg-transparent hover:bg-white/[0.05] text-zinc-400 hover:text-zinc-100",
     danger:
-      "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30",
+      "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-[inset_0_1px_0_rgba(244,63,94,0.15)]",
     warning:
-      "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30",
+      "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-[inset_0_1px_0_rgba(245,158,11,0.15)]",
     success:
-      "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+      "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[inset_0_1px_0_rgba(16,185,129,0.15)]",
     subtle:
-      "bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/50"
+      "bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 border border-white/[0.06]"
   };
 
   const sizes = {

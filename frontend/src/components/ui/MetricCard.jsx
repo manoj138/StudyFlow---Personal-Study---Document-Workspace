@@ -1,8 +1,8 @@
 import React from "react";
 
 /**
- * MetricCard - High-Density Quantitative Tile
- * Linear/Raycast standard: JetBrains Mono digits, 1px border, compact layout.
+ * MetricCard - High-Density Quantitative Tile with Specular Highlight
+ * Linear/Raycast standard: Tabular figures, micro-glow corner, physical bevel.
  */
 export const MetricCard = ({
   label,
@@ -16,19 +16,23 @@ export const MetricCard = ({
   return (
     <div
       onClick={onClick}
-      className={`rounded-lg border border-zinc-800 bg-[#121215] p-4 text-zinc-100 shadow-sm flex flex-col justify-between gap-2.5 transition-colors ${
-        onClick ? "cursor-pointer hover:border-zinc-700" : ""
+      className={`rounded-lg specular-card-interactive p-4 text-zinc-100 flex flex-col justify-between gap-3 ${
+        onClick ? "cursor-pointer" : ""
       } ${className}`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400">
           {label}
         </span>
-        {Icon && <Icon size={15} className="text-zinc-500 shrink-0" />}
+        {Icon && (
+          <div className="p-1 rounded-md bg-white/[0.04] border border-white/[0.06] text-zinc-400 shrink-0">
+            <Icon size={14} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-1">
-        <div className="text-2xl font-mono font-bold text-zinc-100 tracking-tight leading-none">
+        <div className="text-2xl font-mono font-bold text-zinc-100 tracking-tight leading-none tabular-nums">
           {value}
         </div>
         {(subtext || trend) && (

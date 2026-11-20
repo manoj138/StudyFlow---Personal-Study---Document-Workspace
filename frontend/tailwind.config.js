@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         dark: {
-          canvas: "#080C14",
-          surface: "#0E1526",
-          elevated: "#151E34",
-          hover: "#1C2744",
-          border: "rgba(255, 255, 255, 0.08)"
+          canvas: "#070709",
+          surface: "#0c0d13",
+          elevated: "#12131a",
+          border: "rgba(255, 255, 255, 0.08)",
+          specular: "rgba(255, 255, 255, 0.12)"
         },
         brand: {
           indigo: "#6366F1",
@@ -26,6 +26,15 @@ export default {
       fontFamily: {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "Fira Code", "monospace"]
+      },
+      letterSpacing: {
+        tighter: "-0.03em",
+        tight: "-0.015em"
+      },
+      boxShadow: {
+        specular: "inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.6)",
+        "specular-glow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 0 24px -4px rgba(99, 102, 241, 0.15)",
+        "kbd-bevel": "0 1px 0 1px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12)"
       }
     },
   },
