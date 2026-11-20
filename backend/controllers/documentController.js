@@ -154,6 +154,7 @@ export const getDocuments = async (req, res, next) => {
     if (sort === "title") sortOption = { title: 1 };
 
     const documents = await Document.find(query)
+      .select("-extractedText -aiFlashcards -aiChapters")
       .populate("subjectId", "name color icon")
       .sort(sortOption);
 
