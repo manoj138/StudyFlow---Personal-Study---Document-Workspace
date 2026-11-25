@@ -12,6 +12,8 @@ import { ReaderPage } from "./pages/ReaderPage";
 import { RevisionPage } from "./pages/RevisionPage";
 import { InterviewHubPage } from "./pages/InterviewHubPage";
 import { InterviewRoomPage } from "./pages/InterviewRoomPage";
+import { ChallengeHubPage } from "./pages/ChallengeHubPage";
+import { ChallengeViewPage } from "./pages/ChallengeViewPage";
 import { DocumentScannerLoader } from "./components/common/DocumentScannerLoader";
 
 // Protected Route Guard
@@ -88,6 +90,26 @@ function App() {
                       <InterviewRoomPage />
                     </ProtectedRoute>
                   }
+                />
+                <Route
+                  path="/challenge"
+                  element={
+                    <ProtectedRoute>
+                      <ChallengeHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/challenge/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ChallengeViewPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/roadmap"
+                  element={<Navigate to="/challenge" replace />}
                 />
 
                 <Route path="*" element={<Navigate to="/" replace />} />

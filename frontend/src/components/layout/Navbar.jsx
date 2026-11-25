@@ -13,7 +13,8 @@ import {
   Mic,
   BookOpen,
   LayoutDashboard,
-  RotateCcw
+  RotateCcw,
+  CalendarCheck
 } from "lucide-react";
 import { Button, Badge, Kbd } from "../ui";
 
@@ -79,6 +80,18 @@ export const Navbar = () => {
           >
             <Mic size={13} className="text-indigo-400" />
             <span>Interview Hub</span>
+          </Link>
+
+          <Link
+            to="/challenge"
+            className={`px-3 py-1 rounded-[4px] transition-colors flex items-center gap-1.5 select-none ${
+              isActive("/challenge") || location.pathname.startsWith("/challenge")
+                ? "bg-[#1C202C] text-zinc-100 shadow-sm border border-white/[0.12] font-semibold"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+            }`}
+          >
+            <CalendarCheck size={13} className="text-amber-400" />
+            <span>Roadmap</span>
           </Link>
 
           <Link
@@ -221,6 +234,22 @@ export const Navbar = () => {
               <div className="flex items-center gap-2">
                 <Mic size={13} className="text-indigo-400" />
                 <span>Interview Hub</span>
+              </div>
+              <ChevronRight size={13} className="text-zinc-500" />
+            </Link>
+
+            <Link
+              to="/challenge"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`w-full p-2.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                isActive("/challenge")
+                  ? "bg-[#1C202C] text-zinc-100 font-semibold border border-white/[0.12]"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <CalendarCheck size={13} className="text-amber-400" />
+                <span>Study Roadmaps</span>
               </div>
               <ChevronRight size={13} className="text-zinc-500" />
             </Link>
