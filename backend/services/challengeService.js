@@ -436,6 +436,285 @@ export const get30DayDeveloperRoadmapTemplate = (userName = "Manoj") => {
 };
 
 /**
+ * High-fidelity Parser for Structured Markdown Roadmaps (.md / .txt)
+ * Accurately extracts tracks, table data, days (Day 1..N), emojis, phase colors, and subtasks
+ * without any table artifact leakage.
+ */
+export const parseStructuredMarkdownRoadmap = (text, userName = "Manoj") => {
+  if (!text || typeof text !== "string") return null;
+
+  const cleanName = userName ? userName.split(" ")[0] : "Manoj";
+  const lines = text.split(/\r?\n/);
+
+  // Check if text has at least 2 Day headers (e.g. ### Day 1, Day 2 – ...)
+  const dayHeaderRegex = /^(?:#{1,4}\s+|\*{1,2})?Day\s+(\d+)(?:\*{1,2})?\s*[:–\-\.]\s*(.*?)(?:\*{1,2})?$/i;
+  let dayMatchesCount = 0;
+  for (const line of lines) {
+    if (dayHeaderRegex.test(line.trim())) {
+      dayMatchesCount++;
+      if (dayMatchesCount >= 2) break;
+    }
+  }
+
+  if (dayMatchesCount < 2) {
+    return null;
+  }
+
+  // 1. Extract Document Title
+  let title = "Developer Study Roadmap Challenge";
+  const titleLine = lines.find((l) => /^#\s+(.+)/.test(l.trim()));
+  if (titleLine) {
+    title = titleLine
+      .replace(/^#\s+/, "")
+      .replace(/^[\p{Extended_Pictographic}\u2600-\u27BF\s]+/u, "")
+      .trim();
+  }
+
+  // 2. Extract Subtitle & Tagline
+  let subtitle = "";
+  let tagline = "Learn • Build • Deploy – Your Dream Career";
+  const quoteLine = lines.find((l) => /^>\s+(.+)/.test(l.trim()));
+  if (quoteLine) {
+    const rawQuote = quoteLine.replace(/^>\s+/, "").replace(/\*\*/g, "").trim();
+    const parts = rawQuote.split(/[—–-]/);
+    if (parts.length > 1) {
+      subtitle = parts[0].trim();
+      tagline = parts.slice(1).join(" — ").trim();
+    } else {
+      subtitle = rawQuote;
+    }
+  }
+
+  // 3. Extract Tracks from Overview Table and Track Headings
+  const tracks = [];
+  const trackMap = new Map();
+
+  // Method A: Check Markdown Overview Table (| Track | Topic | Days | Color |)
+  const tableRowRegex = /^\|\s*(\d+)\s*\|\s*([^|]+)\|\s*(\d+)[–\-](\d+)\s*\|\s*([^|]+)\|/i;
+  for (const line of lines) {
+    const m = line.trim().match(tableRowRegex);
+    if (m) {
+      const trackNum = parseInt(m[1]);
+      const topic = m[2].trim();
+      const startDay = parseInt(m[3]);
+      const endDay = parseInt(m[4]);
+      const colorRaw = m[5].trim();
+      const hexMatch = colorRaw.match(/#([0-9a-fA-F]{6})/);
+      const hexColor = hexMatch ? `#${hexMatch[1]}` : "#3B82F6";
+
+      const trackObj = {
+        name: topic,
+        badge: String(trackNum),
+        icon: "Code",
+        color: hexColor,
+        startDay,
+        endDay
+      };
+      tracks.push(trackObj);
+      trackMap.set(trackNum, trackObj);
+    }
+  }
+
+  // Method B: Check Track Headings (## 🌹 Track 1: ... — Days 1–4)
+  const trackHeadingRegex = /^##\s*([\p{Extended_Pictographic}\u2600-\u27BF])?\s*(?:Track\s*(\d+)[:\s–-]+)?(.*?)(?:—|--|-)?\s*Days?\s*(\d+)[–\-](\d+)/u;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const m = line.match(trackHeadingRegex);
+    if (m) {
+      const emoji = m[1] || "";
+      const trackNum = m[2] ? parseInt(m[2]) : tracks.length + 1;
+      const topic = m[3].trim() || `Track ${trackNum}`;
+      const startDay = parseInt(m[4]);
+      const endDay = parseInt(m[5]);
+
+      let hexColor = "#3B82F6";
+      for (let j = i + 1; j < Math.min(lines.length, i + 5); j++) {
+        const cM = lines[j].match(/#([0-9a-fA-F]{6})/);
+        if (cM) {
+          hexColor = `#${cM[1]}`;
+          break;
+        }
+      }
+
+      if (trackMap.has(trackNum)) {
+        const existing = trackMap.get(trackNum);
+        if (emoji) existing.badge = emoji;
+        if (hexColor !== "#3B82F6") existing.color = hexColor;
+      } else {
+        const trackObj = {
+          name: topic,
+          badge: emoji || String(trackNum),
+          icon: "Layers",
+          color: hexColor,
+          startDay,
+          endDay
+        };
+        tracks.push(trackObj);
+        trackMap.set(trackNum, trackObj);
+      }
+    }
+  }
+
+  // 4. Extract Days and Subtasks
+  const days = [];
+  let currentDay = null;
+  let currentTrackName = "";
+  let currentTrackColor = "#3B82F6";
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i];
+    const line = rawLine.trim();
+
+    // Track section heading update
+    const trackM = line.match(trackHeadingRegex);
+    if (trackM) {
+      const tNum = trackM[2] ? parseInt(trackM[2]) : null;
+      if (tNum && trackMap.has(tNum)) {
+        const tObj = trackMap.get(tNum);
+        currentTrackName = tObj.name;
+        currentTrackColor = tObj.color;
+      } else {
+        currentTrackName = trackM[3].trim();
+        for (let j = i + 1; j < Math.min(lines.length, i + 5); j++) {
+          const cM = lines[j].match(/#([0-9a-fA-F]{6})/);
+          if (cM) {
+            currentTrackColor = `#${cM[1]}`;
+            break;
+          }
+        }
+      }
+      continue;
+    }
+
+    // Day header
+    const dayM = line.match(dayHeaderRegex);
+    if (dayM) {
+      if (currentDay) {
+        days.push(currentDay);
+      }
+      const dayNum = parseInt(dayM[1]);
+      let rawTitle = (dayM[2] || `Day ${dayNum}`).trim();
+      rawTitle = rawTitle.replace(/^[\*\s]+|[\*\s]+$/g, "").trim();
+
+      // Find matching track for this day
+      let assignedPhase = currentTrackName;
+      let assignedColor = currentTrackColor;
+      const matchedTrack = tracks.find((t) => dayNum >= t.startDay && dayNum <= t.endDay);
+      if (matchedTrack) {
+        assignedPhase = matchedTrack.name;
+        assignedColor = matchedTrack.color;
+      }
+
+      currentDay = {
+        dayNumber: dayNum,
+        title: rawTitle,
+        phase: assignedPhase || `Phase ${Math.ceil(dayNum / 7)}`,
+        phaseColor: assignedColor || "#3B82F6",
+        subTasks: []
+      };
+      continue;
+    }
+
+    // Subtasks under current day
+    if (currentDay && /^[-*+]\s+/.test(line)) {
+      // Ignore table rows or markdown dividers
+      if (line.startsWith("|") || line.includes("|---|") || /^[-*_=\s]{3,}$/.test(line)) {
+        continue;
+      }
+
+      const taskText = line
+        .replace(/^[-*+]\s+/, "")
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .trim();
+
+      if (taskText.length > 0) {
+        currentDay.subTasks.push({
+          id: `d${currentDay.dayNumber}-t${currentDay.subTasks.length + 1}`,
+          text: taskText,
+          completed: false
+        });
+      }
+    }
+  }
+
+  // Append last day
+  if (currentDay) {
+    days.push(currentDay);
+  }
+
+  if (days.length === 0) {
+    return null;
+  }
+
+  // Ensure default subtasks if any day had no bullet points
+  days.forEach((d) => {
+    if (d.subTasks.length === 0) {
+      d.subTasks = [
+        { id: `d${d.dayNumber}-t1`, text: `Concept exploration & theory: ${d.title}`, completed: false },
+        { id: `d${d.dayNumber}-t2`, text: "Hands-on coding exercises & practice", completed: false },
+        { id: `d${d.dayNumber}-t3`, text: "Daily review notes & commit to GitHub", completed: false }
+      ];
+    }
+  });
+
+  const durationDays = days.length;
+
+  const cleanTracks = tracks.map(({ name, badge, icon, color }) => ({
+    name,
+    badge,
+    icon: icon || "Code",
+    color: color || "#3B82F6"
+  }));
+
+  const dailySchedule = [
+    { timeSlot: "6:00 - 7:00 AM", activity: "DSA Practice & Core Revision" },
+    { timeSlot: "9:00 - 1:00 PM", activity: "Core Learning + Hands-on Coding" },
+    { timeSlot: "2:00 - 3:00 PM", activity: "Project Work & Feature Building" },
+    { timeSlot: "7:00 - 8:00 PM", activity: "Revision + Technical MCQs & Q&A" },
+    { timeSlot: "8:00 - 9:00 PM", activity: "Next Day Planning & GitHub Sync" }
+  ];
+
+  const proTips = [
+    `Follow the plan strictly for all ${durationDays} days without breaking the streak.`,
+    "Build real projects, not just passive tutorial watching.",
+    "Solve problems consistently every single day.",
+    "Deploy your projects live and put verifiable links on your portfolio.",
+    "Take mock interviews and practice explaining your code out loud."
+  ];
+
+  const recommendedTools = [
+    { name: "VS Code", description: "Primary Code Editor & Extensions", icon: "Code" },
+    { name: "Git & GitHub", description: "Version Control & Portfolio Showcase", icon: "GitBranch" },
+    { name: "Vercel / Render", description: "Full Stack Cloud Deployment", icon: "Cloud" },
+    { name: "Postman", description: "REST API Testing & Documentation", icon: "Send" }
+  ];
+
+  const goals = [
+    `Master comprehensive engineering concepts across ${durationDays} days`,
+    "Build a robust streak and consistent study discipline",
+    "Create demonstrable portfolio projects with live deployment",
+    "Gain confidence for real-world technical interviews"
+  ];
+
+  return {
+    title,
+    subtitle: subtitle || (cleanTracks.length > 0 ? cleanTracks.map((t) => t.name).slice(0, 4).join(" • ") : `${durationDays} Days Roadmap`),
+    tagline,
+    durationDays,
+    dailyHours: 4,
+    badgeText: `${durationDays} Days • Focused Study • Real Projects`,
+    goalBadge: "Dream Big... and Achieve It!",
+    tracks: cleanTracks,
+    days,
+    dailySchedule,
+    proTips,
+    recommendedTools,
+    goals,
+    motivationalQuote: `Consistency is the Key – You Can Do It, ${cleanName}! 🚀`
+  };
+};
+
+/**
  * Intelligent AI Roadmap Generator using Google Gemini
  */
 export const generateChallengeWithAI = async ({
@@ -449,6 +728,16 @@ export const generateChallengeWithAI = async ({
   const cleanName = userName ? userName.split(" ")[0] : "Manoj";
   const numDays = Math.max(3, Math.min(100, parseInt(durationDays) || 30));
   const hours = Math.max(1, Math.min(12, parseInt(dailyHours) || 4));
+
+  const combinedText = (fileText || prompt || "").trim();
+
+  // 1. Check if the content is already a structured day-by-day markdown document
+  const structuredRoadmap = parseStructuredMarkdownRoadmap(combinedText, cleanName);
+  if (structuredRoadmap && structuredRoadmap.days && structuredRoadmap.days.length >= 2) {
+    console.log(`[Challenge Service] Detected structured markdown roadmap (${structuredRoadmap.days.length} days, ${structuredRoadmap.tracks.length} tracks). Using direct parser.`);
+    if (dailyHours) structuredRoadmap.dailyHours = hours;
+    return structuredRoadmap;
+  }
 
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -596,11 +885,20 @@ export const generateHeuristicChallenge = ({
     return get30DayDeveloperRoadmapTemplate(cleanName);
   }
 
-  // Extract keywords or lines from input text
+  // Extract keywords or lines from input text, ignoring markdown tables, dividers, code blocks
   const rawLines = (fileText || prompt)
     .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => {
+      if (!l || l.length <= 3 || l.length > 120) return false;
+      // Filter out markdown tables, dividers, blockquotes, code fences
+      if (l.startsWith("|") || l.endsWith("|") || /\|:?[-]+:?\|/.test(l)) return false;
+      if (/^[-*_=\s]{3,}$/.test(l)) return false;
+      if (l.startsWith("```") || l.startsWith(">")) return false;
+      return true;
+    })
     .map((l) => l.replace(/^[-*#\d.)\s]+/, "").trim())
-    .filter((l) => l.length > 3 && l.length < 120);
+    .filter((l) => l.length > 3);
 
   const tracks = [
     { name: "Phase 1: Fundamentals", badge: "01", icon: "BookOpen", color: "#3B82F6" },
