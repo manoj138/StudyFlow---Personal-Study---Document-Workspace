@@ -5,7 +5,8 @@ import { Document } from "../models/Document.js";
 import {
   extractTextFromFile,
   extractQuestionsWithAI,
-  evaluateAnswerWithAI
+  evaluateAnswerWithAI,
+  sanitizeExtractedQuestions
 } from "../services/interviewService.js";
 
 /**
@@ -224,6 +225,20 @@ export const getInterviewSetById = async (req, res, next) => {
         success: false,
         error: "Interview set not found."
       });
+    }
+
+    // Auto-heal dirty/merged questions if any (e.g. questions containing leaked answers)
+    const hasDirtyQuestions = interviewSet.questions?.some(
+      (q) => /(?:ans(?:wer)?\s*[:.)-]?|Q\s*[\):.-])/i.test(q.question)
+    );
+
+    if (hasDirtyQuestions) {
+      console.log(`[Interview Set Auto-Repair] Sanitizing question set: ${interviewSet.title}`);
+      const sanitized = sanitizeExtractedQuestions(interviewSet.questions, interviewSet.topic);
+      if (sanitized.length > 0) {
+        interviewSet.questions = sanitized;
+        await interviewSet.save();
+      }
     }
 
     res.json({

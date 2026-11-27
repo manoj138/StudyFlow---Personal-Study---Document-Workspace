@@ -157,7 +157,7 @@ export const InterviewRoomPage = () => {
     }
 
     if (autoSpeakEnabled) {
-      speakCurrentQuestion(currentQuestion.question);
+      speakCurrentQuestion(getCleanQuestionText(currentQuestion.question));
     }
   }, [currentIndex, currentQuestion?._id]);
 
@@ -218,7 +218,7 @@ export const InterviewRoomPage = () => {
       speechEngine.stop();
       setIsAiSpeaking(false);
     } else if (currentQuestion) {
-      speakCurrentQuestion(currentQuestion.question);
+      speakCurrentQuestion(getCleanQuestionText(currentQuestion.question));
     }
   };
 
@@ -336,6 +336,32 @@ export const InterviewRoomPage = () => {
     } catch (err) {
       console.error("Failed to save interview attempt:", err);
     }
+  };
+
+  // Clean question text so leaked answers or headers are NEVER displayed in the question card
+  const getCleanQuestionText = (qStr) => {
+    if (!qStr) return "";
+    let clean = qStr.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "");
+    clean = clean.replace(/^Q(?:uestion)?\s*\d*[\):.-]\s*/i, "");
+    clean = clean.replace(/^[:.)-\s]+/, "");
+    // Check if answer is leaked inside question
+    const ansIdx = clean.search(/\s+(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s+/i);
+    if (ansIdx !== -1) {
+      clean = clean.slice(0, ansIdx);
+    }
+    return clean.trim();
+  };
+
+  // Clean model answer so if it was leaked in question, it's displayed properly in revealed state
+  const getCleanAnswerText = (qObj) => {
+    if (!qObj) return "";
+    let ans = qObj.answer || "";
+    // If answer was placeholder or fallback, but question contained leaked answer
+    const leakedMatch = qObj.question?.match(/\s+(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s+([\s\S]*)$/i);
+    if (leakedMatch && (!ans || ans.includes("Review core concept") || ans.includes("Review the model answer"))) {
+      ans = leakedMatch[1].trim();
+    }
+    return ans.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
   };
 
   // Helper to render code snippets inside technical answers
@@ -634,7 +660,7 @@ export const InterviewRoomPage = () => {
 
           <CardContent className="space-y-4">
             <h2 className="text-base sm:text-lg font-semibold text-zinc-100 leading-snug">
-              {currentQuestion.question}
+              {getCleanQuestionText(currentQuestion.question)}
             </h2>
 
             {/* Spacebar Reveal Button */}
@@ -673,7 +699,7 @@ export const InterviewRoomPage = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {renderAnswerContent(currentQuestion.answer)}
+                  {renderAnswerContent(getCleanAnswerText(currentQuestion))}
 
                   {/* Expected Interview Keywords */}
                   {currentQuestion.keywords?.length > 0 && (

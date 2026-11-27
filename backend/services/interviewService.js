@@ -59,22 +59,27 @@ export const extractTextFromFile = async (filePath) => {
 };
 
 /**
- * Fallback regex/heuristic Q&A parser for when AI is unavailable or offline
+ * Universal regex/heuristic Q&A parser for when AI is unavailable or pre-formatted text
  */
 export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
+  if (!rawText) return [];
   const cleaned = rawText.replace(/\r\n/g, "\n");
   const questions = [];
 
-  // Strategy 1: Look for explicit Question / Answer tags
-  // Matches Q: ... Ans: ... or Question 1: ... Answer: ...
-  const qaPattern = /(?:(?:^|\n)(?:Q(?:uestion)?\s*(?:\d+)?[:.)-]|(\d+)[\.\)])\s*([\s\S]*?))(?=(?:(?:\n|\s*)(?:A(?:nswer)?\s*(?:\d+)?[:.)-]|Ans[:.)-])\s*))(?:\n|\s*)(?:A(?:nswer)?\s*(?:\d+)?[:.)-]|Ans[:.)-])\s*([\s\S]*?)(?=(?:\n\s*(?:Q(?:uestion)?\s*(?:\d+)?[:.)-]|\d+[\.\)])|$))/gi;
+  // Strategy 1: Universal Q & Ans regex (handles Q ), Q:, Question 1:, 1) ... ans, answer, Ans:, etc., inline or multi-line)
+  const pattern = /(?:^|\n|\s)(?:Q(?:uestion)?\s*\d*[\):.-]|\b\d+[\).])\s*([\s\S]*?)(?=(?:(?:\n|\s)*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*))(?:\n|\s)*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*([\s\S]*?)(?=(?:(?:\n|\s+)(?:Q(?:uestion)?\s*\d*[\):.-]|\b\d+[\).])\s*)|$)/gi;
 
   let match;
-  while ((match = qaPattern.exec(cleaned)) !== null) {
-    const qText = (match[2] || "").trim();
-    let aText = (match[3] || "").trim();
+  while ((match = pattern.exec(cleaned)) !== null) {
+    let qText = (match[1] || "").trim();
+    let aText = (match[2] || "").trim();
 
-    if (qText.length > 5 && aText.length > 5) {
+    // Strip leading document headers if caught in first question (e.g. "Computer Fundamentals (50 Questions)")
+    qText = qText.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").trim();
+    qText = qText.replace(/^[:.)-\s]+/, "").trim();
+    aText = aText.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
+
+    if (qText.length > 3 && aText.length > 2) {
       let englishAns = aText;
       let marathiExp = "";
 
@@ -89,7 +94,7 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
       }
 
       questions.push({
-        question: qText.replace(/^[:.)-\s]+/, "").trim(),
+        question: qText,
         answer: englishAns,
         marathiExplanation: marathiExp,
         keywords: extractKeywordsHeuristic(englishAns, 5),
@@ -100,7 +105,27 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
     }
   }
 
-  // Strategy 2: If no explicit Q/A tags, split by Markdown headers (### or ##)
+  // Strategy 2: If questions end with '?' and are followed by ans/answer
+  if (questions.length === 0) {
+    const qMarkPattern = /([\s\S]*?\?)\s*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*([\s\S]*?)(?=(?:[\s\S]*?\?\s*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-]))|$)/gi;
+    while ((match = qMarkPattern.exec(cleaned)) !== null) {
+      let q = (match[1] || "").trim().replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").replace(/^[:.)-\s]+/, "");
+      let a = (match[2] || "").trim().replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "");
+      if (q.length > 5 && a.length > 3) {
+        questions.push({
+          question: q,
+          answer: a,
+          marathiExplanation: "",
+          keywords: extractKeywordsHeuristic(a, 5),
+          difficulty: "medium",
+          category: defaultTopic,
+          track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
+        });
+      }
+    }
+  }
+
+  // Strategy 3: Split by Markdown headers (### or ##)
   if (questions.length === 0) {
     const sections = cleaned.split(/\n(?=#{1,3}\s+|\d+\.\s+)/g);
     for (const section of sections) {
@@ -114,14 +139,15 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
             answer: body,
             keywords: extractKeywordsHeuristic(body, 5),
             difficulty: "medium",
-            category: defaultTopic
+            category: defaultTopic,
+            track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
           });
         }
       }
     }
   }
 
-  // Strategy 3: Paragraph splitter fallback if still empty
+  // Strategy 4: Paragraph fallback only if nothing else matched
   if (questions.length === 0) {
     const paragraphs = cleaned
       .split(/\n\s*\n/)
@@ -136,18 +162,79 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
         answer: a,
         keywords: extractKeywordsHeuristic(a, 4),
         difficulty: "medium",
-        category: defaultTopic
+        category: defaultTopic,
+        track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
       });
     }
   }
 
-  return questions.slice(0, 50); // limit to reasonable set size
+  return questions.slice(0, 100);
+};
+
+/**
+ * Post-processor that guarantees every question object has only a pure question title
+ * and never leaks answers or multiple questions into question.
+ */
+export const sanitizeExtractedQuestions = (questions = [], defaultTopic = "General") => {
+  const sanitized = [];
+
+  for (const item of questions) {
+    let q = String(item.question || "").trim();
+    let a = String(item.answer || "").trim();
+
+    // Check if q has leaked answers (e.g. contains 'ans' or 'Q )')
+    if (/(?:ans(?:wer)?\s*[:.)-]?|Q\s*[\):.-])/i.test(q)) {
+      const splitItems = parseQuestionsHeuristic(q, item.category || defaultTopic);
+      if (splitItems.length > 0) {
+        sanitized.push(...splitItems);
+        continue;
+      }
+
+      // Single leaked answer match
+      const singleMatch = q.match(/^([\s\S]*?)(?:\s+(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s+)([\s\S]*)$/i);
+      if (singleMatch) {
+        q = singleMatch[1].trim();
+        if (!a || a.includes("Review core concept") || a.includes("Review the model answer")) {
+          a = singleMatch[2].trim();
+        }
+      }
+    }
+
+    // Clean any residual headers or Q markers from question
+    q = q.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").trim();
+    q = q.replace(/^Q(?:uestion)?\s*\d*[\):.-]\s*/i, "").trim();
+    q = q.replace(/^[:.)-\s]+/, "").trim();
+
+    // Clean answer
+    a = a.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
+
+    if (q.length > 3) {
+      sanitized.push({
+        ...item,
+        question: q,
+        answer: a || "Review the model answer.",
+        keywords: Array.isArray(item.keywords) && item.keywords.length > 0 ? item.keywords : extractKeywordsHeuristic(a, 5),
+        difficulty: ["easy", "medium", "hard"].includes(item.difficulty) ? item.difficulty : "medium",
+        category: item.category || defaultTopic,
+        track: item.track || defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
+      });
+    }
+  }
+
+  return sanitized;
 };
 
 /**
  * Intelligent Q&A parser using Google Gemini with automatic model fallback
  */
 export const extractQuestionsWithAI = async (rawText, defaultTopic = "General") => {
+  // If rawText already contains structured Q&A markers (e.g. 'Q ) ... ans ...' or '1. ... ans ...')
+  const heuristicMatch = parseQuestionsHeuristic(rawText, defaultTopic);
+  if (heuristicMatch.length >= 2) {
+    console.log(`[Interview Parser] Detected ${heuristicMatch.length} explicit structured questions from source.`);
+    return sanitizeExtractedQuestions(heuristicMatch, defaultTopic);
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
 
   // Truncate input to avoid exceeding token limits (first ~25,000 characters)
@@ -172,6 +259,12 @@ Extract all interview questions and comprehensive answers from the text below.
 If the text contains notes instead of Q&A, create high-impact interview questions and model answers based on the material.
 For each question, extract 3-5 crucial technical keywords/phrases an interviewer expects to hear.
 Provide an appropriate difficulty ('easy', 'medium', or 'hard') and category/topic.
+
+CRITICAL SEPARATION RULES:
+1. The 'question' property MUST contain ONLY the question title (e.g. "What is an Operating System (OS)?").
+2. NEVER include 'ans', answers, or multiple questions inside the 'question' property!
+3. The 'answer' property MUST contain ONLY the corresponding model answer.
+4. Each item in the array MUST represent exactly ONE question and answer pair.
 
 Return ONLY a valid JSON array of objects. Do not include markdown code block ticks, do not include explanations outside the JSON array.
 Format:
@@ -211,7 +304,7 @@ ${truncatedText}
 
           const parsed = JSON.parse(cleanJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map((item) => ({
+            const mapped = parsed.map((item) => ({
               question: String(item.question || "").trim(),
               answer: String(item.answer || "").trim(),
               marathiExplanation: String(item.marathiExplanation || "").trim(),
@@ -224,6 +317,7 @@ ${truncatedText}
               category: String(item.category || defaultTopic).trim(),
               track: String(item.category || defaultTopic).toLowerCase().replace(/[^a-z0-9]/g, "_")
             }));
+            return sanitizeExtractedQuestions(mapped, defaultTopic);
           }
         }
       } catch (err) {
@@ -234,7 +328,7 @@ ${truncatedText}
 
   // If AI generation fails or no API key, use reliable heuristic fallback
   console.log("[Interview AI Parser] Falling back to heuristic rule-based parser.");
-  return parseQuestionsHeuristic(rawText, defaultTopic);
+  return sanitizeExtractedQuestions(parseQuestionsHeuristic(rawText, defaultTopic), defaultTopic);
 };
 
 /**
