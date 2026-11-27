@@ -561,8 +561,30 @@ export const InterviewRoomPage = () => {
               </h2>
               <Badge variant="neutral" size="sm">{interviewSet.topic}</Badge>
             </div>
-            <div className="text-[11px] font-mono text-zinc-500">
-              Question {currentIndex + 1} of {questions.length}
+            <div className="text-[11px] font-mono text-zinc-500 flex items-center gap-2">
+              <span>Question {currentIndex + 1} of {questions.length}</span>
+              {questions.length > 20 && (
+                <div className="flex items-center gap-1 ml-2">
+                  <span className="text-[10px] text-zinc-400">Jump:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={questions.length}
+                    placeholder="#"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= 1 && val <= questions.length) {
+                          setCurrentIndex(val - 1);
+                          e.target.value = "";
+                        }
+                      }
+                    }}
+                    className="w-14 px-1.5 py-0.5 bg-zinc-900 border border-zinc-700/80 rounded text-[11px] font-mono text-zinc-100 text-center focus:outline-none focus:border-indigo-400"
+                    title={`Type question 1-${questions.length} and press Enter`}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

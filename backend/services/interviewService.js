@@ -59,55 +59,99 @@ export const extractTextFromFile = async (filePath) => {
 };
 
 /**
- * Universal regex/heuristic Q&A parser for when AI is unavailable or pre-formatted text
+ * Universal regex/heuristic Q&A parser for Markdown (.md), PDF, Word (.docx), and plain text
  */
 export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
   if (!rawText) return [];
-  const cleaned = rawText.replace(/\r\n/g, "\n");
+  
+  let cleaned = rawText.replace(/\r\n/g, "\n");
+
+  // 1. Markdown Normalization: Clean bold and heading markers around Q/A
+  cleaned = cleaned.replace(/\*\*(?:ans(?:wer)?)\s*[:.)-]?\*\*/gi, "Ans: ");
+  cleaned = cleaned.replace(/\*\*(?:q(?:uestion)?\s*\d*)\s*[:.)-]?\*\*/gi, "Q: ");
+  cleaned = cleaned.replace(/\*\*(?:marathi\s+explanation|मराठी\s+स्पष्टीकरण)\s*[:.)-]?\*\*/gi, "मराठी स्पष्टीकरण: ");
+  cleaned = cleaned.replace(/^[ \t]*#{1,4}\s+/gm, "");
+
   const questions = [];
 
-  // Strategy 1: Universal Q & Ans regex (handles Q ), Q:, Question 1:, 1) ... ans, answer, Ans:, etc., inline or multi-line)
-  const pattern = /(?:^|\n|\s)(?:Q(?:uestion)?\s*\d*[\):.-]|\b\d+[\).])\s*([\s\S]*?)(?=(?:(?:\n|\s)*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*))(?:\n|\s)*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*([\s\S]*?)(?=(?:(?:\n|\s+)(?:Q(?:uestion)?\s*\d*[\):.-]|\b\d+[\).])\s*)|$)/gi;
+  // Strategy 1: Explicit Q-tag Chunk Parser (Q ), Q:, Q1), Question 1:, etc.)
+  // Bullet points like 1), 2) or 1., 2. inside answers are NEVER treated as questions!
+  const hasQTag = /(?:^|\n|\s)Q(?:uestion)?\s*\d*\s*[\):.-]/i.test(cleaned);
+  if (hasQTag) {
+    const chunks = cleaned.split(/(?:^|\n|\s+)(?=Q(?:uestion)?\s*\d*[\):.-])/gi);
+    for (const chunk of chunks) {
+      const trimmed = chunk.trim();
+      if (!trimmed) continue;
 
-  let match;
-  while ((match = pattern.exec(cleaned)) !== null) {
-    let qText = (match[1] || "").trim();
-    let aText = (match[2] || "").trim();
+      const m = trimmed.match(/^Q(?:uestion)?\s*\d*[\):.-]\s*([\s\S]*?)(?:\s+(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s+)([\s\S]*)$/i);
+      if (m) {
+        let qText = m[1].trim();
+        let aText = m[2].trim();
 
-    // Strip leading document headers if caught in first question (e.g. "Computer Fundamentals (50 Questions)")
-    qText = qText.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").trim();
-    qText = qText.replace(/^[:.)-\s]+/, "").trim();
-    aText = aText.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
+        // Clean document titles or initial headers
+        qText = qText.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").trim();
+        qText = qText.replace(/^[:.)-\s]+/, "").trim();
+        aText = aText.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
 
-    if (qText.length > 3 && aText.length > 2) {
-      let englishAns = aText;
-      let marathiExp = "";
+        if (qText.length > 3 && aText.length > 2) {
+          let englishAns = aText;
+          let marathiExp = "";
 
-      if (aText.includes("मराठी स्पष्टीकरण:")) {
-        const parts = aText.split(/\*{0,2}मराठी स्पष्टीकरण:\*{0,2}\s*/);
-        englishAns = (parts[0] || "").trim();
-        marathiExp = (parts[1] || "").trim();
-      } else if (/marathi explanation:/i.test(aText)) {
-        const parts = aText.split(/\*{0,2}marathi explanation:\*{0,2}\s*/i);
-        englishAns = (parts[0] || "").trim();
-        marathiExp = (parts[1] || "").trim();
+          if (aText.includes("मराठी स्पष्टीकरण:")) {
+            const parts = aText.split(/\*{0,2}मराठी स्पष्टीकरण:\*{0,2}\s*/);
+            englishAns = (parts[0] || "").trim();
+            marathiExp = (parts[1] || "").trim();
+          } else if (/marathi explanation:/i.test(aText)) {
+            const parts = aText.split(/\*{0,2}marathi explanation:\*{0,2}\s*/i);
+            englishAns = (parts[0] || "").trim();
+            marathiExp = (parts[1] || "").trim();
+          }
+
+          questions.push({
+            question: qText,
+            answer: englishAns,
+            marathiExplanation: marathiExp,
+            keywords: extractKeywordsHeuristic(englishAns, 5),
+            difficulty: "medium",
+            category: defaultTopic,
+            track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
+          });
+        }
       }
-
-      questions.push({
-        question: qText,
-        answer: englishAns,
-        marathiExplanation: marathiExp,
-        keywords: extractKeywordsHeuristic(englishAns, 5),
-        difficulty: "medium",
-        category: defaultTopic,
-        track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
-      });
     }
   }
 
-  // Strategy 2: If questions end with '?' and are followed by ans/answer
+  // Strategy 2: Numbered questions with explicit answer tags (1. What is X? ans ... 2. What is Y? ans ...)
+  if (questions.length === 0) {
+    const chunks = cleaned.split(/(?:^|\n)(?=\d+[\).]\s+)/g);
+    for (const chunk of chunks) {
+      const trimmed = chunk.trim();
+      if (!trimmed) continue;
+
+      const m = trimmed.match(/^\d+[\).]\s*([\s\S]*?)(?:\s+(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s+)([\s\S]*)$/i);
+      if (m) {
+        let qText = m[1].trim().replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").replace(/^[:.)-\s]+/, "").trim();
+        let aText = m[2].trim().replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
+
+        if (qText.length > 3 && aText.length > 2) {
+          questions.push({
+            question: qText,
+            answer: aText,
+            marathiExplanation: "",
+            keywords: extractKeywordsHeuristic(aText, 5),
+            difficulty: "medium",
+            category: defaultTopic,
+            track: defaultTopic.toLowerCase().replace(/[^a-z0-9]/g, "_")
+          });
+        }
+      }
+    }
+  }
+
+  // Strategy 3: Questions ending with '?' followed by ans/answer
   if (questions.length === 0) {
     const qMarkPattern = /([\s\S]*?\?)\s*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-])\s*([\s\S]*?)(?=(?:[\s\S]*?\?\s*(?:ans(?:wer)?\s*[:.)-]?|\bA\s*[\):.-]))|$)/gi;
+    let match;
     while ((match = qMarkPattern.exec(cleaned)) !== null) {
       let q = (match[1] || "").trim().replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").replace(/^[:.)-\s]+/, "");
       let a = (match[2] || "").trim().replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "");
@@ -125,15 +169,15 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
     }
   }
 
-  // Strategy 3: Split by Markdown headers (### or ##)
+  // Strategy 4: Standard Markdown headers (## Question or ### Question)
   if (questions.length === 0) {
-    const sections = cleaned.split(/\n(?=#{1,3}\s+|\d+\.\s+)/g);
+    const sections = rawText.split(/\n(?=#{1,4}\s+)/g);
     for (const section of sections) {
       const lines = section.trim().split("\n");
       if (lines.length >= 2) {
-        const header = lines[0].replace(/^#{1,3}\s*|\d+\.\s*/, "").trim();
+        const header = lines[0].replace(/^#{1,4}\s*|\d+[\).]\s*/g, "").trim();
         const body = lines.slice(1).join("\n").trim();
-        if (header.length > 8 && body.length > 10) {
+        if (header.length > 5 && body.length > 5) {
           questions.push({
             question: header.endsWith("?") ? header : `Explain: ${header}`,
             answer: body,
@@ -147,7 +191,7 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
     }
   }
 
-  // Strategy 4: Paragraph fallback only if nothing else matched
+  // Strategy 5: Paragraph fallback only if nothing else matched
   if (questions.length === 0) {
     const paragraphs = cleaned
       .split(/\n\s*\n/)
@@ -168,17 +212,19 @@ export const parseQuestionsHeuristic = (rawText, defaultTopic = "General") => {
     }
   }
 
-  return questions.slice(0, 100);
+  // Support massive question banks (e.g. 1000 to 3000 questions) without arbitrary truncation
+  return questions.slice(0, 3000);
 };
 
 /**
- * Post-processor that guarantees every question object has only a pure question title
- * and never leaks answers or multiple questions into question.
+ * Post-processor that guarantees every question object has only a pure question title,
+ * full answer without truncation, and repairs broken answers.
  */
 export const sanitizeExtractedQuestions = (questions = [], defaultTopic = "General") => {
   const sanitized = [];
 
-  for (const item of questions) {
+  for (let i = 0; i < questions.length; i++) {
+    const item = questions[i];
     let q = String(item.question || "").trim();
     let a = String(item.answer || "").trim();
 
@@ -200,13 +246,29 @@ export const sanitizeExtractedQuestions = (questions = [], defaultTopic = "Gener
       }
     }
 
-    // Clean any residual headers or Q markers from question
+    // Clean any residual headers, Markdown syntax, or Q markers from question
     q = q.replace(/^.*?\(?\d+\s*questions?\)?\s*/i, "").trim();
+    q = q.replace(/^#{1,4}\s+/g, "").trim();
+    q = q.replace(/^\*{1,2}(.*?)\*{1,2}$/, "$1").trim();
     q = q.replace(/^Q(?:uestion)?\s*\d*[\):.-]\s*/i, "").trim();
     q = q.replace(/^[:.)-\s]+/, "").trim();
 
     // Clean answer
     a = a.replace(/^ans(?:wer)?\s*[:.)-]?\s*/i, "").trim();
+    a = a.replace(/^\*{1,2}ans(?:wer)?\s*[:.)-]?\*{1,2}\s*/i, "").trim();
+
+    // AUTO-STITCH REPAIR:
+    // If the answer is truncated to < 5 words and ends with colon/comma/dash (e.g. "CPU components include:"),
+    // and the next item looks like a bullet item, merge them together into a complete answer!
+    if (a.split(/\s+/).length < 6 && /[:,\-–]\s*$/i.test(a) && i + 1 < questions.length) {
+      const nextItem = questions[i + 1];
+      const nextQ = String(nextItem.question || "").trim();
+      const nextA = String(nextItem.answer || "").trim();
+      if (/^(?:\d+[\).]|[•\-\*]|ALU|Registers|L1|L2)/i.test(nextQ)) {
+        a = `${a} ${nextQ} ${nextA}`.trim();
+        i++; // skip next item since it was stitched into this answer
+      }
+    }
 
     if (q.length > 3) {
       sanitized.push({

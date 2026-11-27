@@ -227,9 +227,11 @@ export const getInterviewSetById = async (req, res, next) => {
       });
     }
 
-    // Auto-heal dirty/merged questions if any (e.g. questions containing leaked answers)
+    // Auto-heal dirty/merged questions or truncated answers if any
     const hasDirtyQuestions = interviewSet.questions?.some(
-      (q) => /(?:ans(?:wer)?\s*[:.)-]?|Q\s*[\):.-])/i.test(q.question)
+      (q) =>
+        /(?:ans(?:wer)?\s*[:.)-]?|Q\s*[\):.-])/i.test(q.question) ||
+        (q.answer && q.answer.split(/\s+/).length < 6 && /[:,\-–]\s*$/i.test(q.answer))
     );
 
     if (hasDirtyQuestions) {

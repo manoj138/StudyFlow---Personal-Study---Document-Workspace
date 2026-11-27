@@ -23,8 +23,7 @@ import {
   createInterviewFromText,
   createInterviewFromFile,
   createInterviewFromDocument,
-  deleteInterviewSet,
-  seedMernCurriculum
+  deleteInterviewSet
 } from "../services/interviewService";
 import {
   Button,
@@ -90,25 +89,6 @@ export const InterviewHubPage = () => {
       }
     } catch (err) {
       console.error("Failed to load library documents:", err);
-    }
-  };
-
-  const [loadingMernSeed, setLoadingMernSeed] = useState(false);
-
-  const handleSeedMern = async () => {
-    try {
-      setLoadingMernSeed(true);
-      const res = await seedMernCurriculum();
-      if (res.success) {
-        await loadInterviewSets();
-        if (res.interviewSet?._id) {
-          navigate(`/interview/${res.interviewSet._id}`);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to seed MERN curriculum:", err);
-    } finally {
-      setLoadingMernSeed(false);
     }
   };
 
@@ -232,44 +212,6 @@ export const InterviewHubPage = () => {
           </Button>
         }
       />
-
-      {/* MERN Complete Curriculum Callout */}
-      <Card className="border-indigo-500/25 bg-[#0E1015]">
-        <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-10 h-10 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center shrink-0">
-              <Brain size={20} />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="accent" size="sm">
-                  Official Study Track
-                </Badge>
-                <Badge variant="neutral" size="sm">
-                  Dual-Language (English + Marathi Notes)
-                </Badge>
-              </div>
-              <h3 className="text-sm sm:text-base font-semibold text-zinc-100">
-                MERN Stack Complete Interview Guide (250 Questions)
-              </h3>
-              <p className="text-xs text-zinc-400 max-w-xl">
-                Covers React Hooks, Event Loop, Express APIs, MongoDB Aggregation, JWT Security & 11-Month Internship Questions.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="indigo"
-            size="sm"
-            icon={Sparkles}
-            loading={loadingMernSeed}
-            onClick={handleSeedMern}
-            className="shrink-0"
-          >
-            Load 250 Questions
-          </Button>
-        </div>
-      </Card>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -539,16 +481,64 @@ export const InterviewHubPage = () => {
 
                 {/* Tab 1: File Upload */}
                 {createTab === "upload" && (
-                  <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1">
-                      Upload Document (PDF, DOCX, TXT)
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold">
+                        Upload Document (.md, .pdf, .docx, .txt)
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          .MD Ready
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                          PDF
+                        </span>
+                      </div>
+                    </div>
+
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700/80 hover:border-indigo-500/60 rounded-xl p-5 bg-zinc-950/60 cursor-pointer transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform mb-2">
+                        <Upload size={20} />
+                      </div>
+
+                      {selectedFile ? (
+                        <div className="text-center space-y-1">
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-xs font-bold text-zinc-100 line-clamp-1 max-w-[280px]">
+                              {selectedFile.name}
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              {selectedFile.name.split('.').pop()}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-zinc-400 font-mono">
+                            {(selectedFile.size / 1024).toFixed(1)} KB • Click to choose another file
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-center space-y-1">
+                          <p className="text-xs font-semibold text-zinc-200">
+                            Click to browse or drop your Markdown or Document file
+                          </p>
+                          <p className="text-[11px] text-zinc-400">
+                            Supports Markdown (<span className="text-emerald-400 font-semibold font-mono">.md</span>), PDF, Word (.docx), and Plain Text (.txt)
+                          </p>
+                        </div>
+                      )}
+
+                      <input
+                        type="file"
+                        accept=".md,.markdown,text/markdown,text/x-markdown,.pdf,.docx,.doc,.txt,text/plain"
+                        onChange={(e) => {
+                          const file = e.target.files[0] || null;
+                          setSelectedFile(file);
+                          if (file && !title) {
+                            setTitle(file.name.replace(/\.[^/.]+$/, ""));
+                          }
+                        }}
+                        className="hidden"
+                      />
                     </label>
-                    <input
-                      type="file"
-                      accept=".pdf,.docx,.doc,.txt,.md"
-                      onChange={(e) => setSelectedFile(e.target.files[0] || null)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-md p-2 text-xs text-zinc-300 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700"
-                    />
                   </div>
                 )}
 
